@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 resend.api_key = settings.RESEND_KEY
 
-LOGO_URL = f"{settings.SITE_URL}/static/images/SanterdeTrust.png?v=2"
+LOGO_URL = f"{settings.SITE_URL}/static/images/SanterdeTrust.png?v=3"
 
 
 def _email_shell(preheader, body_html):
@@ -39,7 +39,7 @@ def _email_shell(preheader, body_html):
           <!-- Logo header -->
           <tr>
             <td align="center" style="padding:28px 32px 20px 32px;border-bottom:1px solid #e4e4e7;">
-              <img src="{LOGO_URL}" alt="Santerde Trust" width="120" style="display:block;max-width:120px;height:auto;">
+              <img src="{LOGO_URL}" alt="Santerde Trust" width="104" style="display:block;max-width:104px;height:auto;">
             </td>
           </tr>
 
