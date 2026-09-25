@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Notifications{% endblock %}
+{% block page_description %}View all your notifications{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+            <h1 class="text-lg sm:text-2xl font-bold text-gray-900 lg:hidden">Notifications</h1>
+            <p class="text-sm text-gray-600 mt-1">{{ notifications.paginator.count }} notification{{ notifications.paginator.count|pluralize }}</p>
+        </div>
+        {% if notifications %}
+        <a href="{% url 'notification_mark_all_read' %}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors text-sm">
+            <i class="fas fa-check-double mr-2"></i>Mark All Read
+        </a>
+        {% endif %}
+    </div>
+
+    {% if notifications %}
+    <div class="space-y-4">
+        {% for notification in notifications %}
+        <div class="bg-white rounded-xl shadow-lg border {% if notification.is_read %}border-gray-200{% else %}border-blue-200 bg-blue-50/30{% endif %} p-4 sm:p-6 hover:shadow-xl transition-shadow">
+            <div class="flex items-start space-x-3 sm:space-x-4">
+                <div class="flex-shrink-0 hidden sm:block">
+                    <div class="w-12 h-12 rounded-full flex items-center justify-center
+                        {% if notification.notification_type == 'TRANSACTION' %}bg-blue-100
+                        {% elif notification.notification_type == 'ACCOUNT' %}bg-green-100
+                        {% elif notification.notification_type == 'SECURITY' %}bg-blue-100
+                        {% elif notification.notification_type == 'LOAN' %}bg-purple-100
+                        {% elif notification.notification_type == 'CARD' %}bg-yellow-100
+                        {% else %}bg-gray-100{% endif %}">
+                        <i class="fas 
+                            {% if notification.notification_type == 'TRANSACTION' %}fa-exchange-alt text-blue-600
+                            {% elif notification.notification_type == 'ACCOUNT' %}fa-university text-green-600
+                            {% elif notification.notification_type == 'SECURITY' %}fa-shield-alt text-blue-600
+                            {% elif notification.notification_type == 'LOAN' %}fa-hand-holding-usd text-purple-600
+                            {% elif notification.notification_type == 'CARD' %}fa-credit-card text-yellow-600
+                            {% else %}fa-bell text-gray-600{% endif %} text-xl"></i>
+                    </div>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between mb-2 gap-2">
+                        <div class="flex items-center flex-wrap gap-2 sm:space-x-3">
+                            <h3 class="text-base sm:text-lg font-bold text-gray-900">{{ notification.title }}</h3>
+                            {% if not notification.is_read %}
+                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">New</span>
+                            {% endif %}
+                        </div>
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold
+                            {% if notification.priority == 'URGENT' %}bg-blue-100 text-blue-800
+                            {% elif notification.priority == 'HIGH' %}bg-orange-100 text-orange-800
+                            {% elif notification.priority == 'MEDIUM' %}bg-yellow-100 text-yellow-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ notification.get_priority_display }}
+                        </span>
+                    </div>
+
+                    <p class="text-gray-700 mb-3">{{ notification.message }}</p>
+
+                    <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+                        <span><i class="fas fa-clock mr-1"></i>{{ notification.created_at|timesince }} ago</span>
+                        <span><i class="fas fa-tag mr-1"></i>{{ notification.get_notification_type_display }}</span>
+                    </div>
+
+                    <div class="flex gap-3 mt-4">
+                        {% if not notification.is_read %}
+                        <a href="{% url 'notification_mark_read' notification.id %}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                            <i class="fas fa-check mr-1"></i>Mark as Read
+                        </a>
+                        {% endif %}
+                        {% if notification.transaction %}
+                        <a href="{% url 'transaction_detail' notification.transaction.transaction_id %}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">
+                            <i class="fas fa-receipt mr-1"></i>View Transaction
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if notifications.has_other_pages %}
+    <div class="flex items-center justify-center gap-2">
+        {% if notifications.has_previous %}
+        <a href="?page={{ notifications.previous_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Previous
+        </a>
+        {% endif %}
+        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">{{ notifications.number }}</span>
+        {% if notifications.has_next %}
+        <a href="?page={{ notifications.next_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Next
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="bg-white rounded-xl shadow-lg border-2 border-dashed border-gray-300 p-6 sm:p-12 text-center">
+        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-bell text-gray-400 text-xl sm:text-2xl lg:text-3xl"></i>
+        </div>
+        <h3 class="text-lg sm:text-2xl font-bold text-gray-900 mb-2">No Notifications</h3>
+        <p class="text-gray-600 mb-6">You're all caught up!</p>
+        <a href="{% url 'dashboard' %}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700">
+            <i class="fas fa-home mr-2"></i>Go to Dashboard
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

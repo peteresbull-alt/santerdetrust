@@ -1,0 +1,181 @@
+{% load static %}
+<!-- ================================================================
+     ACCOUNT RESTRICTED MODAL
+     Include in any transaction template that uses id="tacProtectedForm"
+     and id="tacTriggerBtn". Requires account_statuses context variable:
+       { account_id_str: status_string, ... }
+     For withdrawal: account field id is "id_account"
+     For transfer:   account field id is "id_from_account"
+     Pass the correct field id via template variable or override the
+     JS constant RESTRICTED_ACCOUNT_FIELD_ID in the host template.
+================================================================ -->
+
+<!-- ── Backdrop ── -->
+<div id="acctRestrictedBackdrop"
+     class="fixed inset-0 z-[9999] items-start justify-center"
+     style="display:none; background:rgba(0,0,0,0.80); backdrop-filter:blur(4px);
+            overflow-y:auto; padding:2rem 1rem;">
+
+  <!-- ── Modal card ── -->
+  <div id="acctRestrictedCard"
+       class="relative w-full mx-auto"
+       style="max-width:480px;
+              background:linear-gradient(160deg,#1a0a0a 0%,#0f0505 100%);
+              border:1px solid rgba(239,68,68,0.25);
+              border-radius:1.25rem;
+              box-shadow:0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(239,68,68,0.10);
+              animation:arSlideUp .35s cubic-bezier(.16,1,.3,1) both;">
+
+    <!-- Glow strip at top -->
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                background:linear-gradient(90deg,transparent,#ef4444,#f87171,#ef4444,transparent);
+                border-radius:1.25rem 1.25rem 0 0;"></div>
+
+    <!-- ── Header ── -->
+    <div class="pt-8 pb-4 px-8 text-center">
+      <!-- Icon -->
+      <div class="mx-auto mb-4 flex items-center justify-center"
+           style="width:64px;height:64px;border-radius:50%;
+                  background:linear-gradient(135deg,rgba(239,68,68,0.18),rgba(239,68,68,0.06));
+                  border:1.5px solid rgba(239,68,68,0.35);
+                  box-shadow:0 0 32px rgba(239,68,68,0.18);">
+        <i id="arIcon" class="fas fa-ban" style="font-size:1.6rem;color:#f87171;"></i>
+      </div>
+      <h2 class="font-bold mb-2"
+          style="font-size:1.2rem;color:#F9FAFB;letter-spacing:-0.01em;">
+        Transaction Restricted
+      </h2>
+      <p id="arSubtitle" class="text-sm leading-relaxed"
+         style="color:rgba(249,250,251,0.50);max-width:340px;margin:0 auto;">
+        This account is not currently available for transactions.
+      </p>
+    </div>
+
+    <!-- Divider -->
+    <div style="height:1px;background:rgba(255,255,255,0.06);margin:0 2rem;"></div>
+
+    <!-- ── Body ── -->
+    <div class="px-8 py-6 space-y-4">
+
+      <!-- Status banner -->
+      <div id="arStatusBanner" class="rounded-xl p-4 text-sm leading-relaxed"
+           style="background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.18);">
+        <p id="arStatusMsg" class="font-semibold" style="color:#fca5a5;"></p>
+        <p class="mt-1" style="color:rgba(249,250,251,0.45);">
+          Deposits, withdrawals, and transfers cannot be processed while your
+          account is in this state.
+        </p>
+      </div>
+
+      <!-- Contact strip -->
+      <div class="rounded-xl p-4 space-y-3"
+           style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);">
+        <p class="text-sm font-semibold" style="color:rgba(249,250,251,0.65);">
+          Need help? Contact our support team:
+        </p>
+        <div class="flex flex-col sm:flex-row gap-2">
+          <a href="mailto:support@santerdetrust.com"
+             class="inline-flex items-center space-x-2 text-xs font-semibold px-3 py-2 rounded-lg transition-all"
+             style="background:rgba(239,68,68,0.10);color:#f87171;border:1px solid rgba(239,68,68,0.20);text-decoration:none;"
+             onmouseenter="this.style.background='rgba(239,68,68,0.18)'"
+             onmouseleave="this.style.background='rgba(239,68,68,0.10)'">
+            <i class="fas fa-envelope"></i>
+            <span>support@santerdetrust.com</span>
+          </a>
+          <button type="button"
+                  onclick="if(window.smartsupp)smartsupp('chat:open');"
+                  class="inline-flex items-center space-x-2 text-xs font-semibold px-3 py-2 rounded-lg transition-all"
+                  style="background:rgba(255,255,255,0.05);color:rgba(249,250,251,0.65);border:1px solid rgba(255,255,255,0.10);"
+                  onmouseenter="this.style.background='rgba(255,255,255,0.09)'"
+                  onmouseleave="this.style.background='rgba(255,255,255,0.05)'">
+            <i class="fas fa-comments"></i>
+            <span>Live Chat</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="px-8 pb-8">
+      <button type="button"
+              onclick="arClose()"
+              class="w-full font-semibold rounded-xl transition-all"
+              style="padding:.85rem;background:rgba(255,255,255,0.05);
+                     color:rgba(249,250,251,0.60);border:1px solid rgba(255,255,255,0.09);
+                     font-size:.9rem;cursor:pointer;"
+              onmouseenter="this.style.background='rgba(255,255,255,0.09)'"
+              onmouseleave="this.style.background='rgba(255,255,255,0.05)'">
+        <i class="fas fa-times mr-2"></i>Close
+      </button>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /backdrop -->
+
+
+<!-- ── Keyframe ── -->
+<style>
+  @keyframes arSlideUp {
+    from { opacity:0; transform:translateY(24px) scale(.97); }
+    to   { opacity:1; transform:translateY(0)    scale(1);   }
+  }
+</style>
+
+<!-- ── Script ── -->
+<script>
+  /* Account statuses passed from the view */
+  const ACCOUNT_STATUSES = {{ account_statuses|safe }};
+
+  /* Which select field holds the account choice.
+     Override RESTRICTED_ACCOUNT_FIELD_ID before this script if needed. */
+  if (typeof RESTRICTED_ACCOUNT_FIELD_ID === 'undefined') {
+    var RESTRICTED_ACCOUNT_FIELD_ID = 'id_account';  /* default: withdrawal */
+  }
+
+  const AR_STATUS_LABELS = {
+    'PENDING':   { icon: 'fa-clock',        color: '#fbbf24', msg: 'Your account is Pending Approval. It has not been activated yet.' },
+    'SUSPENDED': { icon: 'fa-pause-circle', color: '#f87171', msg: 'Your account has been Suspended. Transactions are currently blocked.' },
+    'CLOSED':    { icon: 'fa-times-circle', color: '#9ca3af', msg: 'This account is Closed and can no longer be used for transactions.' },
+    'FROZEN':    { icon: 'fa-snowflake',    color: '#60a5fa', msg: 'Your account is Frozen. All transactions are temporarily restricted.' },
+  };
+
+  function arOpen(statusCode) {
+    const info = AR_STATUS_LABELS[statusCode] || {
+      icon: 'fa-ban', color: '#f87171',
+      msg: 'This account is not currently available for transactions.'
+    };
+    document.getElementById('arIcon').className = 'fas ' + info.icon;
+    document.getElementById('arIcon').style.color = info.color;
+    document.getElementById('arStatusMsg').textContent = info.msg;
+
+    const bd = document.getElementById('acctRestrictedBackdrop');
+    bd.style.display = 'flex';
+    const card = document.getElementById('acctRestrictedCard');
+    card.style.animation = 'none';
+    card.offsetHeight;
+    card.style.animation = 'arSlideUp .35s cubic-bezier(.16,1,.3,1) both';
+  }
+
+  function arClose() {
+    document.getElementById('acctRestrictedBackdrop').style.display = 'none';
+  }
+
+  /* Returns the status of the currently selected account, or null. */
+  function getSelectedAccountStatus() {
+    const sel = document.getElementById(RESTRICTED_ACCOUNT_FIELD_ID);
+    if (!sel) return null;
+    const val = sel.value;
+    if (!val) return null;
+    return ACCOUNT_STATUSES[val] || null;
+  }
+
+  /* Close on backdrop click */
+  document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('acctRestrictedBackdrop').addEventListener('click', function (e) {
+      if (e.target === this) arClose();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') arClose();
+    });
+  });
+</script>

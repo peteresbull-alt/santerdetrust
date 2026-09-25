@@ -1,0 +1,501 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — Santerde Trust</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Tailwind Config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            azure: {
+              50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe',
+              300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6',
+              600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a',
+            },
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    :root {
+      --onyx: #0A0A0A;
+      --obsidian: #111111;
+      --charcoal: #1A1A1A;
+      --surface: #1E1E1E;
+      --azure: #3b82f6;
+      --azure-light: #60a5fa;
+      --azure-glow: rgba(59,130,246,0.18);
+      --pearl: #F9FAFB;
+      --muted: rgba(249,250,251,0.55);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--onyx);
+      color: var(--pearl);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 50% at 15% 20%, rgba(59,130,246,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 85% 75%, rgba(59,130,246,0.04) 0%, transparent 60%);
+    }
+
+    .auth-card {
+      background: var(--obsidian);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 1.5rem;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+      overflow: hidden;
+    }
+
+    .right-panel {
+      background: linear-gradient(145deg, #0c1733 0%, #0A0A0A 40%, #0b1a2e 100%);
+      position: relative; overflow: hidden;
+    }
+    .right-panel::before {
+      content: ''; position: absolute; top: -30%; left: -20%;
+      width: 80%; height: 80%;
+      background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .right-panel::after {
+      content: ''; position: absolute; bottom: -20%; right: -20%;
+      width: 70%; height: 70%;
+      background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Form inputs */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="number"],
+    input[type="tel"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.75rem;
+      color: var(--pearl);
+      font-size: 0.9rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      outline: none;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--azure);
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+    }
+    input::placeholder, textarea::placeholder { color: rgba(249,250,251,0.3); }
+
+    select {
+      cursor: pointer;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='rgba(249,250,251,0.4)' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.875rem center;
+      padding-right: 2.5rem;
+    }
+    select option { background: #1A1A1A; color: #F9FAFB; }
+
+    textarea { resize: vertical; min-height: 2.75rem; }
+
+    input[type="checkbox"] {
+      width: 1rem; height: 1rem;
+      accent-color: var(--azure);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* Password visibility toggle */
+    .password-field-wrapper { position: relative; }
+    .password-field-wrapper input[type="password"],
+    .password-field-wrapper input[type="text"] { padding-right: 2.75rem; }
+    .password-toggle-btn {
+      position: absolute;
+      right: 0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      padding: 0.25rem;
+      color: rgba(249,250,251,0.4);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s;
+    }
+    .password-toggle-btn:hover { color: rgba(249,250,251,0.75); }
+
+    .btn-primary {
+      width: 100%;
+      padding: 0.875rem 1.5rem;
+      background: linear-gradient(135deg, #2563eb 0%, #3b82f6 50%, #60a5fa 100%);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+      box-shadow: 0 8px 24px rgba(59,130,246,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 32px rgba(59,130,246,0.4);
+    }
+    .btn-primary:active { transform: translateY(0); }
+
+    .form-label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: rgba(249,250,251,0.75);
+    }
+
+    .form-error {
+      margin-top: 0.375rem;
+      font-size: 0.75rem;
+      color: #f87171;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .feature-badge {
+      display: flex; align-items: flex-start; gap: 1rem;
+      padding: 1rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 0.875rem;
+    }
+    .badge-icon {
+      flex-shrink: 0;
+      width: 2.75rem; height: 2.75rem;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(59,130,246,0.2);
+      border-radius: 0.75rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slideDown { animation: slideDown 0.3s ease-out; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    .animate-float { animation: float 6s ease-in-out infinite; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.4); border-radius: 3px; }
+
+    @media (max-width: 640px) {
+      input, select, textarea { font-size: 16px !important; }
+      body, html { overflow-x: hidden; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg-glow"></div>
+
+  <!-- Flash Messages -->
+  {% if messages %}
+  <div class="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+    {% for message in messages %}
+    <div class="animate-slideDown flex items-start gap-3 p-4 rounded-xl border
+      {% if message.tags == 'success' %}bg-azure-900/40 border-azure-500/30
+      {% elif message.tags == 'error' %}bg-red-900/30 border-red-500/30
+      {% elif message.tags == 'warning' %}bg-amber-900/30 border-amber-500/30
+      {% else %}bg-blue-900/30 border-blue-500/30{% endif %}
+      backdrop-blur-md shadow-2xl">
+      <div class="shrink-0 mt-0.5">
+        {% if message.tags == 'success' %}<i class="fas fa-check-circle text-azure-400 text-lg"></i>
+        {% elif message.tags == 'error' %}<i class="fas fa-times-circle text-red-400 text-lg"></i>
+        {% elif message.tags == 'warning' %}<i class="fas fa-exclamation-triangle text-amber-400 text-lg"></i>
+        {% else %}<i class="fas fa-info-circle text-blue-400 text-lg"></i>{% endif %}
+      </div>
+      <p class="flex-1 text-sm font-medium text-white/90">{{ message }}</p>
+      <button type="button" class="shrink-0 text-white/40 hover:text-white/70 transition-colors" onclick="this.parentElement.remove()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Main -->
+  <div class="relative z-10 min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="auth-card max-w-6xl w-full flex">
+
+      <!-- ===== LEFT: Form ===== -->
+      <div class="w-full lg:w-1/2 p-6 sm:p-8 lg:p-10 max-h-[92vh] overflow-y-auto">
+
+        <!-- Logo -->
+        <a href="{% url 'landing_home' %}" class="flex items-center mb-8 group transition-opacity hover:opacity-80">
+          <img src="{% static 'images/SanterdeTrust.png' %}?v=2" alt="Santerde Trust" class="h-14 sm:h-16 w-auto object-contain">
+        </a>
+
+        <!-- Heading -->
+        <div class="mb-7">
+          <h2 class="text-2xl sm:text-3xl font-bold text-white mb-1.5">Open your account</h2>
+          <p class="text-sm" style="color:rgba(249,250,251,0.5)">Join a growing community of wealth builders worldwide</p>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+
+          <!-- Name Fields -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label"><i class="fas fa-user text-azure-400 mr-1.5"></i>First Name</label>
+              {{ form.first_name }}
+              {% if form.first_name.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.first_name.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="form-label">Last Name</label>
+              {{ form.last_name }}
+              {% if form.last_name.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.last_name.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label class="form-label"><i class="fas fa-envelope text-azure-400 mr-1.5"></i>Email Address</label>
+            {{ form.email }}
+            {% if form.email.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.email.errors.0 }}</p>{% endif %}
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label class="form-label"><i class="fas fa-phone text-azure-400 mr-1.5"></i>Phone Number</label>
+            {{ form.phone_number }}
+            {% if form.phone_number.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.phone_number.errors.0 }}</p>{% endif %}
+          </div>
+
+          <!-- Date of Birth & Gender -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label"><i class="fas fa-calendar text-azure-400 mr-1.5"></i>Date of Birth</label>
+              {{ form.date_of_birth }}
+              {% if form.date_of_birth.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.date_of_birth.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="form-label">Gender</label>
+              {{ form.gender }}
+              {% if form.gender.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.gender.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div>
+            <label class="form-label"><i class="fas fa-map-marker-alt text-azure-400 mr-1.5"></i>Street Address</label>
+            {{ form.address }}
+            {% if form.address.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.address.errors.0 }}</p>{% endif %}
+          </div>
+
+          <!-- City, State, Postal -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="form-label">City</label>
+              {{ form.city }}
+              {% if form.city.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.city.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="form-label">State</label>
+              {{ form.state }}
+              {% if form.state.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.state.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="form-label">Postal Code</label>
+              {{ form.postal_code }}
+              {% if form.postal_code.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.postal_code.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          <!-- Country -->
+          <div>
+            <label class="form-label"><i class="fas fa-globe text-azure-400 mr-1.5"></i>Country</label>
+            {{ form.country }}
+            {% if form.country.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.country.errors.0 }}</p>{% endif %}
+          </div>
+
+          <!-- Passwords -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="form-label"><i class="fas fa-lock text-azure-400 mr-1.5"></i>Password</label>
+              <div class="password-field-wrapper">
+                {{ form.password1 }}
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('{{ form.password1.id_for_label }}', this)" aria-label="Show password" tabindex="-1">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              {% if form.password1.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.password1.errors.0 }}</p>{% endif %}
+            </div>
+            <div>
+              <label class="form-label">Confirm Password</label>
+              <div class="password-field-wrapper">
+                {{ form.password2 }}
+                <button type="button" class="password-toggle-btn" onclick="togglePasswordVisibility('{{ form.password2.id_for_label }}', this)" aria-label="Show password" tabindex="-1">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+              {% if form.password2.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.password2.errors.0 }}</p>{% endif %}
+            </div>
+          </div>
+
+          <!-- Referral Code -->
+          <div>
+            <label class="form-label"><i class="fas fa-gift text-azure-400 mr-1.5"></i>Referral Code <span style="color:rgba(249,250,251,0.35);font-weight:400">(Optional)</span></label>
+            {{ form.referral_code }}
+            {% if form.referral_code.errors %}<p class="form-error"><i class="fas fa-exclamation-circle"></i>{{ form.referral_code.errors.0 }}</p>{% endif %}
+          </div>
+
+          <!-- Submit -->
+          <div class="pt-2">
+            <button type="submit" class="btn-primary">
+              <i class="fas fa-user-plus"></i>
+              <span>Create My Account</span>
+              <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- Login Link -->
+          <div class="text-center pt-2">
+            <p class="text-sm" style="color:rgba(249,250,251,0.5)">
+              Already have an account?
+              <a href="{% url 'login' %}" class="font-semibold text-azure-400 hover:text-azure-300 transition-colors ml-1">Sign in here</a>
+            </p>
+          </div>
+        </form>
+      </div>
+
+      <!-- ===== RIGHT: Info Panel ===== -->
+      <div class="right-panel hidden lg:flex lg:w-1/2 flex-col justify-center p-12 text-white">
+        <div class="relative z-10">
+          <!-- Icon -->
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mb-8" style="background:rgba(59,130,246,0.12);border:1px solid rgba(59,130,246,0.22)">
+            <i class="fas fa-seedling text-3xl text-azure-400"></i>
+          </div>
+
+          <h2 class="text-3xl font-bold mb-3 leading-tight">
+            Your prosperity<br/>starts <span style="color:#3b82f6">here</span>
+          </h2>
+          <p class="text-base mb-10" style="color:rgba(249,250,251,0.5)">
+            Build a financial foundation that grows with you. Secure, transparent, and designed for the modern wealth builder.
+          </p>
+
+          <!-- Features -->
+          <div class="space-y-4">
+            <div class="feature-badge">
+              <div class="badge-icon">
+                <i class="fas fa-shield-alt text-azure-400 text-lg"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white text-sm mb-0.5">Enterprise-Grade Security</h3>
+                <p class="text-xs" style="color:rgba(249,250,251,0.45)">Your capital is protected with industry-leading encryption and multi-layer authentication</p>
+              </div>
+            </div>
+
+            <div class="feature-badge">
+              <div class="badge-icon">
+                <i class="fas fa-clock text-azure-400 text-lg"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white text-sm mb-0.5">24/7 Concierge Support</h3>
+                <p class="text-xs" style="color:rgba(249,250,251,0.45)">Dedicated wealth advisors ready around the clock to assist you</p>
+              </div>
+            </div>
+
+            <div class="feature-badge">
+              <div class="badge-icon">
+                <i class="fas fa-mobile-alt text-azure-400 text-lg"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white text-sm mb-0.5">Anywhere Access</h3>
+                <p class="text-xs" style="color:rgba(249,250,251,0.45)">Manage your portfolio from any device, any time, any timezone</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trust footer -->
+          <div class="mt-10 pt-8" style="border-top:1px solid rgba(255,255,255,0.07)">
+            <p class="text-xs mb-3" style="color:rgba(249,250,251,0.35)">Trusted by over 500,000+ users worldwide</p>
+            <div class="flex items-center gap-3">
+              <div class="flex -space-x-2">
+                <div class="w-8 h-8 rounded-full border-2" style="background:linear-gradient(135deg,#3b82f6,#2563eb);border-color:rgba(255,255,255,0.15)"></div>
+                <div class="w-8 h-8 rounded-full border-2" style="background:linear-gradient(135deg,#6366f1,#4f46e5);border-color:rgba(255,255,255,0.15)"></div>
+                <div class="w-8 h-8 rounded-full border-2" style="background:linear-gradient(135deg,#f59e0b,#d97706);border-color:rgba(255,255,255,0.15)"></div>
+              </div>
+              <div class="flex items-center gap-1 text-amber-400">
+                <i class="fas fa-star text-xs"></i>
+                <i class="fas fa-star text-xs"></i>
+                <i class="fas fa-star text-xs"></i>
+                <i class="fas fa-star text-xs"></i>
+                <i class="fas fa-star text-xs"></i>
+                <span class="ml-1 text-white text-xs font-semibold">4.9 / 5.0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <script>
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const icon = btn.querySelector('i');
+      const showing = input.type === 'password';
+      input.type = showing ? 'text' : 'password';
+      icon.classList.toggle('fa-eye', !showing);
+      icon.classList.toggle('fa-eye-slash', showing);
+      btn.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
+    }
+  </script>
+</body>
+</html>

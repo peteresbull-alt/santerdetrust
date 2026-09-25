@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% load currency_filters %}
+
+{% block page_title %}My Accounts{% endblock %}
+{% block page_description %}Manage your bank accounts and view balances{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header with Action Button -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-lg sm:text-2xl font-bold text-gray-900 lg:hidden">My Accounts</h1>
+            <p class="text-sm text-gray-600 mt-1">You have {{ accounts.count }} account{{ accounts.count|pluralize }}</p>
+        </div>
+        <a href="{% url 'account_apply' %}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
+            <i class="fas fa-plus mr-2"></i>
+            Open New Account
+        </a>
+    </div>
+
+    <!-- Accounts Grid -->
+    {% if accounts %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {% for account in accounts %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-shadow duration-300 group">
+            <!-- Account Header with Gradient -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-3 sm:p-6 text-white">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <p class="text-sm text-blue-100 mb-1">{{ account.get_account_type_display }}</p>
+                        <h3 class="text-lg sm:text-2xl font-bold">{{ account.account_name|default:account.get_account_type_display }}</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-wallet text-2xl"></i>
+                    </div>
+                </div>
+                <div class="flex items-baseline space-x-2">
+                    <span class="text-sm text-blue-100">Account Number:</span>
+                    <span class="text-sm sm:text-lg font-mono font-semibold break-all">{{ account.account_number }}</span>
+                </div>
+            </div>
+
+            <!-- Account Details -->
+            <div class="p-3 sm:p-6">
+                <!-- Balance Section -->
+                <div class="mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs text-gray-500 uppercase tracking-wider">Account Balance</p>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                            {% if account.status == 'ACTIVE' %}bg-green-100 text-green-700
+                            {% elif account.status == 'PENDING' %}bg-yellow-100 text-yellow-700
+                            {% elif account.status == 'FROZEN' %}bg-blue-100 text-blue-700
+                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                            {{ account.get_status_display }}
+                        </span>
+                    </div>
+                    <p class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 break-all">{{ account.balance|currency:currency_symbol }}</p>
+                </div>
+
+                <!-- Account Info Grid -->
+                <div class="grid grid-cols-2 gap-4 mb-6 pb-6 border-b border-gray-200">
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Currency</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ account.currency }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Bank Name</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ account.bank_name }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Account Type</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ account.get_account_type_display }}</p>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-500 mb-1">Opened</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ account.created_at|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="{% url 'account_detail' account.account_number %}" class="flex items-center justify-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors text-sm">
+                        <i class="fas fa-eye mr-2"></i>View Details
+                    </a>
+                    {% if account.status == 'ACTIVE' %}
+                    <a href="{% url 'transfer' %}" class="flex items-center justify-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm">
+                        <i class="fas fa-paper-plane mr-2"></i>Transfer
+                    </a>
+                    {% elif account.status == 'PENDING' %}
+                    <a href="{% url 'account_activate' account.account_number %}" class="flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg font-medium transition-colors text-sm">
+                        <i class="fas fa-check-circle mr-2"></i>Activate
+                    </a>
+                    {% else %}
+                    <button disabled class="flex items-center justify-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed text-sm">
+                        <i class="fas fa-lock mr-2"></i>{{ account.get_status_display }}
+                    </button>
+                    {% endif %}
+                </div>
+
+                {% if account.status != 'ACTIVE' %}
+                <div class="mt-4 p-3 rounded-lg" style="background:rgba(251,191,36,0.10);border:1px solid rgba(251,191,36,0.30);">
+                    <div class="flex items-start space-x-2">
+                        <i class="fas fa-exclamation-triangle mt-0.5" style="color:#fbbf24;"></i>
+                        <div class="flex-1">
+                            <p class="text-xs" style="color:#fde68a;">
+                                <strong style="color:#fbbf24;">Activation Required:</strong>
+                                {% if account.status == 'PENDING' %}
+                                Please upload your activation fee receipt to activate this account.
+                                {% else %}
+                                This account is not currently active. Contact support for assistance at support@santerdetrust.com.
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Account Summary Card -->
+    <div class="bg-gradient-to-br from-gray-50 to-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Account Summary</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="text-center sm:text-left">
+                <p class="text-sm text-gray-600 mb-1">Total Accounts</p>
+                <p class="text-lg sm:text-2xl font-bold break-all text-gray-900">{{ accounts.count }}</p>
+            </div>
+            <div class="text-center sm:text-left">
+                <p class="text-sm text-gray-600 mb-1">Combined Balance</p>
+                <p class="text-lg sm:text-2xl font-bold break-all text-green-600">{{ user.get_total_balance|currency:currency_symbol }}</p>
+            </div>
+            <div class="text-center sm:text-left">
+                <p class="text-sm text-gray-600 mb-1">Active Accounts</p>
+                <p class="text-lg sm:text-2xl font-bold break-all text-blue-600">{{ accounts|length }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-xl shadow-lg border-2 border-dashed border-gray-300 p-6 sm:p-12 text-center">
+        <div class="max-w-md mx-auto">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-wallet text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No Accounts Yet</h3>
+            <p class="text-gray-600 mb-6">Open your first account to start managing your finances with Optima SCPB.</p>
+            <a href="{% url 'account_apply' %}" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-plus mr-2"></i>
+                Open Your First Account
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Account Types Info -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Available Account Types</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="p-4 bg-gradient-to-br from-blue-50 to-white rounded-lg border border-blue-200">
+                <div class="flex items-center space-x-3 mb-2">
+                    <i class="fas fa-credit-card text-blue-600 text-xl"></i>
+                    <h4 class="font-semibold text-gray-900">Checking</h4>
+                </div>
+                <p class="text-xs text-gray-600">Easy access for daily transactions</p>
+            </div>
+            <div class="p-4 bg-gradient-to-br from-green-50 to-white rounded-lg border border-green-200">
+                <div class="flex items-center space-x-3 mb-2">
+                    <i class="fas fa-piggy-bank text-green-600 text-xl"></i>
+                    <h4 class="font-semibold text-gray-900">Savings</h4>
+                </div>
+                <p class="text-xs text-gray-600">Earn interest on your balance</p>
+            </div>
+            <div class="p-4 bg-gradient-to-br from-purple-50 to-white rounded-lg border border-purple-200">
+                <div class="flex items-center space-x-3 mb-2">
+                    <i class="fas fa-briefcase text-purple-600 text-xl"></i>
+                    <h4 class="font-semibold text-gray-900">Business</h4>
+                </div>
+                <p class="text-xs text-gray-600">Designed for business needs</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

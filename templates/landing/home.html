@@ -1,0 +1,1428 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Santerde Trust — Your Wealth. Amplified.</title>
+
+    <!-- ===================== FAVICONS ===================== -->
+    <link rel="icon" type="image/x-icon"       href="{% static 'icons/favicon.ico' %}?v=2" />
+    <link rel="icon" type="image/png" sizes="16x16"  href="{% static 'icons/favicon-16x16.png' %}?v=2" />
+    <link rel="icon" type="image/png" sizes="32x32"  href="{% static 'icons/favicon-32x32.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="180x180"     href="{% static 'icons/apple-touch-icon.png' %}?v=2" />
+    <link rel="manifest"                             href="{% static 'icons/site.webmanifest' %}?v=2" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+
+    <!-- ===================== SEO: Core ===================== -->
+    <meta name="description" content="Santerde Trust — secure online wealth management built for modern individuals. Open your account today." />
+    <meta name="keywords"    content="Santerde Trust, secure wealth management, financial freedom, savings, investments, personal finance" />
+    <meta name="robots"      content="index, follow" />
+    <meta name="author"      content="Santerde Trust" />
+    <link rel="canonical"    href="/" />
+
+    <!-- ===================== SEO: Open Graph ===================== -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:site_name"   content="Santerde Trust" />
+    <meta property="og:title"       content="Santerde Trust — Your Wealth. Amplified." />
+    <meta property="og:description" content="Secure online instant transfers, and wealth management built for modern individuals." />
+    <meta property="og:image"       content="{% static 'icons/android-chrome-512x512.png' %}?v=2" />
+    <meta property="og:url"         content="/" />
+
+    <!-- ===================== SEO: Twitter Card ===================== -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:site"        content="@SanterdeTrust" />
+    <meta name="twitter:title"       content="Santerde Trust — Your Wealth. Amplified." />
+    <meta name="twitter:description" content="Secure online instant transfers, and wealth management built for modern individuals." />
+    <meta name="twitter:image"       content="{% static 'icons/android-chrome-512x512.png' %}?v=2" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Serif+Display:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Plus Jakarta Sans", "sans-serif"],
+              serif: ["DM Serif Display", "serif"],
+            },
+            colors: {
+              azure: {
+                50:  "#eff6ff",
+                100: "#dbeafe",
+                200: "#bfdbfe",
+                300: "#93c5fd",
+                400: "#60a5fa",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+                800: "#1e40af",
+                900: "#1e3a8a",
+                950: "#172554",
+              },
+              gold: {
+                50:  "#fffbeb",
+                100: "#fef3c7",
+                200: "#fde68a",
+                300: "#fcd34d",
+                400: "#fbbf24",
+                500: "#f59e0b",
+                600: "#d97706",
+                700: "#b45309",
+              },
+              ice: {
+                50:  "#ecfeff",
+                100: "#cffafe",
+                200: "#a5f3fc",
+                300: "#67e8f9",
+                400: "#22d3ee",
+                500: "#06b6d4",
+                600: "#0891b2",
+                700: "#0e7490",
+              },
+              onyx:    "#0A0A0A",
+              obsidian:"#111111",
+              charcoal:"#1A1A1A",
+              iron:    "#2A2A2A",
+              ash:     "#6B7280",
+              pearl:   "#F9FAFB",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+      html { scroll-behavior: smooth; }
+
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: #0A0A0A; }
+      ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #3b82f6, #2563eb); border-radius: 3px; }
+
+      .text-ice-gradient {
+        background: linear-gradient(135deg, #a5f3fc, #22d3ee, #3b82f6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .glass-dark {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .noise {
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+        pointer-events: none;
+      }
+
+      .hero-bg {
+        background:
+          radial-gradient(ellipse 80% 50% at 50% -20%, rgba(59,130,246,0.15) 0%, transparent 60%),
+          radial-gradient(ellipse 60% 40% at 80% 80%, rgba(34,211,238,0.08) 0%, transparent 50%),
+          #0A0A0A;
+      }
+      .bg-section-dark { background: #0F0F0F; }
+      .bg-section-mid  { background: #141414; }
+
+      .grid-pattern {
+        background-image: linear-gradient(rgba(59,130,246,1) 1px, transparent 1px),
+                          linear-gradient(90deg, rgba(59,130,246,1) 1px, transparent 1px);
+        background-size: 80px 80px;
+        opacity: 0.03;
+      }
+      .dot-pattern {
+        background-image: radial-gradient(circle, #3b82f6 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0.02;
+      }
+
+      .glass-dark {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+
+      .hover-lift {
+        transition: transform 0.4s cubic-bezier(0.23,1,0.32,1), box-shadow 0.4s ease;
+      }
+      .hover-lift:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 24px 48px -12px rgba(0,0,0,0.6);
+      }
+
+      .underline-hover { position: relative; }
+      .underline-hover::after {
+        content: "";
+        position: absolute;
+        bottom: -2px; left: 0;
+        width: 0; height: 1px;
+        background: #3b82f6;
+        transition: width 0.3s ease;
+      }
+      .underline-hover:hover::after { width: 100%; }
+
+      .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+      }
+      .reveal.visible { opacity: 1; transform: translateY(0); }
+
+      .delay-100 { transition-delay: 0.1s; }
+      .delay-200 { transition-delay: 0.2s; }
+      .delay-300 { transition-delay: 0.3s; }
+      .delay-400 { transition-delay: 0.4s; }
+      .delay-500 { transition-delay: 0.5s; }
+
+      @keyframes marquee {
+        from { transform: translateX(0); }
+        to   { transform: translateX(-50%); }
+      }
+      .animate-marquee { animation: marquee 45s linear infinite; }
+
+      @keyframes badge-shimmer {
+        0%   { background-position: -200% 0; }
+        100% { background-position:  200% 0; }
+      }
+      .badge-shimmer {
+        background: linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,0.25) 50%, rgba(59,130,246,0.1) 100%);
+        background-size: 200% 100%;
+        animation: badge-shimmer 2.5s infinite;
+      }
+
+      @keyframes gradient-border-spin {
+        0%   { background-position: 0% 50%; }
+        50%  { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+      }
+      .gradient-border-anim { position: relative; }
+      .gradient-border-anim::before {
+        content: "";
+        position: absolute; inset: -1px;
+        background: linear-gradient(135deg, #3b82f6, #22d3ee, #6366f1, #3b82f6);
+        background-size: 200% 200%;
+        border-radius: inherit;
+        z-index: -1;
+        animation: gradient-border-spin 4s linear infinite;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      .gradient-border-anim:hover::before { opacity: 1; }
+
+      .feature-icon-azure {
+        background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(37,99,235,0.1));
+      }
+      .feature-icon-ice {
+        background: linear-gradient(135deg, rgba(34,211,238,0.2), rgba(8,145,178,0.1));
+      }
+      .feature-icon-violet {
+        background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(109,40,217,0.1));
+      }
+
+      /* Mobile nav animation */
+      #mobileMenu {
+        max-height: 0; overflow: hidden; opacity: 0;
+        transition: max-height 0.4s ease, opacity 0.3s ease;
+      }
+      #mobileMenu.open { max-height: 500px; opacity: 1; }
+
+      /* FAQ accordion */
+      .faq-answer {
+        max-height: 0; overflow: hidden;
+        transition: max-height 0.4s ease;
+      }
+      .faq-answer.open { max-height: 320px; }
+
+      /* Floating cards on hero */
+      @keyframes float-up {
+        0%, 100% { transform: translateY(0); }
+        50%       { transform: translateY(-10px); }
+      }
+      .float-card { animation: float-up 6s ease-in-out infinite; }
+      .float-card-delayed { animation: float-up 7s ease-in-out 1s infinite; }
+
+      /* Ping slow */
+      @keyframes ping-slow {
+        0%   { transform: scale(1); opacity: 0.6; }
+        75%, 100% { transform: scale(2); opacity: 0; }
+      }
+      .animate-ping-slow { animation: ping-slow 3s cubic-bezier(0,0,0.2,1) infinite; }
+
+      /* Step connector */
+      .step-connector {
+        display: none;
+      }
+      @media (min-width: 1024px) {
+        .step-connector {
+          display: block;
+          position: absolute;
+          top: 64px;
+          left: 50%;
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(90deg, rgba(59,130,246,0.4), transparent);
+        }
+      }
+
+      /* ==========================================
+         SANTERDE BLUE — signature effects
+      ========================================== */
+      ::selection { background: rgba(59,130,246,0.35); color: #fff; }
+
+      .text-azure-gradient {
+        background: linear-gradient(110deg, #93c5fd 0%, #3b82f6 30%, #22d3ee 55%, #6366f1 80%, #93c5fd 100%);
+        background-size: 250% 100%;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: azure-flow 8s ease-in-out infinite;
+      }
+      @keyframes azure-flow {
+        0%, 100% { background-position: 0% 50%; }
+        50%      { background-position: 100% 50%; }
+      }
+
+      /* Aurora behind the hero */
+      .aurora { position: absolute; inset: -20%; pointer-events: none; filter: blur(80px); opacity: 0.55; }
+      .aurora span { position: absolute; border-radius: 9999px; mix-blend-mode: screen; }
+      .aurora .a1 { width: 45vw; height: 45vw; top: 5%;  left: 45%; background: radial-gradient(circle, rgba(37,99,235,0.55), transparent 65%); animation: aurora-drift 18s ease-in-out infinite; }
+      .aurora .a2 { width: 35vw; height: 35vw; top: 40%; left: 60%; background: radial-gradient(circle, rgba(34,211,238,0.35), transparent 65%); animation: aurora-drift 22s ease-in-out -6s infinite reverse; }
+      .aurora .a3 { width: 40vw; height: 40vw; top: 35%; left: 5%;  background: radial-gradient(circle, rgba(99,102,241,0.30), transparent 65%); animation: aurora-drift 26s ease-in-out -12s infinite; }
+      @keyframes aurora-drift {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        33%      { transform: translate(-6%, 4%) scale(1.08); }
+        66%      { transform: translate(5%, -5%) scale(0.95); }
+      }
+
+      /* Cursor-following spotlight in the hero */
+      .spotlight {
+        position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.4s ease;
+        background: radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%), rgba(59,130,246,0.10), transparent 60%);
+      }
+      .hero-bg:hover .spotlight { opacity: 1; }
+
+      /* Fade the grid toward the edges */
+      .grid-pattern {
+        -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 100%);
+                mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 100%);
+        opacity: 0.05;
+      }
+
+      /* Primary CTA — electric gradient with glow */
+      .btn-azure {
+        color: #fff !important;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 50%, #1d4ed8 100%) !important;
+        box-shadow: 0 0 0 1px rgba(147,197,253,0.25) inset, 0 10px 30px -8px rgba(59,130,246,0.6) !important;
+        position: relative; isolation: isolate; overflow: hidden;
+      }
+      .btn-azure::after {
+        content: ""; position: absolute; inset: 0; z-index: -1;
+        background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.25) 50%, transparent 80%);
+        transform: translateX(-120%); transition: transform 0.7s ease;
+      }
+      .btn-azure:hover { box-shadow: 0 0 0 1px rgba(147,197,253,0.4) inset, 0 14px 40px -6px rgba(59,130,246,0.85), 0 0 60px -10px rgba(34,211,238,0.5) !important; }
+      .btn-azure:hover::after { transform: translateX(120%); }
+
+      /* Hero image — glowing gradient ring */
+      .glow-ring::before {
+        content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1px; z-index: 1; pointer-events: none;
+        background: linear-gradient(140deg, rgba(96,165,250,0.8), rgba(34,211,238,0.1) 40%, rgba(99,102,241,0.6));
+        -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+        -webkit-mask-composite: xor; mask-composite: exclude;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .aurora span, .text-azure-gradient, .animate-marquee, .float-card, .float-card-delayed,
+        .badge-shimmer, .animate-ping-slow { animation: none !important; }
+        .btn-azure::after { display: none; }
+      }
+
+      @media (max-width: 640px) {
+        .text-7xl, .text-8xl { font-size: 2.8rem !important; line-height: 1.05 !important; }
+        .text-6xl { font-size: 2.2rem !important; }
+        .text-5xl { font-size: 1.9rem !important; }
+      }
+    </style>
+  </head>
+
+  <body class="font-sans bg-onyx text-pearl overflow-x-hidden">
+    <!-- Noise overlay -->
+    <div class="noise fixed inset-0 z-0 pointer-events-none"></div>
+
+    <!-- ======================================================
+         NAVIGATION
+    ====================================================== -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500">
+      <div class="max-w-[1440px] mx-auto px-6 lg:px-12">
+        <div class="flex justify-between items-center h-20 lg:h-24">
+
+          <!-- Logo -->
+          <a href="/" class="flex items-center group transition-opacity hover:opacity-80">
+            <img src="{% static 'images/SanterdeTrust.png' %}?v=2" alt="Santerde Trust" class="h-11 w-auto object-contain">
+          </a>
+
+          <!-- Desktop Nav Links -->
+          <div class="hidden lg:flex items-center space-x-10">
+            <a href="#features"     class="text-sm font-medium text-pearl/60 hover:text-pearl transition-colors underline-hover">Features</a>
+            <a href="#how-it-works" class="text-sm font-medium text-pearl/60 hover:text-pearl transition-colors underline-hover">How It Works</a>
+            <a href="#stories"      class="text-sm font-medium text-pearl/60 hover:text-pearl transition-colors underline-hover">Stories</a>
+            <a href="#faq"          class="text-sm font-medium text-pearl/60 hover:text-pearl transition-colors underline-hover">FAQ</a>
+          </div>
+
+          <!-- Auth Buttons -->
+          <div class="flex items-center space-x-3">
+            <a href="/login"
+               class="hidden sm:inline-flex items-center px-5 py-2.5 text-sm font-semibold text-pearl/80 hover:text-pearl border border-pearl/10 hover:border-pearl/30 rounded-full transition-all duration-300">
+              Sign In
+            </a>
+            <a href="/register"
+               class="inline-flex items-center px-5 py-2.5 text-sm font-bold btn-azure rounded-full transition-all duration-300 shadow-lg shadow-azure-500/20 hover:shadow-azure-400/30">
+              Get Started
+              <svg class="ml-1.5 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              </svg>
+            </a>
+            <!-- Mobile menu toggle -->
+            <button class="lg:hidden p-2 text-pearl/60 hover:text-pearl transition-colors" onclick="toggleMenu()">
+              <svg id="menuIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Menu -->
+      <div id="mobileMenu" class="lg:hidden border-t border-pearl/5 bg-onyx/95 backdrop-blur-2xl">
+        <div class="px-6 py-6 space-y-1">
+          <a href="#features"     class="flex items-center px-4 py-3 text-sm font-medium text-pearl/70 hover:text-pearl hover:bg-pearl/5 rounded-xl transition-all" onclick="toggleMenu()">Features</a>
+          <a href="#how-it-works" class="flex items-center px-4 py-3 text-sm font-medium text-pearl/70 hover:text-pearl hover:bg-pearl/5 rounded-xl transition-all" onclick="toggleMenu()">How It Works</a>
+          <a href="#stories"      class="flex items-center px-4 py-3 text-sm font-medium text-pearl/70 hover:text-pearl hover:bg-pearl/5 rounded-xl transition-all" onclick="toggleMenu()">Stories</a>
+          <a href="#faq"          class="flex items-center px-4 py-3 text-sm font-medium text-pearl/70 hover:text-pearl hover:bg-pearl/5 rounded-xl transition-all" onclick="toggleMenu()">FAQ</a>
+          <div class="pt-4 border-t border-pearl/10 grid grid-cols-2 gap-3">
+            <a href="/login"    class="flex items-center justify-center px-4 py-3 text-sm font-semibold text-pearl border border-pearl/20 rounded-full hover:border-pearl/40 transition-all">Sign In</a>
+            <a href="/register" class="flex items-center justify-center px-4 py-3 text-sm font-bold text-onyx bg-azure-400 rounded-full hover:bg-azure-300 transition-all">Create Account</a>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ======================================================
+         HERO SECTION
+    ====================================================== -->
+    <section class="relative min-h-screen hero-bg flex flex-col justify-center pt-24 pb-16 px-6 lg:px-12 overflow-hidden">
+      <!-- Aurora + cursor spotlight -->
+      <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+      <div class="spotlight" id="heroSpotlight" aria-hidden="true"></div>
+      <!-- Background blobs -->
+      <div class="absolute top-1/3 right-0 w-[600px] h-[600px] rounded-full bg-azure-500/5 blur-3xl pointer-events-none"></div>
+      <div class="absolute bottom-0 left-1/4 w-[500px] h-[500px] rounded-full bg-ice-500/5 blur-3xl pointer-events-none"></div>
+      <!-- Grid pattern -->
+      <div class="absolute inset-0 grid-pattern pointer-events-none"></div>
+      <!-- Ping dots -->
+      <div class="absolute top-1/4 right-1/4 w-2 h-2">
+        <span class="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-azure-400"></span>
+      </div>
+      <div class="absolute top-2/3 left-1/3 w-1.5 h-1.5" style="animation-delay:1.2s">
+        <span class="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-ice-400 opacity-50"></span>
+      </div>
+
+      <div class="max-w-[1440px] mx-auto w-full relative z-10">
+        <div class="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
+
+          <!-- Left: Copy -->
+          <div class="space-y-8">
+            <!-- Badge -->
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-azure-500/30 badge-shimmer reveal">
+              <span class="w-1.5 h-1.5 bg-azure-400 rounded-full animate-pulse"></span>
+              <span class="text-xs font-semibold text-azure-400 uppercase tracking-wider">Trusted by 500,000+ people worldwide</span>
+            </div>
+
+            <!-- Headline -->
+            <div class="space-y-2 reveal delay-100">
+              <h1 class="text-6xl sm:text-7xl lg:text-8xl font-bold leading-[0.95] tracking-tight">
+                Your wealth,
+                <span class="block font-serif italic font-normal text-azure-gradient">amplified.</span>
+              </h1>
+            </div>
+
+            <!-- Subheadline -->
+            <p class="text-lg text-pearl/50 leading-relaxed max-w-md reveal delay-200">
+              Santerde Trust is the all-in-one wealth platform for ambitious people.
+              Move capital globally, grow your portfolio, and take full control of your
+              financial future — all in one place.
+            </p>
+
+            <!-- CTAs -->
+            <div class="flex flex-col sm:flex-row gap-4 reveal delay-300">
+              <a href="/register"
+                 class="group inline-flex items-center justify-center px-8 py-4 text-base font-bold btn-azure rounded-full transition-all duration-300 shadow-xl shadow-azure-500/20 hover:shadow-azure-400/30 hover:-translate-y-1">
+                Create Free Account
+                <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                </svg>
+              </a>
+              <a href="/login"
+                 class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-pearl/80 hover:text-pearl border border-pearl/10 hover:border-pearl/30 rounded-full transition-all duration-300 hover:-translate-y-1">
+                Sign Into Account
+              </a>
+            </div>
+
+            <!-- Trust micro-copy -->
+            <div class="flex flex-wrap items-center gap-6 pt-2 reveal delay-400">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-azure-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                <span class="text-xs text-pearl/40 font-medium">No hidden charges</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-azure-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                <span class="text-xs text-pearl/40 font-medium">256-bit encryption</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-azure-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                <span class="text-xs text-pearl/40 font-medium">24/7 live support</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Visual -->
+          <div class="relative reveal delay-200">
+            <!-- Main image -->
+            <div class="relative rounded-3xl overflow-hidden glow-ring" style="box-shadow: 0 0 50px rgba(59,130,246,0.28), 0 0 120px rgba(34,211,238,0.10);">
+              <img src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769082109/woman-7895953_1280_zjwwhu.jpg"
+                   class="w-full h-[520px] lg:h-[600px] object-cover" alt="Santerde Trust">
+              <div class="absolute inset-0 bg-gradient-to-t from-onyx/60 via-transparent to-transparent"></div>
+            </div>
+
+            <!-- Floating portfolio card -->
+            <div class="absolute -bottom-6 -left-4 lg:-left-8 glass-dark rounded-2xl p-5 min-w-[190px] float-card border border-azure-500/10">
+              <p class="text-xs font-semibold text-pearl/40 uppercase tracking-wider mb-1">Total Portfolio</p>
+              <p class="text-2xl font-bold text-pearl" style="font-variant-numeric: tabular-nums;">$2,847,500</p>
+              <div class="flex items-center gap-1 mt-1">
+                <svg class="w-3 h-3 text-azure-400" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd"></path>
+                </svg>
+                <span class="text-xs font-bold text-azure-400">+12.4% this month</span>
+              </div>
+            </div>
+
+            <!-- Floating security badge -->
+            <div class="absolute -top-4 -right-2 lg:-right-6 glass-dark rounded-2xl p-4 flex items-center gap-3 float-card-delayed border border-pearl/5">
+              <div class="w-10 h-10 rounded-xl bg-azure-500/20 flex items-center justify-center flex-shrink-0">
+                <svg class="w-5 h-5 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-pearl">Vault Secured</p>
+                <p class="text-xs text-pearl/40">256-bit SSL</p>
+              </div>
+            </div>
+
+            <!-- Floating transfer card (desktop only) -->
+            <div class="absolute top-1/2 -translate-y-1/2 -right-4 lg:-right-10 glass-dark rounded-2xl p-4 hidden lg:block float-card border border-pearl/5">
+              <p class="text-xs text-pearl/40 mb-2">Latest Transfer</p>
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-azure-400 to-azure-600 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-sm font-bold text-pearl">$45,000</p>
+                  <p class="text-xs text-azure-400">Completed ✓</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scroll indicator -->
+      <div class="absolute bottom-8 left-1/2 -translate-x-1/2 hidden lg:flex flex-col items-center gap-2">
+        <span class="text-xs font-medium text-pearl/20 uppercase tracking-widest">Discover</span>
+        <div class="w-5 h-8 border border-pearl/15 rounded-full flex justify-center items-start pt-1.5">
+          <div class="w-1 h-2 bg-azure-400 rounded-full animate-bounce"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         TICKER MARQUEE
+    ====================================================== -->
+    <section class="py-5 overflow-hidden border-y border-azure-500/10" style="background: rgba(30,58,138,0.25);">
+      <div class="flex animate-marquee whitespace-nowrap">
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ Zero Hidden Charges</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ Instant Global Transfers</span>
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ Multi-Currency Portfolio</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ 256-Bit Encrypted Vault</span>
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ 24/7 Dedicated Support</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ Competitive Yield Rates</span>
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ Real-Time Analytics</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ 150+ Nations Reached</span>
+        <!-- Duplicate for seamless loop -->
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ Zero Hidden Charges</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ Instant Global Transfers</span>
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ Multi-Currency Portfolio</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ 256-Bit Encrypted Vault</span>
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ 24/7 Dedicated Support</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ Competitive Yield Rates</span>
+        <span class="text-azure-400/70 text-xs font-bold uppercase tracking-widest mx-10">★ Real-Time Analytics</span>
+        <span class="text-pearl/25 text-xs font-bold uppercase tracking-widest mx-10">★ 150+ Nations Reached</span>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         STATS SECTION
+    ====================================================== -->
+    <section class="py-24 lg:py-32 px-6 lg:px-12 bg-section-dark">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+
+          <!-- Left image -->
+          <div class="lg:col-span-5 reveal">
+            <div class="relative">
+              <div class="rounded-3xl overflow-hidden aspect-[4/5]">
+                <img src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769082109/ai-generated-8478468_1280_ghbzov.jpg"
+                     class="w-full h-full object-cover" alt="STB Community">
+              </div>
+              <div class="absolute -bottom-8 -right-4 lg:-right-8 glass-dark rounded-2xl p-6 shadow-2xl border border-azure-500/10">
+                <div class="text-5xl font-bold text-ice-gradient mb-1" style="font-variant-numeric: tabular-nums;">100K+</div>
+                <div class="text-sm text-pearl/50 font-medium">Active Members</div>
+              </div>
+              <div class="absolute -top-4 -left-4 w-24 h-24 rounded-2xl bg-azure-500/20 blur-2xl pointer-events-none"></div>
+            </div>
+          </div>
+
+          <!-- Right stats -->
+          <div class="lg:col-span-7 lg:pl-8">
+            <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4 reveal">By The Numbers</p>
+            <h2 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-12 reveal delay-100">
+              The numbers<br />
+              <span class="font-serif italic font-normal text-pearl/25">speak for themselves.</span>
+            </h2>
+
+            <div class="grid sm:grid-cols-2 gap-5 lg:gap-6">
+              <div class="group glass-dark rounded-2xl p-8 hover:border-azure-500/30 transition-all duration-500 hover-lift reveal gradient-border-anim">
+                <div class="text-5xl font-bold text-azure-gradient mb-2" style="font-variant-numeric: tabular-nums;">$2B+</div>
+                <div class="text-pearl/40 font-medium text-sm">Capital Under Management</div>
+                <div class="mt-4 h-0.5 w-12 bg-azure-500/40 group-hover:w-full transition-all duration-700 rounded-full"></div>
+              </div>
+              <div class="group glass-dark rounded-2xl p-8 hover:border-azure-500/30 transition-all duration-500 hover-lift reveal delay-100 gradient-border-anim">
+                <div class="text-5xl font-bold text-azure-gradient mb-2" style="font-variant-numeric: tabular-nums;">99.97%</div>
+                <div class="text-pearl/40 font-medium text-sm">Platform Uptime</div>
+                <div class="mt-4 h-0.5 w-12 bg-azure-500/40 group-hover:w-full transition-all duration-700 rounded-full"></div>
+              </div>
+              <div class="group glass-dark rounded-2xl p-8 hover:border-azure-500/30 transition-all duration-500 hover-lift reveal delay-200 gradient-border-anim">
+                <div class="text-5xl font-bold text-azure-gradient mb-2" style="font-variant-numeric: tabular-nums;">150+</div>
+                <div class="text-pearl/40 font-medium text-sm">Nations Reached</div>
+                <div class="mt-4 h-0.5 w-12 bg-azure-500/40 group-hover:w-full transition-all duration-700 rounded-full"></div>
+              </div>
+              <div class="group glass-dark rounded-2xl p-8 hover:border-azure-500/30 transition-all duration-500 hover-lift reveal delay-300 gradient-border-anim">
+                <div class="text-5xl font-bold text-azure-gradient mb-2">24/7</div>
+                <div class="text-pearl/40 font-medium text-sm">Human Support, Always</div>
+                <div class="mt-4 h-0.5 w-12 bg-azure-500/40 group-hover:w-full transition-all duration-700 rounded-full"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         FEATURES — BENTO GRID
+    ====================================================== -->
+    <section id="features" class="py-24 lg:py-32 px-6 lg:px-12 bg-section-mid relative overflow-hidden">
+      <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-azure-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-[1440px] mx-auto relative z-10">
+        <!-- Header -->
+        <div class="max-w-3xl mx-auto text-center mb-16 lg:mb-24">
+          <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4 reveal">Platform Capabilities</p>
+          <h2 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6 reveal delay-100">
+            Built for people who<br />
+            <span class="font-serif italic font-normal text-azure-gradient">take wealth seriously.</span>
+          </h2>
+          <p class="text-lg text-pearl/40 leading-relaxed reveal delay-200">
+            Every feature is intentional. Every detail considered. This is what it feels like
+            when technology truly serves your financial ambitions.
+          </p>
+        </div>
+
+        <!-- Bento Grid -->
+        <div class="grid lg:grid-cols-3 gap-5">
+
+          <!-- Big card: Lightning Transfers -->
+          <div class="lg:col-span-2 group glass-dark rounded-3xl overflow-hidden hover:border-azure-500/20 transition-all duration-500 hover-lift reveal gradient-border-anim">
+            <div class="grid md:grid-cols-2 h-full">
+              <div class="p-8 lg:p-10 flex flex-col justify-between min-h-[300px]">
+                <div>
+                  <div class="w-12 h-12 feature-icon-azure rounded-2xl flex items-center justify-center mb-6 border border-azure-500/20">
+                    <svg class="w-6 h-6 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                  </div>
+                  <h3 class="text-2xl font-bold text-pearl mb-3">Lightning Transfers</h3>
+                  <p class="text-pearl/40 leading-relaxed">Move funds to anyone, anywhere on the globe in seconds. No queues, no waiting periods, no bureaucracy.</p>
+                </div>
+                <div class="mt-8 flex items-center gap-2 text-azure-400 text-sm font-semibold">
+                  <span>Instant settlement</span>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </div>
+              </div>
+              <div class="relative overflow-hidden min-h-[220px]">
+                <img src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769082647/receptionists-5975962_1280_strdgd.jpg"
+                     class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700" alt="">
+                <div class="absolute inset-0 bg-gradient-to-r from-iron/90 to-transparent"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vault Security -->
+          <div class="group glass-dark rounded-3xl p-8 overflow-hidden relative hover:border-azure-500/20 transition-all duration-500 hover-lift reveal delay-100 gradient-border-anim">
+            <div class="absolute top-0 right-0 w-40 h-40 bg-azure-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div class="relative z-10">
+              <div class="w-12 h-12 feature-icon-azure rounded-2xl flex items-center justify-center mb-6 border border-azure-500/20">
+                <svg class="w-6 h-6 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-pearl mb-3">Vault-Grade Security</h3>
+              <p class="text-pearl/40 leading-relaxed">Military-grade 256-bit encryption shields every transaction and every asset. Non-negotiable protection.</p>
+              <div class="mt-6 pt-6 border-t border-pearl/5 flex items-center gap-3">
+                <div class="flex -space-x-1">
+                  <div class="w-6 h-6 rounded-full bg-azure-400/20 border border-azure-500/30"></div>
+                  <div class="w-6 h-6 rounded-full bg-azure-500/20 border border-azure-500/30"></div>
+                  <div class="w-6 h-6 rounded-full bg-azure-600/20 border border-azure-500/30"></div>
+                </div>
+                <span class="text-xs text-pearl/30 font-medium">Multi-layer protection</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics -->
+          <div class="group glass-dark rounded-3xl overflow-hidden hover:border-ice-500/20 transition-all duration-500 hover-lift reveal delay-100 gradient-border-anim">
+            <div class="relative h-44 overflow-hidden">
+              <img src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769085794/laptop-computer-with-company-profit-progress-screen_rllqrp.jpg"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="">
+              <div class="absolute inset-0 bg-gradient-to-t from-iron to-transparent opacity-90"></div>
+            </div>
+            <div class="p-7">
+              <div class="w-10 h-10 feature-icon-ice rounded-xl flex items-center justify-center mb-4 border border-ice-500/20">
+                <svg class="w-5 h-5 text-ice-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-pearl mb-2">Intelligent Analytics</h3>
+              <p class="text-pearl/40 text-sm leading-relaxed">AI-powered insights surface patterns and growth opportunities in your portfolio before you even ask.</p>
+            </div>
+          </div>
+
+          <!-- High-Yield Growth -->
+          <div class="group rounded-3xl p-8 overflow-hidden relative border border-azure-500/20 hover-lift reveal delay-200 gradient-border-anim" style="background: linear-gradient(135deg, rgba(30,58,138,0.6), rgba(2,44,34,0.8));">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-azure-400/20 rounded-full blur-2xl pointer-events-none"></div>
+            <div class="relative z-10">
+              <div class="w-12 h-12 bg-azure-500/20 rounded-2xl flex items-center justify-center mb-6 border border-azure-400/30">
+                <svg class="w-6 h-6 text-azure-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 class="text-2xl font-bold text-pearl mb-3">High-Yield Growth</h3>
+              <p class="text-azure-200/60 leading-relaxed mb-6">Competitive returns on idle capital. Watch your wealth compound while you sleep.</p>
+              <div class="flex items-end gap-1">
+                <span class="text-5xl font-bold text-ice-gradient" style="font-variant-numeric: tabular-nums;">8.5%</span>
+                <span class="text-azure-200/50 text-sm font-medium mb-1.5 ml-1">APY</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Global Access -->
+          <div class="group glass-dark rounded-3xl overflow-hidden hover:border-azure-500/20 transition-all duration-500 hover-lift reveal delay-300 gradient-border-anim">
+            <div class="relative h-44 overflow-hidden">
+              <img src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769086677/earth-2254769_1280_rbczfr.jpg"
+                   class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="">
+              <div class="absolute inset-0 bg-gradient-to-t from-iron to-transparent opacity-85"></div>
+              <div class="absolute bottom-3 left-4">
+                <span class="text-xs font-bold text-pearl/80 bg-azure-500/20 px-3 py-1 rounded-full border border-azure-500/30">150+ Countries</span>
+              </div>
+            </div>
+            <div class="p-7">
+              <h3 class="text-xl font-bold text-pearl mb-2">Global Reach</h3>
+              <p class="text-pearl/40 text-sm leading-relaxed">Multi-currency portfolios with zero conversion penalties. Your wealth has no borders.</p>
+            </div>
+          </div>
+
+          <!-- Premium Membership — full width -->
+          <div class="lg:col-span-3 group glass-dark rounded-3xl overflow-hidden hover:border-ice-500/20 transition-all duration-500 hover-lift reveal delay-200 gradient-border-anim">
+            <div class="grid md:grid-cols-2">
+              <div class="p-8 lg:p-12 flex flex-col justify-center">
+                <div class="w-12 h-12 feature-icon-ice rounded-2xl flex items-center justify-center mb-6 border border-ice-500/20">
+                  <svg class="w-6 h-6 text-ice-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                  </svg>
+                </div>
+                <h3 class="text-3xl font-bold text-pearl mb-4">STB Premium Membership</h3>
+                <p class="text-pearl/40 leading-relaxed max-w-md">Unlock unlimited cashback rewards, priority fund access, dedicated wealth advisors, and exclusive investment opportunities reserved for members only.</p>
+                <a href="/register" class="mt-8 inline-flex items-center gap-2 text-ice-400 text-sm font-semibold hover:text-ice-300 transition-colors">
+                  <span>Explore Premium</span>
+                  <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+              </div>
+              <div class="relative overflow-hidden min-h-[280px]">
+                <img src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769085798/top-view-financial-instruments_b6ca7v.jpg"
+                     class="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-70 group-hover:scale-105 transition-all duration-700" alt="">
+                <div class="absolute inset-0 bg-gradient-to-r from-iron/90 via-iron/30 to-transparent"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         HOW IT WORKS
+    ====================================================== -->
+    <section id="how-it-works" class="py-24 lg:py-32 px-6 lg:px-12 bg-section-dark relative overflow-hidden">
+      <div class="absolute inset-0 dot-pattern pointer-events-none"></div>
+
+      <div class="max-w-[1440px] mx-auto relative z-10">
+        <div class="text-center mb-16 lg:mb-24">
+          <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4 reveal">Simple by Design</p>
+          <h2 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-6 reveal delay-100">
+            Up and running<br />
+            <span class="font-serif italic font-normal text-pearl/25">in three steps.</span>
+          </h2>
+          <p class="text-lg text-pearl/40 max-w-2xl mx-auto leading-relaxed reveal delay-200">
+            No lengthy forms, no week-long waits. From registration to full portfolio access in under five minutes.
+          </p>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8 lg:gap-12">
+
+          <!-- Step 1 -->
+          <div class="group text-center reveal">
+            <div class="relative inline-flex mb-8">
+              <div class="w-28 h-28 rounded-3xl bg-gradient-to-br from-azure-500/20 to-azure-600/10 border border-azure-500/20 flex items-center justify-center group-hover:border-azure-400/50 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-azure-500/10">
+                <svg class="w-12 h-12 text-azure-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </div>
+              <div class="absolute -top-3 -right-3 w-8 h-8 bg-azure-400 rounded-full flex items-center justify-center shadow-lg shadow-azure-500/30">
+                <span class="text-xs font-black text-onyx">01</span>
+              </div>
+            </div>
+            <h3 class="text-2xl font-bold text-pearl mb-3">Create Your Profile</h3>
+            <p class="text-pearl/40 leading-relaxed max-w-xs mx-auto">Register in under two minutes. Basic details, quick identity verification — that's it.</p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="group text-center reveal delay-200">
+            <div class="relative inline-flex mb-8">
+              <div class="w-28 h-28 rounded-3xl bg-gradient-to-br from-ice-500/20 to-ice-600/10 border border-ice-500/20 flex items-center justify-center group-hover:border-ice-400/50 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-ice-500/10">
+                <svg class="w-12 h-12 text-ice-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                </svg>
+              </div>
+              <div class="absolute -top-3 -right-3 w-8 h-8 bg-ice-400 rounded-full flex items-center justify-center shadow-lg shadow-ice-500/30">
+                <span class="text-xs font-black text-onyx">02</span>
+              </div>
+            </div>
+            <h3 class="text-2xl font-bold text-pearl mb-3">Fund Your Portfolio</h3>
+            <p class="text-pearl/40 leading-relaxed max-w-xs mx-auto">Add capital from any source. Multiple funding options, zero entry friction, instant activation.</p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="group text-center reveal delay-400">
+            <div class="relative inline-flex mb-8">
+              <div class="w-28 h-28 rounded-3xl bg-gradient-to-br from-violet-500/20 to-violet-600/10 border border-violet-500/20 flex items-center justify-center group-hover:border-violet-400/50 transition-all duration-500 group-hover:shadow-2xl group-hover:shadow-violet-500/10">
+                <svg class="w-12 h-12 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                </svg>
+              </div>
+              <div class="absolute -top-3 -right-3 w-8 h-8 bg-violet-400 rounded-full flex items-center justify-center shadow-lg shadow-violet-500/30">
+                <span class="text-xs font-black text-onyx">03</span>
+              </div>
+            </div>
+            <h3 class="text-2xl font-bold text-pearl mb-3">Grow &amp; Transact</h3>
+            <p class="text-pearl/40 leading-relaxed max-w-xs mx-auto">Send, receive, save, and grow. Every wealth tool you need, right at your fingertips.</p>
+          </div>
+        </div>
+
+        <div class="text-center mt-16 reveal delay-300">
+          <a href="/register"
+             class="inline-flex items-center px-10 py-4 text-base font-bold btn-azure rounded-full transition-all duration-300 shadow-xl shadow-azure-500/20 hover:shadow-azure-400/30 hover:-translate-y-1">
+            Start Your Journey
+            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         TESTIMONIALS
+    ====================================================== -->
+    <section id="stories" class="py-24 lg:py-32 px-6 lg:px-12 bg-section-mid">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-16 lg:mb-24 gap-6">
+          <div class="max-w-2xl">
+            <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4 reveal">Member Stories</p>
+            <h2 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight reveal delay-100">
+              Real people,<br />
+              <span class="font-serif italic font-normal text-pearl/25">real prosperity.</span>
+            </h2>
+          </div>
+          <a href="/register"
+             class="group inline-flex items-center text-sm font-bold text-azure-400 hover:text-azure-300 transition-colors reveal self-start lg:self-end">
+            Join Them
+            <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+          </a>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+
+          <!-- Featured testimonial -->
+          <div class="lg:col-span-2 group glass-dark rounded-3xl p-8 lg:p-12 hover:border-azure-500/20 transition-all duration-500 hover-lift reveal gradient-border-anim">
+            <div class="flex flex-col lg:flex-row gap-8">
+              <div class="flex-shrink-0">
+                <div class="w-20 h-20 lg:w-28 lg:h-28 rounded-2xl overflow-hidden border border-pearl/10">
+                  <img class="w-full h-full object-cover" src="https://res.cloudinary.com/daf9tr3lf/image/upload/v1768460781/elite/httitwekxqw2r3u86xrc.jpg" alt="Sarah Chen">
+                </div>
+              </div>
+              <div class="flex flex-col justify-between">
+                <div>
+                  <div class="text-gold-400 text-lg mb-5">★★★★★</div>
+                  <blockquote class="text-2xl lg:text-3xl font-medium text-pearl leading-relaxed mb-6">
+                    "Switching to Santerde Trust was the best financial move I've made. The wealth analytics alone helped me spot a 23% improvement in my cash flow within the first month."
+                  </blockquote>
+                </div>
+                <div>
+                  <p class="font-bold text-pearl">Sarah Chen</p>
+                  <p class="text-pearl/40 text-sm">Tech Entrepreneur, San Francisco</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Testimonial 2 -->
+          <div class="group glass-dark rounded-3xl p-8 hover:border-azure-500/20 transition-all duration-500 hover-lift reveal delay-100 gradient-border-anim">
+            <div class="w-14 h-14 rounded-xl overflow-hidden border border-pearl/10 mb-6">
+              <img class="w-full h-full object-cover" src="https://res.cloudinary.com/djspmrmxw/image/upload/v1761827409/samples/man-portrait.jpg" alt="Marcus Johnson">
+            </div>
+            <div class="text-gold-400 mb-4">★★★★★</div>
+            <blockquote class="text-lg text-pearl leading-relaxed mb-6">
+              "I travel constantly. Having access to my full portfolio and being able to move capital anywhere, instantly — it's genuinely changed how I operate."
+            </blockquote>
+            <p class="font-bold text-pearl">Marcus Johnson</p>
+            <p class="text-pearl/40 text-sm">Global Consultant</p>
+          </div>
+
+          <!-- Testimonial 3 -->
+          <div class="group rounded-3xl p-8 hover-lift reveal delay-100 gradient-border-anim border border-azure-500/20" style="background: linear-gradient(135deg, rgba(30,58,138,0.4), rgba(2,44,34,0.6));">
+            <div class="w-14 h-14 rounded-xl overflow-hidden border border-azure-500/20 mb-6">
+              <img class="w-full h-full object-cover" src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769084427/latina-4573900_1280_qsuggr.jpg" alt="Emily Rodriguez">
+            </div>
+            <div class="text-gold-400 mb-4">★★★★★</div>
+            <blockquote class="text-lg text-azure-100/80 leading-relaxed mb-6">
+              "The interface is gorgeous and everything just works. No complexity, no confusion. STB is the way money platforms should have always felt."
+            </blockquote>
+            <p class="font-bold text-pearl">Emily Rodriguez</p>
+            <p class="text-azure-300/50 text-sm">Creative Director, NYC</p>
+          </div>
+
+          <!-- Testimonial 4 - wide -->
+          <div class="lg:col-span-2 group glass-dark rounded-3xl p-8 lg:p-10 hover:border-azure-500/20 transition-all duration-500 hover-lift reveal delay-200 gradient-border-anim">
+            <div class="flex flex-col lg:flex-row gap-8 items-start lg:items-center">
+              <div class="w-full lg:w-52 h-52 rounded-2xl overflow-hidden flex-shrink-0 border border-pearl/10">
+                <img class="w-full h-full object-cover" src="https://res.cloudinary.com/djspmrmxw/image/upload/v1761827414/cld-sample.jpg" alt="Cynthia Longwood">
+              </div>
+              <div>
+                <div class="text-gold-400 mb-4">★★★★★</div>
+                <blockquote class="text-2xl font-medium text-pearl leading-relaxed mb-5">
+                  "As a business owner, liquidity is everything. STB's instant fund movement and intelligent analytics helped me grow revenue by 40% this year."
+                </blockquote>
+                <p class="font-bold text-pearl">Cynthia Longwood</p>
+                <p class="text-pearl/40 text-sm">Founder, PetPark &amp; Co.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         COMPARISON TABLE
+    ====================================================== -->
+    <section class="py-24 lg:py-32 px-6 lg:px-12 bg-section-dark relative overflow-hidden">
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-azure-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="max-w-[1440px] mx-auto relative z-10">
+        <div class="text-center mb-16 lg:mb-20">
+          <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4 reveal">The STB Difference</p>
+          <h2 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight reveal delay-100">
+            Why choose Santerde Trust<br />
+            <span class="font-serif italic font-normal text-pearl/25">over anything else?</span>
+          </h2>
+        </div>
+
+        <div class="max-w-4xl mx-auto">
+          <!-- Table header -->
+          <div class="grid grid-cols-3 mb-3 reveal">
+            <div></div>
+            <div class="text-center py-4 px-4">
+              <span class="text-sm font-semibold text-pearl/30">Traditional Platforms</span>
+            </div>
+            <div class="text-center py-4 px-4 bg-azure-500/10 rounded-2xl border border-azure-500/20">
+              <span class="text-sm font-bold text-azure-400">Santerde Trust</span>
+            </div>
+          </div>
+
+          <!-- Rows -->
+          <div class="space-y-2">
+            <div class="grid grid-cols-3 items-center glass-dark rounded-2xl overflow-hidden reveal">
+              <div class="p-5 text-sm font-medium text-pearl/50">Instant Fund Transfers</div>
+              <div class="text-center p-5 text-pearl/20 text-lg">✕</div>
+              <div class="text-center p-5 bg-azure-500/5 text-azure-400 text-lg font-bold">✓</div>
+            </div>
+            <div class="grid grid-cols-3 items-center glass-dark rounded-2xl overflow-hidden reveal">
+              <div class="p-5 text-sm font-medium text-pearl/50">Zero Hidden Charges</div>
+              <div class="text-center p-5 text-pearl/20 text-lg">✕</div>
+              <div class="text-center p-5 bg-azure-500/5 text-azure-400 text-lg font-bold">✓</div>
+            </div>
+            <div class="grid grid-cols-3 items-center glass-dark rounded-2xl overflow-hidden reveal">
+              <div class="p-5 text-sm font-medium text-pearl/50">Multi-Currency Portfolio</div>
+              <div class="text-center p-5 text-pearl/20 text-lg">✕</div>
+              <div class="text-center p-5 bg-azure-500/5 text-azure-400 text-lg font-bold">✓</div>
+            </div>
+            <div class="grid grid-cols-3 items-center glass-dark rounded-2xl overflow-hidden reveal">
+              <div class="p-5 text-sm font-medium text-pearl/50">AI Wealth Analytics</div>
+              <div class="text-center p-5 text-pearl/20 text-lg">✕</div>
+              <div class="text-center p-5 bg-azure-500/5 text-azure-400 text-lg font-bold">✓</div>
+            </div>
+            <div class="grid grid-cols-3 items-center glass-dark rounded-2xl overflow-hidden reveal">
+              <div class="p-5 text-sm font-medium text-pearl/50">Competitive Yield Rates</div>
+              <div class="text-center p-5 text-pearl/20 text-lg">✕</div>
+              <div class="text-center p-5 bg-azure-500/5 text-azure-400 text-lg font-bold">✓</div>
+            </div>
+            <div class="grid grid-cols-3 items-center glass-dark rounded-2xl overflow-hidden reveal">
+              <div class="p-5 text-sm font-medium text-pearl/50">24/7 Human Support</div>
+              <div class="text-center p-5 text-sm text-pearl/25">Rarely</div>
+              <div class="text-center p-5 bg-azure-500/5 text-azure-400 text-sm font-bold">Always</div>
+            </div>
+            <div class="grid grid-cols-3 items-center glass-dark rounded-2xl overflow-hidden reveal">
+              <div class="p-5 text-sm font-medium text-pearl/50">Account Setup Time</div>
+              <div class="text-center p-5 text-sm text-pearl/25">Days — Weeks</div>
+              <div class="text-center p-5 bg-azure-500/5 text-azure-400 text-sm font-bold">Under 5 Minutes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         ABOUT / TEAM MOSAIC
+    ====================================================== -->
+    <section class="py-24 lg:py-32 px-6 lg:px-12 bg-section-mid">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
+
+          <!-- Image Mosaic -->
+          <div class="grid grid-cols-2 gap-4 reveal">
+            <div class="space-y-4">
+              <div class="aspect-[3/4] rounded-2xl overflow-hidden border border-pearl/5">
+                <img class="w-full h-full object-cover" src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769085443/meeting-7564970_1280_hwetcu.jpg" alt="">
+              </div>
+              <div class="aspect-square rounded-2xl overflow-hidden border border-pearl/5">
+                <img class="w-full h-full object-cover" src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769085444/manfred-gunther-835824_1280_qefrji.jpg" alt="">
+              </div>
+            </div>
+            <div class="space-y-4 pt-10">
+              <div class="aspect-square rounded-2xl overflow-hidden border border-pearl/5">
+                <img class="w-full h-full object-cover" src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769085443/speaker-1596210_1280_q4hnfq.jpg" alt="">
+              </div>
+              <div class="aspect-[3/4] rounded-2xl overflow-hidden border border-pearl/5">
+                <img class="w-full h-full object-cover" src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769085447/close-up-young-colleagues-having-meeting_jvsmgb.jpg" alt="">
+              </div>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="reveal delay-200">
+            <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4">About Santerde Trust</p>
+            <h2 class="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight mb-8">
+              Built by those<br />
+              <span class="font-serif italic font-normal text-pearl/25">who demanded better.</span>
+            </h2>
+            <p class="text-lg text-pearl/40 leading-relaxed mb-6">
+              We're a team of technologists, economists, and designers who grew frustrated with the state of wealth management. Slow, opaque, and built to serve institutions — not people.
+            </p>
+            <p class="text-lg text-pearl/40 leading-relaxed mb-10">
+              So we built Santerde Trust: a platform that centers you. Every policy, every feature, every design decision starts with one question — does this genuinely improve our members' financial lives?
+            </p>
+
+            <div class="grid grid-cols-2 gap-4 mb-10">
+              <div class="glass-dark rounded-2xl p-5 border border-pearl/5">
+                <div class="text-3xl font-bold text-azure-gradient mb-1">2019</div>
+                <div class="text-sm text-pearl/40">Founded with a mission</div>
+              </div>
+              <div class="glass-dark rounded-2xl p-5 border border-pearl/5">
+                <div class="text-3xl font-bold text-azure-gradient mb-1">A+</div>
+                <div class="text-sm text-pearl/40">Security Rating</div>
+              </div>
+            </div>
+
+            <a href="/register"
+               class="inline-flex items-center px-8 py-4 text-base font-bold btn-azure rounded-full transition-all duration-300 shadow-xl shadow-azure-500/20 hover:shadow-azure-400/30 hover:-translate-y-1">
+              Join Santerde Trust
+              <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         FAQ
+    ====================================================== -->
+    <section id="faq" class="py-24 lg:py-32 px-6 lg:px-12 bg-section-dark">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="grid lg:grid-cols-2 gap-16 lg:gap-24">
+
+          <!-- Left -->
+          <div class="reveal">
+            <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4">FAQ</p>
+            <h2 class="text-4xl lg:text-5xl font-bold leading-tight mb-6">
+              Common<br />
+              <span class="font-serif italic font-normal text-pearl/25">questions.</span>
+            </h2>
+            <p class="text-lg text-pearl/40 leading-relaxed mb-10">
+              Can't find what you're looking for? Our support team is available around the clock.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4">
+              <a href="/register" class="inline-flex items-center justify-center px-7 py-3.5 text-sm font-bold btn-azure rounded-full transition-all duration-300 shadow-lg shadow-azure-500/20">
+                Create Account
+              </a>
+              <a href="/login" class="inline-flex items-center justify-center px-7 py-3.5 text-sm font-semibold text-pearl border border-pearl/15 hover:border-pearl/30 rounded-full transition-all duration-300">
+                Sign In
+              </a>
+            </div>
+          </div>
+
+          <!-- Right: Accordion -->
+          <div class="space-y-3 reveal delay-200">
+
+            <div class="faq-item glass-dark rounded-2xl overflow-hidden border border-pearl/5 hover:border-pearl/10 transition-colors">
+              <button class="w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                <span class="text-base font-semibold text-pearl">How do I open a Santerde Trust account?</span>
+                <svg class="faq-icon w-5 h-5 text-pearl/30 flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+              <div class="faq-answer px-6">
+                <p class="text-pearl/40 leading-relaxed pb-6">Simply click "Create Account" and complete registration in under 5 minutes. You'll need a valid email, basic personal details, and a government-issued ID for verification. Once verified, your portfolio is fully active.</p>
+              </div>
+            </div>
+
+            <div class="faq-item glass-dark rounded-2xl overflow-hidden border border-pearl/5 hover:border-pearl/10 transition-colors">
+              <button class="w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                <span class="text-base font-semibold text-pearl">Are my funds protected?</span>
+                <svg class="faq-icon w-5 h-5 text-pearl/30 flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+              <div class="faq-answer px-6">
+                <p class="text-pearl/40 leading-relaxed pb-6">Yes. Santerde Trust employs 256-bit SSL encryption, multi-factor authentication, and round-the-clock fraud monitoring. Your capital is safeguarded by enterprise-grade security infrastructure used by leading institutions worldwide.</p>
+              </div>
+            </div>
+
+            <div class="faq-item glass-dark rounded-2xl overflow-hidden border border-pearl/5 hover:border-pearl/10 transition-colors">
+              <button class="w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                <span class="text-base font-semibold text-pearl">What currencies can I hold?</span>
+                <svg class="faq-icon w-5 h-5 text-pearl/30 flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+              <div class="faq-answer px-6">
+                <p class="text-pearl/40 leading-relaxed pb-6">STB supports USD, EUR, and GBP multi-currency portfolios with competitive exchange rates and zero foreign transaction penalties. More currencies are added regularly.</p>
+              </div>
+            </div>
+
+            <div class="faq-item glass-dark rounded-2xl overflow-hidden border border-pearl/5 hover:border-pearl/10 transition-colors">
+              <button class="w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                <span class="text-base font-semibold text-pearl">How fast are fund transfers?</span>
+                <svg class="faq-icon w-5 h-5 text-pearl/30 flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+              <div class="faq-answer px-6">
+                <p class="text-pearl/40 leading-relaxed pb-6">Domestic transfers are processed instantly. International transfers typically settle within seconds to minutes depending on the destination. No more waiting days for funds to clear.</p>
+              </div>
+            </div>
+
+            <div class="faq-item glass-dark rounded-2xl overflow-hidden border border-pearl/5 hover:border-pearl/10 transition-colors">
+              <button class="w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                <span class="text-base font-semibold text-pearl">Is Santerde Trust available in my country?</span>
+                <svg class="faq-icon w-5 h-5 text-pearl/30 flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+              <div class="faq-answer px-6">
+                <p class="text-pearl/40 leading-relaxed pb-6">Santerde Trust operates across 150+ countries. We're constantly expanding our footprint. Create an account to check availability in your specific region.</p>
+              </div>
+            </div>
+
+            <div class="faq-item glass-dark rounded-2xl overflow-hidden border border-pearl/5 hover:border-pearl/10 transition-colors">
+              <button class="w-full flex items-center justify-between p-6 text-left" onclick="toggleFaq(this)">
+                <span class="text-base font-semibold text-pearl">Are there fees for maintaining an account?</span>
+                <svg class="faq-icon w-5 h-5 text-pearl/30 flex-shrink-0 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              </button>
+              <div class="faq-answer px-6">
+                <p class="text-pearl/40 leading-relaxed pb-6">Zero monthly account fees. Zero hidden charges. We believe your wealth should grow, not be eroded by platform costs. Premium membership offers additional benefits for power users.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         FINAL CTA
+    ====================================================== -->
+    <section class="py-24 lg:py-32 px-6 lg:px-12 bg-section-mid">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="relative rounded-[2.5rem] overflow-hidden border border-azure-500/20"
+             style="background: linear-gradient(135deg, rgba(30,58,138,0.6) 0%, #0A0A0A 50%, #0A0A0A 100%);">
+          <!-- Glow -->
+          <div class="absolute top-0 left-1/4 w-[600px] h-[400px] bg-azure-500/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute bottom-0 right-1/4 w-[400px] h-[300px] bg-ice-500/5 rounded-full blur-3xl pointer-events-none"></div>
+          <!-- Grid overlay -->
+          <div class="absolute inset-0 grid-pattern pointer-events-none"></div>
+
+          <div class="relative z-10 grid lg:grid-cols-2 gap-12 lg:gap-20 p-10 lg:p-20">
+
+            <!-- Left -->
+            <div class="flex flex-col justify-center">
+              <p class="text-xs font-bold text-azure-400 uppercase tracking-widest mb-4 reveal">Begin Today</p>
+              <h2 class="text-4xl lg:text-5xl xl:text-6xl font-bold text-pearl leading-tight mb-6 reveal delay-100">
+                Your financial<br />
+                <span class="font-serif italic font-normal text-azure-gradient">future starts now.</span>
+              </h2>
+              <p class="text-lg text-pearl/40 leading-relaxed mb-10 max-w-md reveal delay-200">
+                Join 500,000+ members who chose to take their wealth seriously. Open your portfolio today — it takes less than five minutes.
+              </p>
+
+              <div class="flex flex-col sm:flex-row gap-4 reveal delay-300">
+                <a href="/register"
+                   class="group inline-flex items-center justify-center px-8 py-4 text-base font-bold btn-azure rounded-full transition-all duration-300 shadow-xl shadow-azure-500/20 hover:shadow-azure-400/30 hover:-translate-y-1">
+                  Create Free Account
+                  <svg class="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                </a>
+                <a href="/login"
+                   class="inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-pearl border border-pearl/15 hover:border-pearl/30 rounded-full transition-all duration-300 hover:-translate-y-1">
+                  Sign Into Account
+                </a>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-6 mt-8 reveal delay-400">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-azure-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                  <span class="text-xs text-pearl/35">No setup cost</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-azure-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                  <span class="text-xs text-pearl/35">Cancel anytime</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-azure-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                  <span class="text-xs text-pearl/35">Instant access</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Image + badges -->
+            <div class="relative reveal delay-200">
+              <div class="rounded-3xl overflow-hidden border border-pearl/5">
+                <img class="w-full h-full object-cover aspect-square"
+                     src="https://res.cloudinary.com/djspmrmxw/image/upload/v1769082109/business-man-805763_1280_zcpgpr.jpg" alt="">
+              </div>
+              <div class="absolute -top-5 -left-4 lg:-left-6 glass-dark rounded-2xl p-4 flex items-center gap-3 border border-pearl/10 float-card">
+                <div class="text-2xl">⭐</div>
+                <div>
+                  <div class="text-sm font-bold text-pearl">4.9 / 5.0</div>
+                  <div class="text-xs text-pearl/35">Member Rating</div>
+                </div>
+              </div>
+              <div class="absolute -bottom-5 -right-4 lg:-right-6 glass-dark rounded-2xl p-5 border border-pearl/10 text-center float-card-delayed">
+                <div class="text-3xl font-bold text-azure-gradient">500K+</div>
+                <div class="text-xs text-pearl/35 mt-1">Members Worldwide</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================
+         FOOTER
+    ====================================================== -->
+    <footer class="bg-onyx border-t border-pearl/5 py-16 lg:py-20 px-6 lg:px-12">
+      <div class="max-w-[1440px] mx-auto">
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+
+          <!-- Brand -->
+          <div class="lg:col-span-2">
+            <a href="/" class="flex items-center mb-6 group transition-opacity hover:opacity-80">
+              <img src="{% static 'images/SanterdeTrust.png' %}?v=2" alt="Santerde Trust" class="h-11 w-auto object-contain">
+            </a>
+            <p class="text-pearl/35 leading-relaxed max-w-sm mb-6">
+              The all-in-one wealth platform for people who demand more. Manage, grow, and move your capital with total confidence.
+            </p>
+            <address class="not-italic flex items-start gap-2 text-sm text-pearl/35 leading-relaxed mb-6">
+              <svg class="w-4 h-4 mt-0.5 flex-shrink-0 text-azure-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 21s-7-6.2-7-11.5a7 7 0 1 1 14 0C19 14.8 12 21 12 21z"/>
+                <circle cx="12" cy="9.5" r="2.5"/>
+              </svg>
+              <span>Wales Street Aberdeen AB24 5HA Scotland</span>
+            </address>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-azure-500/20 bg-azure-500/5">
+                <div class="w-1.5 h-1.5 bg-azure-400 rounded-full animate-pulse"></div>
+                <span class="text-xs text-azure-400 font-medium">All systems operational</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Platform Links -->
+          <div>
+            <p class="text-sm font-bold text-pearl mb-6">Platform</p>
+            <ul class="space-y-3">
+              <li><a href="#features"     class="text-sm text-pearl/35 hover:text-pearl transition-colors underline-hover">Features</a></li>
+              <li><a href="#how-it-works" class="text-sm text-pearl/35 hover:text-pearl transition-colors underline-hover">How It Works</a></li>
+              <li><a href="#stories"      class="text-sm text-pearl/35 hover:text-pearl transition-colors underline-hover">Member Stories</a></li>
+              <li><a href="#faq"          class="text-sm text-pearl/35 hover:text-pearl transition-colors underline-hover">FAQ</a></li>
+            </ul>
+          </div>
+
+          <!-- Account Links -->
+          <div>
+            <p class="text-sm font-bold text-pearl mb-6">Account</p>
+            <ul class="space-y-3">
+              <li><a href="/register" class="text-sm text-pearl/35 hover:text-azure-400 transition-colors underline-hover">Create Account</a></li>
+              <li><a href="/login"    class="text-sm text-pearl/35 hover:text-azure-400 transition-colors underline-hover">Sign In</a></li>
+              <li><a href="/login"    class="text-sm text-pearl/35 hover:text-pearl transition-colors underline-hover">Portfolio Access</a></li>
+              <li><a href="/login"    class="text-sm text-pearl/35 hover:text-pearl transition-colors underline-hover">Transaction History</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="pt-8 border-t border-pearl/5 flex flex-col lg:flex-row justify-between items-center gap-4">
+          <p class="text-sm text-pearl/20 text-center lg:text-left">
+            &copy; <span id="footerYear"></span> Santerde Trust (STB). All rights reserved.
+          </p>
+          <div class="flex items-center gap-6">
+            <span class="text-xs text-pearl/15 font-medium">Enterprise-Grade Security</span>
+            <span class="w-1 h-1 bg-pearl/10 rounded-full"></span>
+            <span class="text-xs text-pearl/15 font-medium">256-bit Encrypted</span>
+            <span class="w-1 h-1 bg-pearl/10 rounded-full"></span>
+            <span class="text-xs text-pearl/15 font-medium">STB &copy; <span class="ltb-year"></span></span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      // Hero spotlight follows the cursor
+      (function () {
+        const hero = document.querySelector('.hero-bg');
+        const spot = document.getElementById('heroSpotlight');
+        if (!hero || !spot || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        hero.addEventListener('mousemove', (e) => {
+          const r = hero.getBoundingClientRect();
+          spot.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+          spot.style.setProperty('--my', (e.clientY - r.top) + 'px');
+        });
+      })();
+
+      // Year
+      const year = new Date().getFullYear();
+      document.getElementById('footerYear').textContent = year;
+      document.querySelectorAll('.ltb-year').forEach(el => el.textContent = year);
+
+      // Mobile menu
+      function toggleMenu() {
+        document.getElementById('mobileMenu').classList.toggle('open');
+      }
+
+      // Smooth scroll
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('mobileMenu').classList.remove('open');
+          }
+        });
+      });
+
+      // Navbar scroll behaviour
+      const navbar = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        if (window.scrollY > 60) {
+          navbar.classList.add('bg-onyx/92', 'backdrop-blur-2xl', 'border-b', 'border-pearl/5', 'shadow-2xl');
+        } else {
+          navbar.classList.remove('bg-onyx/92', 'backdrop-blur-2xl', 'border-b', 'border-pearl/5', 'shadow-2xl');
+        }
+      });
+
+      // Scroll reveal
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+      document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+      // FAQ accordion
+      function toggleFaq(btn) {
+        const answer  = btn.nextElementSibling;
+        const icon    = btn.querySelector('.faq-icon');
+        const isOpen  = answer.classList.contains('open');
+
+        // Close all
+        document.querySelectorAll('.faq-answer.open').forEach(el => {
+          el.classList.remove('open');
+          el.closest('.faq-item').querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+        });
+
+        if (!isOpen) {
+          answer.classList.add('open');
+          icon.style.transform = 'rotate(45deg)';
+        }
+      }
+    </script>
+
+    <!-- Smartsupp Live Chat script -->
+    <script type="text/javascript">
+      var _smartsupp = _smartsupp || {};
+      _smartsupp.key = 'e95ce794f8b90685a205e304915803d5ca614c5d';
+      _smartsupp.color = '#3b82f6';
+      window.smartsupp||(function(d) {
+        var s,c,o=smartsupp=function(){ o._.push(arguments)};o._=[];
+        s=d.getElementsByTagName('script')[0];c=d.createElement('script');
+        c.type='text/javascript';c.charset='utf-8';c.async=true;
+        c.src='https://www.smartsuppchat.com/loader.js?';s.parentNode.insertBefore(c,s);
+      })(document);
+    </script>
+    <noscript>Powered by <a href="https://www.smartsupp.com" target="_blank">Smartsupp</a></noscript>
+  </body>
+</html>

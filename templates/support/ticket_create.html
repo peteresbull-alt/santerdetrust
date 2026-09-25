@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Create Support Ticket{% endblock %}
+{% block page_description %}Submit a new support request{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'support_ticket_list' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Tickets
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-headset text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Create Support Ticket</h1>
+        <p class="text-gray-600">Our team will respond within 24 hours</p>
+    </div>
+
+    <!-- Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 sm:p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Form Errors:</h4>
+                <div class="space-y-2">
+                    {% for field, errors in form.errors.items %}
+                    <div class="bg-white rounded p-3 border border-blue-300">
+                        <p class="font-semibold text-blue-900 mb-1">
+                            {% if field == '__all__' %}General Error:{% else %}{{ field|title }}:{% endif %}
+                        </p>
+                        <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                            {% for error in errors %}<li>• {{ error }}</li>{% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Create Ticket Form -->
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Ticket Details -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Ticket Details</h3>
+            
+            <div class="space-y-6">
+                <!-- Category -->
+                <div>
+                    <label for="{{ form.category.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-tag text-blue-600 mr-2"></i>Category *
+                    </label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                    <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.category.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">Select the category that best describes your issue</p>
+                </div>
+
+                <!-- Priority -->
+                <div>
+                    <label for="{{ form.priority.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-exclamation-triangle text-blue-600 mr-2"></i>Priority *
+                    </label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                    <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.priority.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">How urgent is this issue?</p>
+                </div>
+
+                <!-- Subject -->
+                <div>
+                    <label for="{{ form.subject.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-heading text-blue-600 mr-2"></i>Subject *
+                    </label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                    <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.subject.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">Brief summary of your issue</p>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-align-left text-blue-600 mr-2"></i>Description *
+                    </label>
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                    <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.description.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">Please provide as much detail as possible</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Related Information (Optional) -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Related Information (Optional)</h3>
+            
+            <div class="space-y-6">
+                <!-- Related Transaction -->
+                <div>
+                    <label for="{{ form.related_transaction.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-receipt text-blue-600 mr-2"></i>Related Transaction ID
+                    </label>
+                    {{ form.related_transaction }}
+                    {% if form.related_transaction.errors %}
+                    <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.related_transaction.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">If this is about a specific transaction, enter the transaction ID (e.g., TXN-20260120-ABC123)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Important Notice -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-blue-900 mb-2">Important Information</h4>
+                    <ul class="text-xs text-blue-800 space-y-1">
+                        <li>• Our support team typically responds within 24 hours</li>
+                        <li>• High priority tickets are addressed first</li>
+                        <li>• You'll receive email notifications when your ticket is updated</li>
+                        <li>• Please check your spam folder for our responses</li>
+                        <li>• For urgent account security issues, call our 24/7 hotline</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button type="submit" class="flex-1 px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors">
+                <i class="fas fa-paper-plane mr-2"></i>Submit Ticket
+            </button>
+            <a href="{% url 'support_ticket_list' %}" class="flex-1 px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+
+    <!-- FAQ Section -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
+        <div class="space-y-4">
+            <div class="border-b border-gray-200 pb-4">
+                <h4 class="font-semibold text-gray-900 mb-2">How long does it take to get a response?</h4>
+                <p class="text-sm text-gray-600">Our team typically responds within 24 hours. High priority tickets are addressed faster.</p>
+            </div>
+            <div class="border-b border-gray-200 pb-4">
+                <h4 class="font-semibold text-gray-900 mb-2">Can I attach files to my ticket?</h4>
+                <p class="text-sm text-gray-600">Currently, file attachments are not supported. Please describe your issue in detail in the description field.</p>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900 mb-2">What if I need immediate help?</h4>
+                <p class="text-sm text-gray-600">For urgent issues, especially account security concerns, email our 24/7 support mail at support@santerdetrust.com.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="text"], select, textarea {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900;
+    }
+    
+    textarea {
+        @apply min-h-32 resize-y;
+    }
+</style>
+{% endblock %}

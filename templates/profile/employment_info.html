@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Employment Information{% endblock %}
+{% block page_description %}Update your employment details{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'profile' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-purple-600 to-purple-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-briefcase text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Employment Information</h1>
+        <p class="text-gray-600">Provide your employment details for verification</p>
+    </div>
+
+    <!-- Show Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Form Errors Found:</h4>
+                <div class="space-y-2">
+                    {% for field, errors in form.errors.items %}
+                        <div class="bg-white rounded p-3 border border-blue-300">
+                            <p class="font-semibold text-blue-900 mb-1">
+                                {% if field == '__all__' %}General Form Error:{% else %}Field "{{ field }}":{% endif %}
+                            </p>
+                            <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Employment Form -->
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Employment Status -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Employment Status</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Employment Status -->
+                <div>
+                    <label for="{{ form.employment_status.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Employment Status *
+                    </label>
+                    {{ form.employment_status }}
+                    {% if form.employment_status.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.employment_status.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Employment Type -->
+                <div>
+                    <label for="{{ form.employment_type.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Employment Type
+                    </label>
+                    {{ form.employment_type }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Employer Details -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Employer Details</h3>
+            
+            <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Employer Name -->
+                    <div>
+                        <label for="{{ form.employer_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Employer Name
+                        </label>
+                        {{ form.employer_name }}
+                    </div>
+
+                    <!-- Job Title -->
+                    <div>
+                        <label for="{{ form.job_title.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Job Title
+                        </label>
+                        {{ form.job_title }}
+                    </div>
+
+                    <!-- Employer Phone -->
+                    <div>
+                        <label for="{{ form.employer_phone.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Employer Phone
+                        </label>
+                        {{ form.employer_phone }}
+                    </div>
+
+                    <!-- Annual Income -->
+                    <div>
+                        <label for="{{ form.annual_income.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Annual Income ({{ currency_symbol }})
+                        </label>
+                        {{ form.annual_income }}
+                    </div>
+                </div>
+
+                <!-- Employer Address -->
+                <div>
+                    <label for="{{ form.employer_address.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Employer Address
+                    </label>
+                    {{ form.employer_address }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Job Start Date -->
+                    <div>
+                        <label for="{{ form.job_start_date.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Job Start Date
+                        </label>
+                        {{ form.job_start_date }}
+                    </div>
+
+                    <!-- Job End Date -->
+                    <div>
+                        <label for="{{ form.job_end_date.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Job End Date (if applicable)
+                        </label>
+                        {{ form.job_end_date }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Supporting Documents -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Supporting Documents</h3>
+            
+            <div class="space-y-6">
+                <!-- Proof of Employment -->
+                <div>
+                    <label for="{{ form.proof_of_employment.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Proof of Employment
+                    </label>
+                    <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors">
+                        <div class="space-y-2 text-center">
+                            <i class="fas fa-file-upload text-gray-400 text-2xl sm:text-4xl mb-3"></i>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="{{ form.proof_of_employment.id_for_label }}" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500">
+                                    <span>Upload a file</span>
+                                    {{ form.proof_of_employment }}
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">Employment letter, contract, or pay stub (PDF, JPG, PNG up to 5MB)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proof of Income -->
+                <div>
+                    <label for="{{ form.proof_of_income.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Proof of Income
+                    </label>
+                    <div class="mt-2 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-purple-400 transition-colors">
+                        <div class="space-y-2 text-center">
+                            <i class="fas fa-file-invoice-dollar text-gray-400 text-2xl sm:text-4xl mb-3"></i>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="{{ form.proof_of_income.id_for_label }}" class="relative cursor-pointer bg-white rounded-md font-medium text-purple-600 hover:text-purple-500">
+                                    <span>Upload a file</span>
+                                    {{ form.proof_of_income }}
+                                </label>
+                                <p class="pl-1">or drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">Bank statements, tax returns, or pay stubs (PDF, JPG, PNG up to 5MB)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-blue-900 mb-2">Why We Need This Information</h4>
+                    <ul class="text-xs text-blue-800 space-y-1">
+                        <li>• Employment verification helps us assess your financial standing</li>
+                        <li>• Required for certain account types and credit applications</li>
+                        <li>• All information is encrypted and kept confidential</li>
+                        <li>• Helps us provide you with better financial products</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button type="submit" class="flex-1 px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-colors">
+                <i class="fas fa-save mr-2"></i>Save Employment Information
+            </button>
+            <a href="{% url 'profile' %}" class="flex-1 px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    input[type="text"], input[type="tel"], input[type="date"], input[type="number"], input[type="file"], select, textarea {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-900;
+    }
+    
+    input[type="file"] {
+        display: none;
+    }
+    
+    textarea {
+        @apply min-h-24 resize-y;
+    }
+</style>
+{% endblock %}

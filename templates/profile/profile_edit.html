@@ -1,0 +1,297 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+
+{% block page_title %}Edit Profile{% endblock %}
+{% block page_description %}Update your personal information{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'profile' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-user-edit text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Edit Profile</h1>
+        <p class="text-gray-600">Update your personal information</p>
+    </div>
+
+    <!-- Show Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Form Errors Found:</h4>
+                <div class="space-y-2">
+                    {% for field, errors in form.errors.items %}
+                        <div class="bg-white rounded p-3 border border-blue-300">
+                            <p class="font-semibold text-blue-900 mb-1">
+                                {% if field == '__all__' %}General Form Error:{% else %}Field "{{ field }}":{% endif %}
+                            </p>
+                            <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Edit Form -->
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+        
+        <!-- Profile Image -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-4">Profile Picture</h3>
+            
+            <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+                <!-- Current Image -->
+                <div class="flex-shrink-0">
+                    {% if user.profile_image %}
+                    <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-4 border-gray-200">
+                    {% else %}
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center border-4 border-gray-200">
+                        <span class="text-xl sm:text-3xl font-bold text-gray-600">{{ user.first_name.0 }}{{ user.last_name.0 }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Upload -->
+                <div class="w-full min-w-0">
+                    <label for="{{ form.profile_image.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Upload New Picture
+                    </label>
+                    <div class="w-full overflow-hidden">{{ form.profile_image }}</div>
+                    <p class="mt-2 text-xs text-gray-500">JPG, PNG or GIF (max 5MB)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Personal Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- First Name -->
+                <div>
+                    <label for="{{ form.first_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        First Name *
+                    </label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.first_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Middle Name -->
+                <div>
+                    <label for="{{ form.middle_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Middle Name
+                    </label>
+                    {{ form.middle_name }}
+                </div>
+
+                <!-- Last Name -->
+                <div>
+                    <label for="{{ form.last_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Last Name *
+                    </label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.last_name.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Date of Birth -->
+                <div>
+                    <label for="{{ form.date_of_birth.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Date of Birth
+                    </label>
+                    {{ form.date_of_birth }}
+                </div>
+
+                <!-- Gender -->
+                <div>
+                    <label for="{{ form.gender.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Gender
+                    </label>
+                    {{ form.gender }}
+                </div>
+
+                <!-- Marital Status -->
+                <div>
+                    <label for="{{ form.marital_status.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Marital Status
+                    </label>
+                    {{ form.marital_status }}
+                </div>
+
+                <!-- Nationality -->
+                <div>
+                    <label for="{{ form.nationality.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Nationality
+                    </label>
+                    {{ form.nationality }}
+                </div>
+
+                <!-- Citizenship Status -->
+                <div>
+                    <label for="{{ form.citizenship_status.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Citizenship Status
+                    </label>
+                    {{ form.citizenship_status }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Contact Information</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Phone Number -->
+                <div>
+                    <label for="{{ form.phone_number.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Phone Number *
+                    </label>
+                    {{ form.phone_number }}
+                    {% if form.phone_number.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.phone_number.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Alternate Phone -->
+                <div>
+                    <label for="{{ form.alternate_phone.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Alternate Phone
+                    </label>
+                    {{ form.alternate_phone }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Information -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Address Information</h3>
+            
+            <div class="space-y-6">
+                <!-- Address -->
+                <div>
+                    <label for="{{ form.address.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Street Address
+                    </label>
+                    {{ form.address }}
+                </div>
+
+                <!-- Address Line 2 -->
+                <div>
+                    <label for="{{ form.address_line2.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Address Line 2
+                    </label>
+                    {{ form.address_line2 }}
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- City -->
+                    <div>
+                        <label for="{{ form.city.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            City
+                        </label>
+                        {{ form.city }}
+                    </div>
+
+                    <!-- State -->
+                    <div>
+                        <label for="{{ form.state.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            State/Province
+                        </label>
+                        {{ form.state }}
+                    </div>
+
+                    <!-- Postal Code -->
+                    <div>
+                        <label for="{{ form.postal_code.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Postal Code
+                        </label>
+                        {{ form.postal_code }}
+                    </div>
+
+                    <!-- Country -->
+                    <div>
+                        <label for="{{ form.country.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                            Country
+                        </label>
+                        {{ form.country }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preferences -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Preferences</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Preferred Currency -->
+                <div>
+                    <label for="{{ form.preferred_currency.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Preferred Currency
+                    </label>
+                    {{ form.preferred_currency }}
+                </div>
+
+                <!-- Preferred Language -->
+                <div>
+                    <label for="{{ form.preferred_language.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Preferred Language
+                    </label>
+                    {{ form.preferred_language }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button type="submit" class="flex-1 px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors">
+                <i class="fas fa-save mr-2"></i>Save Changes
+            </button>
+            <a href="{% url 'profile' %}" class="flex-1 px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+        @apply w-full px-3 py-2 sm:px-4 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 text-sm sm:text-base;
+        font-size: 16px; /* prevents iOS zoom on focus */
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+
+    input[type="file"] {
+        @apply w-full border border-gray-300 rounded-lg text-gray-900 text-sm;
+        padding: 0.4rem 0.5rem;
+        font-size: 14px;
+        max-width: 100%;
+        overflow: hidden;
+        box-sizing: border-box;
+        background-color: #f9fafb;
+    }
+
+    textarea {
+        @apply min-h-24 resize-y;
+    }
+</style>
+{% endblock %}

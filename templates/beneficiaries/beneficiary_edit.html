@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Edit Beneficiary{% endblock %}
+{% block page_description %}Update beneficiary information{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'beneficiary_list' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Beneficiaries
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-user-edit text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Edit Beneficiary</h1>
+        <p class="text-gray-600">Update {{ beneficiary.nickname|default:beneficiary.account_name }}'s information</p>
+    </div>
+
+    <!-- Show Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-3 sm:p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Form Errors Found:</h4>
+                <div class="space-y-2">
+                    {% for field, errors in form.errors.items %}
+                        <div class="bg-white rounded p-3 border border-blue-300">
+                            <p class="font-semibold text-blue-900 mb-1">
+                                {% if field == '__all__' %}General Form Error:{% else %}Field "{{ field }}":{% endif %}
+                            </p>
+                            <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Edit Beneficiary Form -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-6">Beneficiary Information</h2>
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Nickname -->
+            <div>
+                <label for="{{ form.nickname.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-tag text-blue-600 mr-2"></i>Nickname *
+                </label>
+                {{ form.nickname }}
+                {% if form.nickname.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.nickname.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">A friendly name to identify this beneficiary</p>
+            </div>
+
+            <!-- Full Name -->
+            <div>
+                <label for="{{ form.account_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-user text-blue-600 mr-2"></i>Account Name *
+                </label>
+                {{ form.account_name }}
+                {% if form.account_name.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.account_name.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Beneficiary's full name as registered with bank</p>
+            </div>
+
+            <!-- Account Number -->
+            <div>
+                <label for="{{ form.account_number.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-hashtag text-blue-600 mr-2"></i>Account Number *
+                </label>
+                {{ form.account_number }}
+                {% if form.account_number.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.account_number.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Beneficiary's bank account number</p>
+            </div>
+
+            <!-- Bank Name -->
+            <div>
+                <label for="{{ form.bank_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-university text-blue-600 mr-2"></i>Bank Name *
+                </label>
+                {{ form.bank_name }}
+                {% if form.bank_name.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.bank_name.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Name of the beneficiary's bank</p>
+            </div>
+
+            <!-- Bank Code (Optional) -->
+            <div>
+                <label for="{{ form.bank_code.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-code text-blue-600 mr-2"></i>Bank Code / Routing Number
+                </label>
+                {{ form.bank_code }}
+                {% if form.bank_code.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.bank_code.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Bank routing number or SWIFT code (optional)</p>
+            </div>
+
+            <!-- Last Updated Info -->
+            <div class="bg-gray-50 rounded-lg p-4">
+                <div class="flex items-center space-x-2 text-sm text-gray-600">
+                    <i class="fas fa-clock"></i>
+                    <span>Last updated: {{ beneficiary.updated_at|date:"M d, Y - H:i" }}</span>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <button type="submit" class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-save mr-2"></i>
+                    Update Beneficiary
+                </button>
+                <a href="{% url 'beneficiary_list' %}" class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="bg-white rounded-xl shadow-lg border-2 border-blue-200 p-3 sm:p-6">
+        <h3 class="text-lg font-bold text-blue-900 mb-2">Danger Zone</h3>
+        <p class="text-sm text-gray-600 mb-4">Once you delete a beneficiary, there is no going back. Please be certain.</p>
+        <a href="{% url 'beneficiary_delete' beneficiary.id %}" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+            <i class="fas fa-trash mr-2"></i>
+            Delete Beneficiary
+        </a>
+    </div>
+</div>
+
+<style>
+    input[type="text"], input[type="email"], input[type="tel"], select {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900;
+    }
+</style>
+{% endblock %}

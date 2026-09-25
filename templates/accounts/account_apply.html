@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Open New Account{% endblock %}
+{% block page_description %}Apply for a new bank account{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'account_list' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Accounts
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-wallet text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Open a New Account</h1>
+        <p class="text-gray-600">Choose the account type that best fits your needs</p>
+    </div>
+
+    <!-- Account Types Selection -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="group cursor-pointer" onclick="selectAccountType('CHECKING')">
+            <div class="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-3 sm:p-6 hover:border-blue-600 hover:shadow-xl transition-all duration-200">
+                <div class="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-200 transition-colors">
+                    <i class="fas fa-credit-card text-blue-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 text-center mb-2">Checking Account</h3>
+                <p class="text-sm text-gray-600 text-center mb-4">Perfect for daily transactions and easy access to your funds</p>
+                <ul class="space-y-2 text-xs text-gray-600">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        Unlimited transactions
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        Debit card included
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        Mobile banking
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="group cursor-pointer" onclick="selectAccountType('SAVINGS')">
+            <div class="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-3 sm:p-6 hover:border-blue-600 hover:shadow-xl transition-all duration-200">
+                <div class="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors">
+                    <i class="fas fa-piggy-bank text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 text-center mb-2">Savings Account</h3>
+                <p class="text-sm text-gray-600 text-center mb-4">Grow your money with competitive interest rates</p>
+                <ul class="space-y-2 text-xs text-gray-600">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        High interest rates
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        No minimum balance
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        FDIC insured
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="group cursor-pointer" onclick="selectAccountType('BUSINESS')">
+            <div class="bg-white rounded-xl shadow-lg border-2 border-gray-200 p-3 sm:p-6 hover:border-blue-600 hover:shadow-xl transition-all duration-200">
+                <div class="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-purple-200 transition-colors">
+                    <i class="fas fa-briefcase text-purple-600 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-900 text-center mb-2">Business Account</h3>
+                <p class="text-sm text-gray-600 text-center mb-4">Designed for business banking needs</p>
+                <ul class="space-y-2 text-xs text-gray-600">
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        Business tools
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        Higher limits
+                    </li>
+                    <li class="flex items-center">
+                        <i class="fas fa-check text-green-600 mr-2"></i>
+                        Merchant services
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Form -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Account Application</h2>
+        
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Account Type -->
+            <div>
+                <label for="{{ form.account_type.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-layer-group text-blue-600 mr-2"></i>Account Type *
+                </label>
+                {{ form.account_type }}
+                {% if form.account_type.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.account_type.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Select the type of account you want to open</p>
+            </div>
+
+            
+
+            <!-- Account Name (Optional) -->
+            <div>
+                <label for="{{ form.account_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-tag text-blue-600 mr-2"></i>Account Name (Optional)
+                </label>
+                {{ form.account_name }}
+                {% if form.account_name.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.account_name.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Give your account a custom name (e.g., "Emergency Fund", "Vacation Savings")</p>
+            </div>
+
+            <!-- Terms & Conditions -->
+            <div class="bg-gray-50 rounded-lg p-3 sm:p-6 border border-gray-200">
+                <div class="flex items-start space-x-3">
+                    <div class="flex items-center h-5">
+                        {{ form.terms_accepted }}
+                    </div>
+                    <label for="{{ form.terms_accepted.id_for_label }}" class="text-sm text-gray-700 cursor-pointer">
+                        I have read and agree to the <a href="#" class="text-blue-600 hover:text-blue-700 font-semibold">Account Terms and Conditions</a> and <a href="#" class="text-blue-600 hover:text-blue-700 font-semibold">Privacy Policy</a>
+                    </label>
+                </div>
+                {% if form.terms_accepted.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.terms_accepted.errors.0 }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- Important Information -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-blue-900 mb-2">Important Information</h4>
+                        <ul class="text-xs text-blue-800 space-y-1">
+                            <li>• An activation fee of {{ currency_symbol }}100 is required to activate your account</li>
+                            <li>• Your account will be pending until the activation fee is paid</li>
+                            <li>• You must complete KYC verification to use all account features</li>
+                            <li>• Account activation typically takes 24-48 hours after fee payment</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Errors -->
+            {% if form.non_field_errors %}
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-exclamation-triangle text-blue-600 text-xl mt-0.5"></i>
+                    <div class="flex-1">
+                        {% for error in form.non_field_errors %}
+                        <p class="text-sm text-blue-800">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Submit Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <button type="submit" class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-check mr-2"></i>
+                    Submit Application
+                </button>
+                <a href="{% url 'account_list' %}" class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Frequently Asked Questions</h3>
+        <div class="space-y-4">
+            <div>
+                <h4 class="text-sm font-semibold text-gray-900 mb-1">How long does account opening take?</h4>
+                <p class="text-xs text-gray-600">Your account is created instantly, but requires activation fee payment and verification within 24-48 hours.</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold text-gray-900 mb-1">Is there a minimum balance requirement?</h4>
+                <p class="text-xs text-gray-600">The minimum balance varies by account type. Checking accounts have no minimum, while savings accounts may require {{ currency_symbol }}100.</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-semibold text-gray-900 mb-1">Can I open multiple accounts?</h4>
+                <p class="text-xs text-gray-600">Yes! You can open up to 5 accounts of different types to organize your finances.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectAccountType(type) {
+    const accountTypeSelect = document.getElementById('{{ form.account_type.id_for_label }}');
+    if (accountTypeSelect) {
+        accountTypeSelect.value = type;
+        // Visual feedback
+        document.querySelectorAll('.group').forEach(el => {
+            el.querySelector('div').classList.remove('border-blue-600', 'shadow-xl');
+            el.querySelector('div').classList.add('border-gray-200');
+        });
+        event.currentTarget.querySelector('div').classList.remove('border-gray-200');
+        event.currentTarget.querySelector('div').classList.add('border-blue-600', 'shadow-xl');
+    }
+}
+</script>
+
+<style>
+    select {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 bg-white;
+    }
+    
+    input[type="text"] {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900;
+    }
+    
+    input[type="checkbox"] {
+        @apply w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer;
+    }
+</style>
+{% endblock %}

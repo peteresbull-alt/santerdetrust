@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Delete Beneficiary{% endblock %}
+{% block page_description %}Confirm beneficiary deletion{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'beneficiary_list' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Beneficiaries
+    </a>
+
+    <!-- Warning Card -->
+    <div class="bg-white rounded-xl shadow-lg border-2 border-blue-300 overflow-hidden">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4 sm:p-6 text-white text-center">
+            <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-exclamation-triangle text-white text-2xl"></i>
+            </div>
+            <h1 class="text-lg sm:text-2xl font-bold mb-2">Delete Beneficiary</h1>
+            <p class="text-blue-100">This action cannot be undone</p>
+        </div>
+
+        <!-- Body -->
+        <div class="p-4 sm:p-8">
+            <!-- Beneficiary Info -->
+            <div class="bg-gray-50 rounded-lg p-3 sm:p-6 mb-6">
+                <p class="text-sm text-gray-600 mb-4">You are about to delete:</p>
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-900 text-lg break-all">{{ beneficiary.nickname|default:beneficiary.account_name }}</p>
+                            {% if beneficiary.nickname %}
+                            <p class="text-sm text-gray-600">{{ beneficiary.account_name }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-gray-200 space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Account Number:</span>
+                            <span class="font-mono font-semibold text-gray-900 break-all">{{ beneficiary.account_number }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Bank:</span>
+                            <span class="font-semibold text-gray-900 break-all">{{ beneficiary.bank_name }}</span>
+                        </div>
+                        {% if beneficiary.email %}
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Email:</span>
+                            <span class="font-semibold text-gray-900 break-all">{{ beneficiary.email }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Message -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-exclamation-circle text-blue-600 text-xl mt-0.5"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-blue-900 mb-2">Warning</h4>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li>• This beneficiary will be permanently deleted</li>
+                            <li>• You cannot undo this action</li>
+                            <li>• You'll need to re-add them if you want to transfer again</li>
+                            <li>• Past transactions to this beneficiary will not be affected</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Confirmation Form -->
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Confirmation Checkbox -->
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <div class="flex items-start space-x-3">
+                        <div class="flex items-center h-5 mt-1">
+                            <input type="checkbox" id="confirm" name="confirm" required class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
+                        </div>
+                        <label for="confirm" class="text-sm text-gray-700 cursor-pointer flex-1">
+                           I understand that this action is permanent and cannot be reversed. I want to delete <strong>{{ beneficiary.nickname|default:beneficiary.account_name }}</strong>.
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="submit" class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>
+                        Yes, Delete Beneficiary
+                    </button>
+                    <a href="{% url 'beneficiary_list' %}" class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel, Keep Beneficiary
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Alternative Actions -->
+    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-lightbulb text-blue-600 text-xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-sm font-semibold text-blue-900 mb-2">Not sure?</h4>
+                <p class="text-sm text-blue-800 mb-3">Instead of deleting, you could:</p>
+                <a href="{% url 'beneficiary_edit' beneficiary.id %}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors text-sm">
+                    <i class="fas fa-edit mr-2"></i>Edit Beneficiary Details
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input[type="checkbox"] {
+        @apply w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% load currency_filters %}
+
+{% block page_title %}My Cards{% endblock %}
+{% block page_description %}Manage your debit and credit cards{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header with Action Button -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <h1 class="text-lg sm:text-2xl font-bold text-gray-900 lg:hidden">My Cards</h1>
+            <p class="text-sm text-gray-600 mt-1">You have {{ cards.count }} card{{ cards.count|pluralize }}</p>
+        </div>
+        <a href="{% url 'card_apply' %}" class="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
+            <i class="fas fa-plus mr-2"></i>
+            Apply for Card
+        </a>
+    </div>
+
+    <!-- Cards Grid -->
+    {% if cards %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {% for card in cards %}
+        <div class="group perspective">
+            <!-- Credit Card Design -->
+            <div class="relative bg-gradient-to-br 
+                {% if card.card_type == 'DEBIT' %}from-blue-600 to-blue-800
+                {% elif card.card_type == 'CREDIT' %}from-purple-600 to-purple-800
+                {% else %}from-gray-700 to-gray-900{% endif %}
+                rounded-2xl shadow-2xl p-4 sm:p-6 text-white h-56 flex flex-col justify-between overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-3xl">
+                
+                <!-- Background Pattern -->
+                <div class="absolute inset-0 opacity-10">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -translate-y-32 translate-x-32"></div>
+                    <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full translate-y-24 -translate-x-24"></div>
+                </div>
+
+                <!-- Card Header -->
+                <div class="relative z-10 flex items-start justify-between">
+                    <div>
+                        <p class="text-xs opacity-80 mb-1">{{ card.get_card_type_display }}</p>
+                        <p class="text-sm font-semibold">{{ card.user.get_full_name }}</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        {% if card.status == 'ACTIVE' %}
+                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                            <i class="fas fa-wifi text-lg"></i>
+                        </div>
+                        {% elif card.status == 'PENDING' %}
+                        <span class="px-2 py-1 bg-yellow-500 bg-opacity-80 rounded-full text-xs font-semibold">Pending</span>
+                        {% elif card.status == 'BLOCKED' %}
+                        <span class="px-2 py-1 bg-blue-500 bg-opacity-80 rounded-full text-xs font-semibold">Blocked</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Card Number -->
+                <div class="relative z-10">
+                    <p class="text-sm sm:text-lg font-mono tracking-widest mb-1 break-all">
+                        •••• •••• •••• {{ card.card_number|slice:"-4:" }}
+                    </p>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="relative z-10 flex items-end justify-between">
+                    <div>
+                        <p class="text-xs opacity-80 mb-1">Expires</p>
+                        <p class="text-sm font-semibold font-mono">{{ card.expiry_month }}/{{ card.expiry_year|slice:"-2:" }}</p>
+                    </div>
+                    <div class="text-right">
+                        {% if card.card_type == 'DEBIT' %}
+                        <div class="text-xl font-bold">VISA</div>
+                        {% else %}
+                        <div class="text-xl font-bold">MasterCard</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card Actions -->
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                <a href="{% url 'card_detail' card.id %}" class="flex items-center justify-center px-4 py-2 bg-white border-2 border-gray-200 text-gray-700 rounded-lg font-medium hover:border-blue-600 hover:text-blue-600 transition-all text-sm">
+                    <i class="fas fa-eye mr-2"></i>View Details
+                </a>
+                {% if card.status == 'ACTIVE' %}
+                <a href="{% url 'card_block' card.id %}" class="flex items-center justify-center px-4 py-2 bg-orange-100 text-orange-700 rounded-lg font-medium hover:bg-orange-200 transition-colors text-sm">
+                    <i class="fas fa-lock mr-2"></i>Block Card
+                </a>
+                {% elif card.status == 'PENDING' %}
+                <a href="{% url 'card_activate' card.id %}" class="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm">
+                    <i class="fas fa-check-circle mr-2"></i>Activate
+                </a>
+                {% elif card.status == 'BLOCKED' %}
+                <a href="{% url 'card_block' card.id %}" class="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors text-sm">
+                    <i class="fas fa-unlock mr-2"></i>Unblock
+                </a>
+                {% endif %}
+            </div>
+
+            <!-- Card Info Summary -->
+            <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 text-sm">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-gray-600">Linked Account</span>
+                    <span class="font-semibold text-gray-900">
+                        {% if card.account %}{{ card.account.account_number }}{% else %}Not Linked{% endif %}
+                    </span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-600">Activation Fee</span>
+                    <span class="font-semibold text-gray-900">{{ card.activation_fee|currency:currency_symbol }}</span>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Card Statistics -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-credit-card text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Total Cards</p>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ cards.count }}</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Active Cards</p>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ cards|length }}</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-credit-card text-purple-600 text-xl"></i>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Debit Cards</p>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900">{{ cards|length }}</p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-2">
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-credit-card text-blue-600 text-xl"></i>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600 mb-1">Credit Cards</p>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900">0</p>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-xl shadow-lg border-2 border-dashed border-gray-300 p-6 sm:p-12 text-center">
+        <div class="max-w-md mx-auto">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-credit-card text-gray-400 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No Cards Yet</h3>
+            <p class="text-gray-600 mb-6">Apply for your first debit or credit card to start making transactions.</p>
+            <a href="{% url 'card_apply' %}" class="inline-flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
+                <i class="fas fa-plus mr-2"></i>
+                Apply for Your First Card
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Card Benefits -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Card Benefits</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-shield-alt text-green-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Secure Transactions</h4>
+                    <p class="text-xs text-gray-600">Advanced fraud protection and encryption</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-globe text-blue-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Global Acceptance</h4>
+                    <p class="text-xs text-gray-600">Use your card worldwide</p>
+                </div>
+            </div>
+            <div class="flex items-start space-x-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-gift text-purple-600"></i>
+                </div>
+                <div>
+                    <h4 class="font-semibold text-gray-900 mb-1">Rewards Program</h4>
+                    <p class="text-xs text-gray-600">Earn points on every purchase</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .perspective {
+        perspective: 1000px;
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .group:hover .transform {
+        transform: rotateY(5deg) rotateX(2deg);
+    }
+</style>
+{% endblock %}

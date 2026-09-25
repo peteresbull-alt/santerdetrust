@@ -1,0 +1,377 @@
+{% load static %}
+<!-- ================================================================
+     TRANSFER AUTHORIZATION CODE (TAC) MODAL
+     Include this in any template that requires TAC verification.
+     The host form needs:
+       - id="tacProtectedForm"
+       - a hidden input: <input type="hidden" name="tac_code" id="tacCodeHidden">
+     The trigger button needs:
+       - id="tacTriggerBtn"
+================================================================ -->
+
+<!-- ── Backdrop ── -->
+<div id="tacModalBackdrop"
+     class="fixed inset-0 z-[9998] items-start justify-center"
+     style="display:none; background:rgba(0,0,0,0.75); backdrop-filter:blur(4px);
+            overflow-y:auto; padding:2rem 1rem;">
+
+  <!-- ── Modal card ── -->
+  <div id="tacModalCard"
+       class="relative w-full mx-auto"
+       style="max-width:480px;
+              background:linear-gradient(160deg,#111827 0%,#0d1117 100%);
+              border:1px solid rgba(59,130,246,0.20);
+              border-radius:1.25rem;
+              box-shadow:0 32px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(59,130,246,0.08);
+              transform:translateY(0);
+              animation:tacSlideUp .35s cubic-bezier(.16,1,.3,1) both;">
+
+    <!-- Glow strip at top -->
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;
+                background:linear-gradient(90deg,transparent,#3b82f6,#60a5fa,#3b82f6,transparent);
+                border-radius:1.25rem 1.25rem 0 0;"></div>
+
+    <!-- ── Header ── -->
+    <div class="pt-8 pb-4 px-8 text-center">
+      <!-- Lock icon -->
+      <div class="mx-auto mb-4 flex items-center justify-center"
+           style="width:64px;height:64px;border-radius:50%;
+                  background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(59,130,246,0.05));
+                  border:1.5px solid rgba(59,130,246,0.30);
+                  box-shadow:0 0 32px rgba(59,130,246,0.15);">
+        <i class="fas fa-lock" style="font-size:1.6rem;color:#60a5fa;"></i>
+      </div>
+      <h2 class="font-bold mb-2"
+          style="font-size:1.2rem;color:#F9FAFB;letter-spacing:-0.01em;">
+        Transfer Authorization Code is Required
+      </h2>
+      <p class="text-sm leading-relaxed"
+         style="color:rgba(249,250,251,0.50);max-width:340px;margin:0 auto;">
+        <strong style="color:rgba(249,250,251,0.70);">Transfer Authorization Code (TAC)</strong>
+        is a unique, time-sensitive security code issued by the bank to
+        authorize specific transactions or account-related actions.
+      </p>
+    </div>
+
+    <!-- Divider -->
+    <div style="height:1px;background:rgba(255,255,255,0.06);margin:0 2rem;"></div>
+
+    <!-- ── Body ── -->
+    <div class="px-8 py-6 space-y-5">
+
+      <!-- TAC input -->
+      <div>
+        <label class="block text-xs font-semibold uppercase tracking-widest mb-2"
+               style="color:rgba(249,250,251,0.45);">
+          Enter TAC
+        </label>
+        <div class="relative">
+          <input id="tacInputField"
+                 type="password"
+                 maxlength="10"
+                 autocomplete="off"
+                 placeholder="••••••••"
+                 style="width:100%;padding:.85rem 3.5rem .85rem 1.25rem;
+                        background:rgba(255,255,255,0.04);
+                        border:1.5px solid rgba(255,255,255,0.10);
+                        border-radius:.875rem;
+                        color:#F9FAFB;font-size:1.1rem;letter-spacing:.15em;
+                        font-family:monospace;outline:none;
+                        transition:border-color .2s,box-shadow .2s;"
+                 onfocus="this.style.borderColor='#3b82f6';this.style.boxShadow='0 0 0 3px rgba(59,130,246,0.15)'"
+                 onblur="this.style.borderColor='rgba(255,255,255,0.10)';this.style.boxShadow='none'" />
+          <!-- Eye toggle -->
+          <button type="button"
+                  onclick="tacToggleVisibility()"
+                  class="absolute right-4 top-1/2 -translate-y-1/2"
+                  style="color:rgba(249,250,251,0.35);background:none;border:none;cursor:pointer;">
+            <i id="tacEyeIcon" class="fas fa-eye-slash" style="font-size:.9rem;"></i>
+          </button>
+        </div>
+
+        <!-- Error message -->
+        <div id="tacErrorMsg"
+             class="mt-2 flex items-center space-x-2 text-sm"
+             style="display:none;color:#f87171;">
+          <i class="fas fa-times-circle text-xs"></i>
+          <span id="tacErrorText">Invalid Transfer Authorization Code.</span>
+        </div>
+      </div>
+
+      <!-- Info box -->
+      <div class="rounded-xl p-4 text-sm leading-relaxed"
+           style="background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.12);color:rgba(249,250,251,0.55);">
+        <strong style="color:rgba(249,250,251,0.70);">Transfer Authorization Code (TAC)</strong>
+        is a unique, time-sensitive security code issued by the bank to authorize specific
+        transactions or account-related actions.
+      </div>
+
+      <!-- What is TAC? toggle -->
+      <div>
+        <button type="button"
+                onclick="tacToggleHelp()"
+                class="flex items-center space-x-2 text-sm font-semibold transition-colors"
+                style="color:#60a5fa;background:none;border:none;cursor:pointer;">
+          <i class="fas fa-circle-question text-xs"></i>
+          <span>What is TAC?</span>
+          <i id="tacHelpChevron" class="fas fa-chevron-down text-xs transition-transform" style="transition:transform .2s;"></i>
+        </button>
+
+        <!-- Help panel -->
+        <div id="tacHelpPanel"
+             style="display:none;margin-top:.75rem;overflow:hidden;">
+          <div class="rounded-xl p-5 space-y-3 text-sm leading-relaxed"
+               style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);color:rgba(249,250,251,0.55);">
+
+            <p><strong style="color:rgba(249,250,251,0.80);">What is Transfer Authorization Code?</strong></p>
+            <p>
+              A <strong style="color:#60a5fa;">Transfer Authorization Code (TAC)</strong> is a unique,
+              time-sensitive security code issued by the bank to authorize specific transactions or
+              account-related actions. It serves as an additional layer of verification to confirm that
+              the request is being made by the legitimate account holder.
+            </p>
+            <p>
+              TACs are commonly required for activities such as fund transfers, changes to account
+              details, activation of services, or authorization of high-risk transactions.
+            </p>
+            <p>
+              By requiring a TAC, the bank helps protect customers against unauthorized access, fraud,
+              and identity theft. The code must be entered within a limited timeframe — ensuring that
+              even if login credentials are compromised, transactions cannot be completed without the
+              authorized code.
+            </p>
+
+            <!-- Contact strip -->
+            <div class="rounded-lg p-3 mt-3 space-y-2"
+                 style="background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);">
+              <p style="color:rgba(249,250,251,0.70);">
+                Need a TAC? Reach out to our team and we'll assist you right away:
+              </p>
+              <div class="flex flex-col sm:flex-row gap-2">
+                <a href="mailto:support@santerdetrust.com"
+                   class="inline-flex items-center space-x-2 text-xs font-semibold px-3 py-2 rounded-lg transition-all"
+                   style="background:rgba(59,130,246,0.12);color:#60a5fa;border:1px solid rgba(59,130,246,0.20);text-decoration:none;"
+                   onmouseenter="this.style.background='rgba(59,130,246,0.20)'"
+                   onmouseleave="this.style.background='rgba(59,130,246,0.12)'">
+                  <i class="fas fa-envelope"></i>
+                  <span>support@santerdetrust.com</span>
+                </a>
+                <button type="button"
+                        onclick="if(window.smartsupp)smartsupp('chat:open');"
+                        class="inline-flex items-center space-x-2 text-xs font-semibold px-3 py-2 rounded-lg transition-all"
+                        style="background:rgba(255,255,255,0.05);color:rgba(249,250,251,0.65);border:1px solid rgba(255,255,255,0.10);"
+                        onmouseenter="this.style.background='rgba(255,255,255,0.09)'"
+                        onmouseleave="this.style.background='rgba(255,255,255,0.05)'">
+                  <i class="fas fa-comments"></i>
+                  <span>Live Chat</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="px-8 pb-8 space-y-3">
+      <!-- Proceed button -->
+      <button type="button"
+              id="tacProceedBtn"
+              onclick="tacProceed()"
+              class="w-full font-bold text-white rounded-xl transition-all"
+              style="padding:.9rem;
+                     background:linear-gradient(135deg,#3b82f6,#2563eb);
+                     box-shadow:0 6px 20px rgba(59,130,246,0.30);
+                     font-size:.95rem;letter-spacing:.04em;
+                     border:none;cursor:pointer;">
+        <span id="tacProceedLabel">
+          <i class="fas fa-arrow-right mr-2"></i>PROCEED
+        </span>
+        <span id="tacProceedSpinner" style="display:none;">
+          <i class="fas fa-circle-notch fa-spin mr-2"></i>Verifying…
+        </span>
+      </button>
+
+      <!-- Cancel -->
+      <button type="button"
+              onclick="tacClose()"
+              class="w-full font-semibold rounded-xl transition-all"
+              style="padding:.75rem;background:rgba(255,255,255,0.04);
+                     color:rgba(249,250,251,0.45);border:1px solid rgba(255,255,255,0.07);
+                     font-size:.85rem;cursor:pointer;"
+              onmouseenter="this.style.background='rgba(255,255,255,0.08)'"
+              onmouseleave="this.style.background='rgba(255,255,255,0.04)'">
+        Cancel
+      </button>
+
+      <!-- Support note -->
+      <p class="text-center text-xs" style="color:rgba(249,250,251,0.28);">
+        Need help?&nbsp;
+        <a href="mailto:support@santerdetrust.com"
+           style="color:#60a5fa;text-decoration:none;">support@santerdetrust.com</a>
+        &nbsp;or use&nbsp;
+        <button type="button"
+                onclick="if(window.smartsupp)smartsupp('chat:open');"
+                style="color:#60a5fa;background:none;border:none;cursor:pointer;padding:0;font-size:inherit;">
+          Live Chat
+        </button>
+      </p>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /backdrop -->
+
+
+<!-- ── Keyframe ── -->
+<style>
+  @keyframes tacSlideUp {
+    from { opacity:0; transform:translateY(24px) scale(.97); }
+    to   { opacity:1; transform:translateY(0)    scale(1);   }
+  }
+</style>
+
+<!-- ── Script ── -->
+<script>
+  /* ---------- helpers ---------- */
+  function tacOpen() {
+    document.getElementById('tacInputField').value = '';
+    tacHideError();
+    const bd = document.getElementById('tacModalBackdrop');
+    bd.style.display = 'flex';
+    // reset animation
+    const card = document.getElementById('tacModalCard');
+    card.style.animation = 'none';
+    card.offsetHeight; // reflow
+    card.style.animation = 'tacSlideUp .35s cubic-bezier(.16,1,.3,1) both';
+    setTimeout(() => document.getElementById('tacInputField').focus(), 50);
+  }
+
+  function tacClose() {
+    document.getElementById('tacModalBackdrop').style.display = 'none';
+    document.getElementById('tacInputField').value = '';
+    tacHideError();
+  }
+
+  function tacToggleVisibility() {
+    const inp  = document.getElementById('tacInputField');
+    const icon = document.getElementById('tacEyeIcon');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      icon.classList.replace('fa-eye-slash','fa-eye');
+    } else {
+      inp.type = 'password';
+      icon.classList.replace('fa-eye','fa-eye-slash');
+    }
+  }
+
+  function tacToggleHelp() {
+    const panel   = document.getElementById('tacHelpPanel');
+    const chevron = document.getElementById('tacHelpChevron');
+    const visible = panel.style.display !== 'none';
+    panel.style.display   = visible ? 'none' : 'block';
+    chevron.style.transform = visible ? 'rotate(0deg)' : 'rotate(180deg)';
+  }
+
+  function tacShowError(msg) {
+    const el = document.getElementById('tacErrorMsg');
+    document.getElementById('tacErrorText').textContent = msg;
+    el.style.display = 'flex';
+  }
+
+  function tacHideError() {
+    document.getElementById('tacErrorMsg').style.display = 'none';
+  }
+
+  function tacSetLoading(on) {
+    document.getElementById('tacProceedLabel').style.display  = on ? 'none' : 'inline';
+    document.getElementById('tacProceedSpinner').style.display = on ? 'inline' : 'none';
+    document.getElementById('tacProceedBtn').disabled = on;
+  }
+
+  /* ---------- main action ---------- */
+  function getCsrfToken() {
+    const name = 'csrftoken';
+    for (let c of document.cookie.split(';')) {
+      c = c.trim();
+      if (c.startsWith(name + '=')) return decodeURIComponent(c.slice(name.length + 1));
+    }
+    return '';
+  }
+
+  function tacProceed() {
+    const code = document.getElementById('tacInputField').value.trim();
+    if (!code) { tacShowError('Please enter your Transfer Authorization Code.'); return; }
+
+    tacHideError();
+    tacSetLoading(true);
+
+    fetch('{% url "validate_tac" %}', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-CSRFToken': getCsrfToken(),
+      },
+      body: 'tac=' + encodeURIComponent(code),
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.valid) {
+        // Inject TAC into the hidden field and submit the real form
+        document.getElementById('tacCodeHidden').value = code;
+        document.getElementById('tacProtectedForm').submit();
+      } else {
+        tacSetLoading(false);
+        tacShowError(data.error || 'Invalid Transfer Authorization Code. Please try again.');
+      }
+    })
+    .catch(() => {
+      tacSetLoading(false);
+      tacShowError('A network error occurred. Please try again.');
+    });
+  }
+
+  /* ---------- wire up trigger button ---------- */
+  document.addEventListener('DOMContentLoaded', function () {
+    const btn = document.getElementById('tacTriggerBtn');
+    if (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        const form = document.getElementById('tacProtectedForm');
+        // Let the browser highlight all missing/invalid fields first
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return;
+        }
+        // Check account status before opening TAC modal
+        const acctStatus = (typeof getSelectedAccountStatus === 'function')
+          ? getSelectedAccountStatus() : null;
+        if (acctStatus && acctStatus !== 'ACTIVE') {
+          arOpen(acctStatus);
+          return;
+        }
+        tacOpen();
+      });
+    }
+
+    /* also allow Enter key inside input to proceed */
+    document.getElementById('tacInputField').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); tacProceed(); }
+    });
+
+    /* close on backdrop click */
+    document.getElementById('tacModalBackdrop').addEventListener('click', function (e) {
+      if (e.target === this) tacClose();
+    });
+
+    /* close on Escape */
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') tacClose();
+    });
+
+    {% if tac_error %}
+    /* Re-open modal automatically if the server returned a TAC error */
+    tacOpen();
+    tacShowError('Invalid Transfer Authorization Code. Please try again.');
+    {% endif %}
+  });
+</script>

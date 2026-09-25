@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block page_title %}KYC Documents{% endblock %}
+{% block page_description %}Upload your identity verification documents{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'profile' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-id-card text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">KYC Verification</h1>
+        <p class="text-gray-600">Upload your identity documents for verification</p>
+    </div>
+
+    <!-- Show Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Form Errors Found:</h4>
+                <div class="space-y-2">
+                    {% for field, errors in form.errors.items %}
+                        <div class="bg-white rounded p-3 border border-blue-300">
+                            <p class="font-semibold text-blue-900 mb-1">
+                                {% if field == '__all__' %}General Form Error:{% else %}Field "{{ field }}":{% endif %}
+                            </p>
+                            <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- KYC Form -->
+    <form method="post" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Current Status -->
+        {% if user.has_submitted_kyc %}
+        <div class="{% if user.has_verified_kyc %}bg-green-50 border-green-200{% else %}bg-yellow-50 border-yellow-200{% endif %} border-2 rounded-lg p-6">
+            <div class="flex items-start space-x-3">
+                <i class="fas {% if user.has_verified_kyc %}fa-check-circle text-green-600{% else %}fa-clock text-yellow-600{% endif %} text-2xl mt-0.5"></i>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold {% if user.has_verified_kyc %}text-green-900{% else %}text-yellow-900{% endif %} mb-2">
+                        {% if user.has_verified_kyc %}
+                            KYC Verified
+                        {% else %}
+                            KYC Under Review
+                        {% endif %}
+                    </h3>
+                    <p class="text-sm {% if user.has_verified_kyc %}text-green-800{% else %}text-yellow-800{% endif %}">
+                        {% if user.has_verified_kyc %}
+                            Your identity has been verified on {{ user.kyc_verified_at|date:"F d, Y" }}. You can update your documents below if needed.
+                        {% else %}
+                            Your documents have been submitted and are currently under review. This typically takes 24-48 hours. You can update your documents below.
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Government ID Information -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Government ID Information</h3>
+
+            <div class="space-y-6">
+                <!-- ID Type -->
+                <div>
+                    <label for="{{ form.government_id_type.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-id-card text-green-600 mr-2"></i>ID Type *
+                    </label>
+                    {{ form.government_id_type }}
+                    {% if form.government_id_type.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.government_id_type.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">Select your government-issued ID type</p>
+                </div>
+
+                <!-- ID Number -->
+                <div>
+                    <label for="{{ form.government_id_number.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-hashtag text-green-600 mr-2"></i>ID Number *
+                    </label>
+                    {{ form.government_id_number }}
+                    {% if form.government_id_number.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.government_id_number.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">Enter your ID number as shown on the document</p>
+                </div>
+
+                <!-- ID Expiry Date -->
+                <div>
+                    <label for="{{ form.government_id_expiry.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-calendar text-green-600 mr-2"></i>Expiry Date
+                    </label>
+                    {{ form.government_id_expiry }}
+                    {% if form.government_id_expiry.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.government_id_expiry.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-gray-500">ID expiration date (if applicable)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ID Images Upload -->
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">ID Images</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Front ID Image -->
+                <div>
+                    <label for="{{ form.front_id_image.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Front of ID *
+                    </label>
+
+                    {% if user.front_id_image %}
+                    <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-green-900">Front ID uploaded</p>
+                                <p class="text-xs text-green-700">Upload a new file to replace</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
+                        <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl sm:text-4xl mb-3"></i>
+                        <div class="mb-3">
+                            <label for="{{ form.front_id_image.id_for_label }}" class="cursor-pointer text-green-600 hover:text-green-700 font-medium">
+                                <span>Upload Front ID</span>
+                                {{ form.front_id_image }}
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500">JPG, PNG or PDF (max 5MB)</p>
+                    </div>
+                    {% if form.front_id_image.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.front_id_image.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Back ID Image -->
+                <div>
+                    <label for="{{ form.back_id_image.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Back of ID
+                    </label>
+
+                    {% if user.back_id_image %}
+                    <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-check-circle text-green-600 text-2xl"></i>
+                            <div>
+                                <p class="text-sm font-semibold text-green-900">Back ID uploaded</p>
+                                <p class="text-xs text-green-700">Upload a new file to replace</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-green-400 transition-colors">
+                        <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl sm:text-4xl mb-3"></i>
+                        <div class="mb-3">
+                            <label for="{{ form.back_id_image.id_for_label }}" class="cursor-pointer text-green-600 hover:text-green-700 font-medium">
+                                <span>Upload Back ID</span>
+                                {{ form.back_id_image }}
+                            </label>
+                        </div>
+                        <p class="text-xs text-gray-500">JPG, PNG or PDF (max 5MB)</p>
+                    </div>
+                    {% if form.back_id_image.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.back_id_image.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Guidelines -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-blue-900 mb-2">Upload Guidelines</h4>
+                    <ul class="text-xs text-blue-800 space-y-1">
+                        <li>• Ensure all text and photos are clear and readable</li>
+                        <li>• Upload full documents - do not crop or edit</li>
+                        <li>• Documents must be valid and not expired</li>
+                        <li>• File size should not exceed 5MB per file</li>
+                        <li>• Accepted formats: JPG, PNG, PDF</li>
+                        <li>• Your information will be kept secure and confidential</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button type="submit" class="flex-1 px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-colors">
+                <i class="fas fa-upload mr-2"></i>
+                {% if user.has_submitted_kyc %}Update Documents{% else %}Submit Documents{% endif %}
+            </button>
+            <a href="{% url 'profile' %}" class="flex-1 px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+    input[type="text"], input[type="date"], input[type="file"], select {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-gray-900;
+    }
+
+    input[type="file"] {
+        display: none;
+    }
+</style>
+{% endblock %}

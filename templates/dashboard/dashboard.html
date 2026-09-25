@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+
+{% load currency_filters %}
+
+{% block content %}
+<div class="animate-fadeIn">
+    <!-- Welcome Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+                <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900">
+                    Welcome back{% if user.first_name %}, <span class="gradient-text">{{ user.first_name.capitalize }}.</span> {% endif %}
+                </h1>
+                <p class="text-sm sm:text-base text-gray-600 mt-1">Here's what's happening with your accounts today</p>
+            </div>
+            <div class="text-right">
+                <p class="text-sm text-gray-500">{{ user.email }}</p>
+                <p class="text-xs text-gray-400">Last login: {{ user.last_login|date:"M d, Y H:i" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+        <!-- Total Balance -->
+        <div class="bg-gradient-to-br from-blue-600 to-blue-800 rounded-xl shadow-lg p-3 sm:p-6 text-white transform hover:scale-105 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2 sm:mb-4">
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-wallet text-base sm:text-2xl"></i>
+                </div>
+                <i class="fas fa-arrow-up text-green-300 text-xs sm:text-base"></i>
+            </div>
+            <p class="text-xs sm:text-sm text-blue-100 mb-1">Total Balance</p>
+            <h3 class="text-base sm:text-xl lg:text-3xl font-bold break-all">{{ total_balance|currency:currency_symbol }}</h3>
+            <p class="text-xs text-blue-200 mt-1 sm:mt-2">Across {{ total_accounts }} account{{ total_accounts|pluralize }}</p>
+        </div>
+
+        <!-- Recent Deposits -->
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-gray-200 transform hover:scale-105 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2 sm:mb-4">
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-arrow-down text-green-600 text-base sm:text-2xl"></i>
+                </div>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-600 mb-1">Recent Deposits</p>
+            <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-gray-900 break-all">{{ recent_deposits|currency:currency_symbol }}</h3>
+            <p class="text-xs text-gray-500 mt-1 sm:mt-2">Last 30 days</p>
+        </div>
+
+        <!-- Recent Withdrawals -->
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-gray-200 transform hover:scale-105 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2 sm:mb-4">
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-arrow-up text-blue-600 text-base sm:text-2xl"></i>
+                </div>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-600 mb-1">Recent Withdrawals</p>
+            <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-gray-900 break-all">{{ recent_withdrawals|currency:currency_symbol }}</h3>
+            <p class="text-xs text-gray-500 mt-1 sm:mt-2">Last 30 days</p>
+        </div>
+
+        <!-- Pending Transactions -->
+        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 border border-gray-200 transform hover:scale-105 transition-all duration-200">
+            <div class="flex items-center justify-between mb-2 sm:mb-4">
+                <div class="w-8 h-8 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-clock text-blue-600 text-base sm:text-2xl"></i>
+                </div>
+                {% if pending_transactions > 0 %}
+                <span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-semibold">{{ pending_transactions }}</span>
+                {% endif %}
+            </div>
+            <p class="text-xs sm:text-sm text-gray-600 mb-1">Pending</p>
+            <h3 class="text-base sm:text-xl lg:text-3xl font-bold text-gray-900">{{ pending_transactions }}</h3>
+            <p class="text-xs text-gray-500 mt-1 sm:mt-2">Transaction{{ pending_transactions|pluralize }} awaiting</p>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 mb-6 sm:mb-8 border border-gray-200">
+        <h2 class="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4">Quick Actions</h2>
+        <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4">
+            <a href="{% url 'transfer' %}" class="group flex flex-col items-center p-4 rounded-lg hover:bg-blue-50 transition-all duration-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <i class="fas fa-paper-plane text-blue-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 group-hover:text-blue-600">Transfer</span>
+            </a>
+
+            <a href="{% url 'deposit' %}" class="group flex flex-col items-center p-4 rounded-lg hover:bg-green-50 transition-all duration-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <i class="fas fa-plus-circle text-green-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 group-hover:text-green-600">Deposit</span>
+            </a>
+
+            <a href="{% url 'withdrawal' %}" class="group flex flex-col items-center p-4 rounded-lg hover:bg-blue-50 transition-all duration-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <i class="fas fa-minus-circle text-blue-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 group-hover:text-blue-600">Withdraw</span>
+            </a>
+
+            <a href="{% url 'account_apply' %}" class="group flex flex-col items-center p-4 rounded-lg hover:bg-blue-50 transition-all duration-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <i class="fas fa-wallet text-blue-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 text-center group-hover:text-blue-600">New Account</span>
+            </a>
+
+            <a href="{% url 'card_apply' %}" class="group flex flex-col items-center p-4 rounded-lg hover:bg-purple-50 transition-all duration-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <i class="fas fa-credit-card text-purple-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 group-hover:text-purple-600">Apply Card</span>
+            </a>
+
+            <a href="{% url 'support_ticket_create' %}" class="group flex flex-col items-center p-4 rounded-lg hover:bg-gray-100 transition-all duration-200">
+                <div class="w-10 h-10 sm:w-14 sm:h-14 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-200">
+                    <i class="fas fa-headset text-gray-600 text-xl"></i>
+                </div>
+                <span class="text-sm font-semibold text-gray-700 group-hover:text-gray-600">Support</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+        <!-- Accounts Section -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- My Accounts -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+                <div class="p-3 sm:p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-gray-900">My Accounts</h2>
+                    <a href="{% url 'account_list' %}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">View all <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="p-3 sm:p-6">
+                    {% if accounts %}
+                        <div class="space-y-4">
+                            {% for account in accounts|slice:":3" %}
+                            <a href="{% url 'account_detail' account.account_number %}" class="block group">
+                                <div class="p-5 rounded-lg border-2 border-gray-200 hover:border-blue-500 transition-all duration-200 hover:shadow-md">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-700 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-university text-white text-lg"></i>
+                                            </div>
+                                            <div>
+                                                <h3 class="font-bold text-gray-900">{{ account.get_account_type_display }}</h3>
+                                                <p class="text-sm text-gray-500">****{{ account.account_number|slice:"-4:" }}</p>
+                                            </div>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold
+                                            {% if account.status == 'ACTIVE' %}bg-green-100 text-green-700
+                                            {% elif account.status == 'PENDING' %}bg-yellow-100 text-yellow-700
+                                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                            {{ account.get_status_display }}
+                                        </span>
+                                    </div>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs text-gray-500 mb-1">Account Balance</p>
+                                            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ account.balance|currency:currency_symbol }}</p>
+                                        </div>
+                                        <i class="fas fa-chevron-right text-gray-400 group-hover:text-blue-600 transition-colors"></i>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-6 sm:py-12">
+                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-wallet text-gray-400 text-3xl"></i>
+                            </div>
+                            <p class="text-gray-600 mb-4">No accounts yet</p>
+                            <a href="{% url 'account_apply' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all duration-200">
+                                <i class="fas fa-plus mr-2"></i>Open Your First Account
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+                <div class="p-3 sm:p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-gray-900">Recent Transactions</h2>
+                    <a href="{% url 'transaction_list' %}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">View all <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    {% if recent_transactions %}
+                        {% for transaction in recent_transactions|slice:":5" %}
+                        <a href="{% url 'transaction_detail' transaction.transaction_id %}" class="block hover:bg-gray-50 transition-colors duration-200">
+                            <div class="p-3 sm:p-6 flex items-center justify-between gap-2">
+                                <div class="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
+                                    <div class="w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0
+                                        {% if transaction.transaction_type == 'DEPOSIT' %}bg-green-100
+                                        {% elif transaction.transaction_type == 'WITHDRAWAL' %}bg-blue-100
+                                        {% elif transaction.transaction_type == 'TRANSFER' %}bg-blue-100
+                                        {% else %}bg-gray-100{% endif %}">
+                                        <i class="fas 
+                                            {% if transaction.transaction_type == 'DEPOSIT' %}fa-arrow-down text-green-600
+                                            {% elif transaction.transaction_type == 'WITHDRAWAL' %}fa-arrow-up text-blue-600
+                                            {% elif transaction.transaction_type == 'TRANSFER' %}fa-exchange-alt text-blue-600
+                                            {% else %}fa-file text-gray-600{% endif %} text-lg"></i>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="font-semibold text-gray-900 text-sm sm:text-base truncate">{{ transaction.get_transaction_type_display }}</p>
+                                        <p class="text-xs sm:text-sm text-gray-500">{{ transaction.initiated_at|date:"M d, Y" }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <p class="font-bold text-sm sm:text-lg
+                                        {% if transaction.transaction_type == 'DEPOSIT' %}text-green-600
+                                        {% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}text-blue-600
+                                        {% else %}text-gray-900{% endif %}">
+                                        {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
+                                    </p>
+                                    <span class="inline-block px-2 py-1 rounded-full text-xs font-semibold
+                                        {% if transaction.status == 'COMPLETED' %}bg-green-100 text-green-700
+                                        {% elif transaction.status == 'PENDING' %}bg-yellow-100 text-yellow-700
+                                        {% elif transaction.status == 'FAILED' %}bg-blue-100 text-blue-700
+                                        {% else %}bg-gray-100 text-gray-700{% endif %}">
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="p-6 sm:p-12 text-center">
+                            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-exchange-alt text-gray-400 text-3xl"></i>
+                            </div>
+                            <p class="text-gray-600">No transactions yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="space-y-6">
+            <!-- My Cards -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+                <div class="p-3 sm:p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-gray-900">My Cards</h2>
+                    <a href="{% url 'card_list' %}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">View all</a>
+                </div>
+                <div class="p-3 sm:p-6">
+                    {% if cards %}
+                        <div class="space-y-4">
+                            {% for card in cards|slice:":2" %}
+                            <a href="{% url 'card_detail' card.id %}" class="block group">
+                                <div class="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-5 text-white shadow-lg group-hover:shadow-xl transition-all duration-200">
+                                    <div class="flex items-center justify-between mb-4">
+                                        <i class="fas fa-credit-card text-2xl opacity-75"></i>
+                                        <span class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">{{ card.get_card_type_display }}</span>
+                                    </div>
+                                    <p class="text-sm sm:text-xl font-mono mb-2">****  ****  ****  {{ card.card_number|slice:"-4:" }}</p>
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-xs opacity-75">{{ card.card_name }}</p>
+                                        </div>
+                                        <div class="text-right">
+                                            <p class="text-xs opacity-75">Expires</p>
+                                            <p class="font-mono">{{ card.expiry_month }}/{{ card.expiry_year|slice:"2:" }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-8">
+                            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-credit-card text-gray-400 text-2xl"></i>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-4">No cards yet</p>
+                            <a href="{% url 'card_apply' %}" class="inline-flex items-center text-sm px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-plus mr-2"></i>Apply Now
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200">
+                <div class="p-3 sm:p-6 border-b border-gray-200 flex items-center justify-between">
+                    <h2 class="text-lg font-bold text-gray-900">Notifications</h2>
+                    <a href="{% url 'notification_list' %}" class="text-sm text-blue-600 hover:text-blue-700 font-semibold">View all</a>
+                </div>
+                <div class="divide-y divide-gray-200">
+                    {% if unread_notifications %}
+                        {% for notification in unread_notifications %}
+                        <a href="{% url 'notification_mark_read' notification.id %}" class="block p-4 hover:bg-gray-50 transition-colors duration-200">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
+                                    {% if notification.priority == 'HIGH' %}bg-blue-100
+                                    {% elif notification.priority == 'MEDIUM' %}bg-yellow-100
+                                    {% else %}bg-blue-100{% endif %}">
+                                    <i class="fas fa-bell text-sm
+                                        {% if notification.priority == 'HIGH' %}text-blue-600
+                                        {% elif notification.priority == 'MEDIUM' %}text-yellow-600
+                                        {% else %}text-blue-600{% endif %}"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-gray-900 truncate">{{ notification.title }}</p>
+                                    <p class="text-xs text-gray-600 mt-1 line-clamp-2">{{ notification.message }}</p>
+                                    <p class="text-xs text-gray-400 mt-1">{{ notification.created_at|timesince }} ago</p>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="p-4 sm:p-8 text-center">
+                            <i class="fas fa-check-circle text-green-500 text-3xl mb-2"></i>
+                            <p class="text-sm text-gray-600">All caught up!</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fadeIn {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+{% endblock %}

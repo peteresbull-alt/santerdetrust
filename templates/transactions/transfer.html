@@ -1,0 +1,589 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+{% block page_title %}Transfer Funds{% endblock %}
+{% block page_description %}Send money to another account{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'transaction_list' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Transactions
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-exchange-alt text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Transfer Funds</h1>
+        <p class="text-gray-600">Send money to another account securely</p>
+    </div>
+
+    <!-- Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Please correct the following errors:</h4>
+                <div class="space-y-2">
+                    {% for field, errors in form.errors.items %}
+                    <div class="bg-white rounded-lg p-3 border border-blue-300">
+                        <p class="font-semibold text-blue-900 mb-1">
+                            {% if field == '__all__' %}Error{% else %}{{ field|title }}{% endif %}:
+                        </p>
+                        <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                            {% for error in errors %}
+                            <li>• {{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Transfer Form -->
+        <div class="lg:col-span-2">
+            <form method="post" id="tacProtectedForm" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Section 1: Source Account -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center">
+                            <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">1</span>
+                            Source Account
+                        </h2>
+                    </div>
+                    <div class="p-3 sm:p-6">
+                        <div>
+                            <label for="{{ form.from_account.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-wallet text-blue-600 mr-2"></i>From Account *
+                            </label>
+                            {{ form.from_account }}
+                            {% if form.from_account.errors %}
+                            <p class="mt-2 text-sm text-blue-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                {{ form.from_account.errors.0 }}
+                            </p>
+                            {% endif %}
+                            <p class="mt-1 text-xs text-gray-500">Select the account to transfer from</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Beneficiary Selection -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center">
+                            <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">2</span>
+                            Recipient Details
+                        </h2>
+                    </div>
+                    <div class="p-3 sm:p-6 space-y-6">
+                        <!-- Beneficiary Selection Method -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center space-x-4 mb-4">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="entry_method" value="saved" id="method_saved" 
+                                           class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                           {% if selected_beneficiary or beneficiaries %}checked{% endif %}>
+                                    <span class="ml-2 text-sm font-medium text-gray-700">Select Saved Beneficiary</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="radio" name="entry_method" value="manual" id="method_manual" 
+                                           class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                                           {% if not selected_beneficiary and not beneficiaries %}checked{% endif %}>
+                                    <span class="ml-2 text-sm font-medium text-gray-700">Enter Manually</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Saved Beneficiary Dropdown -->
+                            <div id="savedBeneficiarySection" {% if not selected_beneficiary and not beneficiaries %}class="hidden"{% endif %}>
+                                <label for="beneficiarySelect" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-users text-blue-600 mr-2"></i>Choose Beneficiary
+                                </label>
+                                <select id="beneficiarySelect" name="beneficiary_select" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white">
+                                    <option value="">-- Select a saved beneficiary --</option>
+                                    {% for beneficiary in beneficiaries %}
+                                    <option value="{{ beneficiary.id }}" 
+                                            data-account-name="{{ beneficiary.account_name }}"
+                                            data-account-number="{{ beneficiary.account_number }}"
+                                            data-bank-name="{{ beneficiary.bank_name }}"
+                                            {% if selected_beneficiary and selected_beneficiary.id == beneficiary.id %}selected{% endif %}>
+                                        {{ beneficiary.nickname|default:beneficiary.account_name }} - {{ beneficiary.bank_name }} (****{{ beneficiary.account_number|slice:"-4:" }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                {% if not beneficiaries %}
+                                <p class="mt-2 text-sm text-blue-700">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    No saved beneficiaries yet. 
+                                    <a href="{% url 'beneficiary_add' %}" class="underline font-medium">Add one now</a>
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Manual Entry Fields -->
+                        <div id="manualEntrySection" class="space-y-4">
+                            <!-- Account Number -->
+                            <div>
+                                <label for="{{ form.beneficiary_account_number.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-hashtag text-blue-600 mr-2"></i>Account Number *
+                                </label>
+                                {{ form.beneficiary_account_number }}
+                                {% if form.beneficiary_account_number.errors %}
+                                <p class="mt-2 text-sm text-blue-600 flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ form.beneficiary_account_number.errors.0 }}
+                                </p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Account Name -->
+                            <div>
+                                <label for="{{ form.beneficiary_name.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-user text-blue-600 mr-2"></i>Account Name *
+                                </label>
+                                {{ form.beneficiary_name }}
+                                {% if form.beneficiary_name.errors %}
+                                <p class="mt-2 text-sm text-blue-600 flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ form.beneficiary_name.errors.0 }}
+                                </p>
+                                {% endif %}
+                            </div>
+
+                            <!-- Bank Name -->
+                            <div>
+                                <label for="{{ form.beneficiary_bank.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-university text-blue-600 mr-2"></i>Bank Name *
+                                </label>
+                                {{ form.beneficiary_bank }}
+                                {% if form.beneficiary_bank.errors %}
+                                <p class="mt-2 text-sm text-blue-600 flex items-center">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ form.beneficiary_bank.errors.0 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Save Beneficiary Option -->
+                        <div id="saveBeneficiarySection" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hidden">
+                            <div class="flex items-start space-x-3">
+                                <div class="flex items-center h-5 mt-1">
+                                    {{ form.save_beneficiary }}
+                                </div>
+                                <div class="flex-1">
+                                    <label for="{{ form.save_beneficiary.id_for_label }}" class="text-sm font-medium text-gray-700 cursor-pointer">
+                                        Save this beneficiary for future transfers
+                                    </label>
+                                    <p class="text-xs text-gray-500 mt-1">You won't need to enter these details again</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Nickname Field -->
+                            <div id="nicknameField" class="mt-4 hidden">
+                                <label for="{{ form.beneficiary_nickname.id_for_label }}" class="block text-xs font-semibold text-gray-700 mb-2">
+                                    Nickname (Optional)
+                                </label>
+                                {{ form.beneficiary_nickname }}
+                                <p class="mt-1 text-xs text-gray-500">e.g., "Mom", "Landlord", "John"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Transfer Amount -->
+                <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
+                        <h2 class="text-lg font-bold text-gray-900 flex items-center">
+                            <span class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold mr-3">3</span>
+                            Transfer Amount
+                        </h2>
+                    </div>
+                    <div class="p-3 sm:p-6 space-y-4">
+                        <div>
+                            <label for="{{ form.amount.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-dollar-sign text-blue-600 mr-2"></i>Amount *
+                            </label>
+                            {{ form.amount }}
+                            {% if form.amount.errors %}
+                            <p class="mt-2 text-sm text-blue-600 flex items-center">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                {{ form.amount.errors.0 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Fee Calculator -->
+                        <div id="feeCalculator" class="bg-gray-50 rounded-lg p-4 border border-gray-200 hidden">
+                            <div class="flex justify-between items-center text-sm">
+                                <span class="text-gray-600">Transfer Amount:</span>
+                                <span class="font-semibold text-gray-900" id="displayAmount">{{ currency_symbol }}0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center text-sm mt-2">
+                                <span class="text-gray-600">Transfer Fee (0.5%, max {{ currency_symbol }}10):</span>
+                                <span class="font-semibold text-gray-900" id="displayFee">{{ currency_symbol }}0.00</span>
+                            </div>
+                            <div class="border-t border-gray-300 mt-3 pt-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-gray-900">Total Debit:</span>
+                                    <span class="font-bold text-blue-600 text-lg" id="displayTotal">{{ currency_symbol }}0.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-comment text-blue-600 mr-2"></i>Description (Optional)
+                            </label>
+                            {{ form.description }}
+                            <p class="mt-1 text-xs text-gray-500">Add a note for your records</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden TAC field – populated by the modal JS before submit -->
+                <input type="hidden" name="tac_code" id="tacCodeHidden" value="">
+
+                <!-- Submit Button — opens TAC modal instead of submitting directly -->
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button type="button" id="tacTriggerBtn"
+                            class="flex-1 inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold shadow-lg hover:from-blue-700 hover:to-blue-800 transform hover:scale-105 transition-all duration-200">
+                        <i class="fas fa-paper-plane mr-2"></i>
+                        Send Transfer
+                    </button>
+                    <a href="{% url 'transaction_list' %}"
+                       class="flex-1 inline-flex items-center justify-center px-8 py-4 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-times mr-2"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+            <script>var RESTRICTED_ACCOUNT_FIELD_ID = 'id_from_account';</script>
+            {% include 'transactions/account_restricted_modal.html' %}
+            {% include 'transactions/tac_modal.html' %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Quick Select Beneficiaries -->
+            {% if beneficiaries %}
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-sm font-bold text-gray-900">Quick Select</h3>
+                        <a href="{% url 'beneficiary_list' %}" class="text-xs text-blue-600 hover:text-blue-700 font-medium">
+                            View All
+                        </a>
+                    </div>
+                </div>
+                <div class="p-4 space-y-2 max-h-80 overflow-y-auto">
+                    {% for beneficiary in beneficiaries|slice:":6" %}
+                    <button type="button" 
+                            onclick="selectBeneficiary({{ beneficiary.id }}, '{{ beneficiary.account_name|escapejs }}', '{{ beneficiary.account_number }}', '{{ beneficiary.bank_name|escapejs }}')"
+                            class="w-full p-3 bg-gray-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg transition-all text-left group">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-blue-100 group-hover:bg-blue-200 rounded-full flex items-center justify-center flex-shrink-0 transition-colors">
+                                <i class="fas fa-user text-blue-600"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-semibold text-gray-900 truncate">
+                                    {{ beneficiary.nickname|default:beneficiary.account_name }}
+                                </p>
+                                <p class="text-xs text-gray-500 truncate">
+                                    {{ beneficiary.bank_name }}
+                                </p>
+                            </div>
+                            {% if beneficiary.is_favorite %}
+                            <i class="fas fa-star text-yellow-500 text-xs"></i>
+                            {% endif %}
+                        </div>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Transfer Information -->
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-info-circle text-blue-600 text-lg mt-0.5"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-blue-900 mb-2">Transfer Information</h4>
+                        <ul class="text-xs text-blue-800 space-y-1.5">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-0.5"></i>
+                                Transfer fee: 0.5% (max {{ currency_symbol }}10.00)
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-0.5"></i>
+                                Same-bank transfers are instant
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-0.5"></i>
+                                External transfers: 1-3 business days
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-2 mt-0.5"></i>
+                                Confirmation sent via email
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Notice -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-shield-alt text-yellow-600 text-lg mt-0.5"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-yellow-900 mb-2">Security Notice</h4>
+                        <p class="text-xs text-yellow-800">
+                            Always verify recipient details before sending. Transfers cannot be reversed once completed.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Need Help -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-2">Need Help?</h4>
+                <p class="text-xs text-gray-600 mb-3">Having trouble with your transfer?</p>
+                <a href="{% url 'support_ticket_create' %}" 
+                   class="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium">
+                    <i class="fas fa-headset mr-2"></i>Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const currencySymbol = "{{ currency_symbol }}";
+document.addEventListener('DOMContentLoaded', function() {
+    // DOM Elements
+    const methodSaved = document.getElementById('method_saved');
+    const methodManual = document.getElementById('method_manual');
+    const savedBeneficiarySection = document.getElementById('savedBeneficiarySection');
+    const manualEntrySection = document.getElementById('manualEntrySection');
+    const saveBeneficiarySection = document.getElementById('saveBeneficiarySection');
+    const beneficiarySelect = document.getElementById('beneficiarySelect');
+    const saveBeneficiaryCheckbox = document.getElementById('{{ form.save_beneficiary.id_for_label }}');
+    const nicknameField = document.getElementById('nicknameField');
+    const amountInput = document.getElementById('{{ form.amount.id_for_label }}');
+    const feeCalculator = document.getElementById('feeCalculator');
+    
+    // Form fields
+    const accountNumberField = document.getElementById('{{ form.beneficiary_account_number.id_for_label }}');
+    const accountNameField = document.getElementById('{{ form.beneficiary_name.id_for_label }}');
+    const bankNameField = document.getElementById('{{ form.beneficiary_bank.id_for_label }}');
+    
+    // Track if fields were auto-filled
+    let isAutoFilled = false;
+
+    // Initialize based on URL parameter or selection
+    {% if selected_beneficiary %}
+    isAutoFilled = true;
+    setFieldsReadOnly(true);
+    {% endif %}
+
+    // Entry method toggle
+    function toggleEntryMethod() {
+        if (methodSaved && methodSaved.checked) {
+            savedBeneficiarySection.classList.remove('hidden');
+            saveBeneficiarySection.classList.add('hidden');
+            
+            // If a beneficiary is selected, fill the fields
+            if (beneficiarySelect.value) {
+                fillBeneficiaryDetails();
+                setFieldsReadOnly(true);
+            }
+        } else {
+            savedBeneficiarySection.classList.add('hidden');
+            saveBeneficiarySection.classList.remove('hidden');
+            
+            // Clear and enable fields for manual entry
+            if (!isAutoFilled) {
+                clearBeneficiaryFields();
+            }
+            setFieldsReadOnly(false);
+            isAutoFilled = false;
+        }
+    }
+
+    // Set fields read-only or editable
+    function setFieldsReadOnly(readOnly) {
+        if (accountNumberField) accountNumberField.readOnly = readOnly;
+        if (accountNameField) accountNameField.readOnly = readOnly;
+        if (bankNameField) bankNameField.readOnly = readOnly;
+        
+        // Visual feedback
+        const fields = [accountNumberField, accountNameField, bankNameField];
+        fields.forEach(field => {
+            if (field) {
+                if (readOnly) {
+                    field.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    field.classList.remove('bg-white');
+                } else {
+                    field.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    field.classList.add('bg-white');
+                }
+            }
+        });
+    }
+
+    // Fill beneficiary details from dropdown selection
+    function fillBeneficiaryDetails() {
+        const selectedOption = beneficiarySelect.options[beneficiarySelect.selectedIndex];
+        
+        if (selectedOption && selectedOption.value) {
+            const accountName = selectedOption.getAttribute('data-account-name');
+            const accountNumber = selectedOption.getAttribute('data-account-number');
+            const bankName = selectedOption.getAttribute('data-bank-name');
+            
+            if (accountNameField) accountNameField.value = accountName || '';
+            if (accountNumberField) accountNumberField.value = accountNumber || '';
+            if (bankNameField) bankNameField.value = bankName || '';
+            
+            isAutoFilled = true;
+            setFieldsReadOnly(true);
+            
+            // Visual feedback
+            highlightFields([accountNameField, accountNumberField, bankNameField]);
+        } else {
+            clearBeneficiaryFields();
+            setFieldsReadOnly(false);
+            isAutoFilled = false;
+        }
+    }
+
+    // Clear beneficiary fields
+    function clearBeneficiaryFields() {
+        if (accountNameField) accountNameField.value = '';
+        if (accountNumberField) accountNumberField.value = '';
+        if (bankNameField) bankNameField.value = '';
+    }
+
+    // Highlight auto-filled fields
+    function highlightFields(fields) {
+        fields.forEach(field => {
+            if (field) {
+                field.classList.add('ring-2', 'ring-green-500', 'ring-opacity-50');
+                setTimeout(() => {
+                    field.classList.remove('ring-2', 'ring-green-500', 'ring-opacity-50');
+                }, 2000);
+            }
+        });
+    }
+
+    // Calculate fee and total
+    function calculateFee() {
+        const amount = parseFloat(amountInput.value) || 0;
+        
+        if (amount > 0) {
+            feeCalculator.classList.remove('hidden');
+            
+            const fee = Math.min(amount * 0.005, 10.00);
+            const total = amount + fee;
+            
+            document.getElementById('displayAmount').textContent = currencySymbol + amount.toFixed(2);
+            document.getElementById('displayFee').textContent = currencySymbol + fee.toFixed(2);
+            document.getElementById('displayTotal').textContent = currencySymbol + total.toFixed(2);
+        } else {
+            feeCalculator.classList.add('hidden');
+        }
+    }
+
+    // Event Listeners
+    if (methodSaved) {
+        methodSaved.addEventListener('change', toggleEntryMethod);
+    }
+    if (methodManual) {
+        methodManual.addEventListener('change', toggleEntryMethod);
+    }
+    
+    if (beneficiarySelect) {
+        beneficiarySelect.addEventListener('change', function() {
+            if (this.value) {
+                fillBeneficiaryDetails();
+            } else {
+                clearBeneficiaryFields();
+                setFieldsReadOnly(false);
+                isAutoFilled = false;
+            }
+        });
+    }
+
+    if (saveBeneficiaryCheckbox) {
+        saveBeneficiaryCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                nicknameField.classList.remove('hidden');
+            } else {
+                nicknameField.classList.add('hidden');
+            }
+        });
+    }
+
+    if (amountInput) {
+        amountInput.addEventListener('input', calculateFee);
+        // Initialize if amount already has value
+        calculateFee();
+    }
+
+    // Initialize entry method on page load
+    toggleEntryMethod();
+});
+
+// Global function for quick select buttons
+function selectBeneficiary(id, accountName, accountNumber, bankName) {
+    // Switch to saved beneficiary method
+    const methodSaved = document.getElementById('method_saved');
+    if (methodSaved) {
+        methodSaved.checked = true;
+        methodSaved.dispatchEvent(new Event('change'));
+    }
+    
+    // Select the beneficiary in dropdown
+    const beneficiarySelect = document.getElementById('beneficiarySelect');
+    if (beneficiarySelect) {
+        beneficiarySelect.value = id;
+        beneficiarySelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Scroll to form
+    document.getElementById('transferForm').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+</script>
+
+<style>
+    select, input[type="number"], input[type="text"], textarea {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900;
+    }
+    
+    textarea {
+        @apply min-h-20 resize-y;
+    }
+    
+    input[type="checkbox"], input[type="radio"] {
+        @apply w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer;
+    }
+    
+    input[readonly] {
+        @apply bg-gray-100 cursor-not-allowed;
+    }
+</style>
+{% endblock %}

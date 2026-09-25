@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Beneficiaries{% endblock %}
+{% block page_description %}Manage your saved beneficiaries{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+            <h1 class="text-lg sm:text-2xl font-bold text-gray-900 lg:hidden">Beneficiaries</h1>
+            <p class="text-sm text-gray-600 mt-1">{{ beneficiaries.count }} saved beneficiar{{ beneficiaries.count|pluralize:"y,ies" }}</p>
+        </div>
+        <div class="flex gap-3">
+            <a href="{% url 'transfer' %}" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors text-sm">
+                <i class="fas fa-exchange-alt mr-2"></i>New Transfer
+            </a>
+            <a href="{% url 'beneficiary_add' %}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors text-sm">
+                <i class="fas fa-plus mr-2"></i>Add Beneficiary
+            </a>
+        </div>
+    </div>
+
+    <!-- Beneficiaries Grid -->
+    {% if beneficiaries %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for beneficiary in beneficiaries %}
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-shadow overflow-hidden">
+            <!-- Card Header -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-4 sm:p-6 text-white">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-white text-xl"></i>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{% url 'beneficiary_edit' beneficiary.id %}" class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-colors">
+                            <i class="fas fa-edit text-white text-sm"></i>
+                        </a>
+                        <a href="{% url 'beneficiary_delete' beneficiary.id %}" class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-colors">
+                            <i class="fas fa-trash text-white text-sm"></i>
+                        </a>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold mb-1 break-all">{{ beneficiary.nickname|default:beneficiary.account_name }}</h3>
+                {% if beneficiary.nickname %}
+                <p class="text-sm text-blue-100">{{ beneficiary.account_name }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Card Body -->
+            <div class="p-4 sm:p-6 space-y-4">
+                <!-- Account Number -->
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Account Number</p>
+                    <p class="text-sm font-mono font-semibold text-gray-900 break-all">{{ beneficiary.account_number }}</p>
+                </div>
+
+                <!-- Bank Name -->
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Bank</p>
+                    <p class="text-sm font-semibold text-gray-900">{{ beneficiary.bank_name }}</p>
+                </div>
+
+                {% if beneficiary.bank_code %}
+                <!-- Bank Code -->
+                <div>
+                    <p class="text-xs text-gray-500 mb-1">Bank Code</p>
+                    <p class="text-sm font-mono font-semibold text-gray-900">{{ beneficiary.bank_code }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Created Date -->
+                <div class="pt-3 border-t border-gray-200">
+                    <p class="text-xs text-gray-500">Added {{ beneficiary.created_at|timesince }} ago</p>
+                </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="px-4 sm:px-6 pb-4 sm:pb-6">
+                <a href="{% url 'transfer' %}?beneficiary={{ beneficiary.id }}" class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all transform hover:scale-105">
+                    <i class="fas fa-paper-plane mr-2"></i>Send Money
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if beneficiaries.has_other_pages %}
+    <div class="flex items-center justify-center gap-2 pt-4">
+        {% if beneficiaries.has_previous %}
+        <a href="?page={{ beneficiaries.previous_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Previous
+        </a>
+        {% endif %}
+        
+        <span class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium">
+            {{ beneficiaries.number }}
+        </span>
+        
+        {% if beneficiaries.has_next %}
+        <a href="?page={{ beneficiaries.next_page_number }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50">
+            Next
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="bg-white rounded-xl shadow-lg border-2 border-dashed border-gray-300 p-6 sm:p-12 text-center">
+        <div class="max-w-md mx-auto">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-users text-gray-400 text-xl sm:text-2xl lg:text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No Beneficiaries Yet</h3>
+            <p class="text-gray-600 mb-6">Add beneficiaries to make transfers faster and easier. You won't need to enter their details every time.</p>
+            <a href="{% url 'beneficiary_add' %}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors">
+                <i class="fas fa-plus mr-2"></i>Add Your First Beneficiary
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Info Section -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-3 sm:p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-info-circle text-blue-600 text-xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-sm font-semibold text-blue-900 mb-2">About Beneficiaries</h4>
+                <ul class="text-sm text-blue-800 space-y-1">
+                    <li>• Save frequently used recipients for quick transfers</li>
+                    <li>• All beneficiary information is encrypted and secure</li>
+                    <li>• You can edit or delete beneficiaries anytime</li>
+                    <li>• Click "Send Money" to quickly transfer to a beneficiary</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

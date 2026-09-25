@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+{% block page_title %}Withdraw Funds{% endblock %}
+{% block page_description %}Withdraw money from your account{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'transaction_list' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Transactions
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-arrow-up text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Withdraw Funds</h1>
+        <p class="text-gray-600">Request a withdrawal from your account</p>
+    </div>
+
+    <!-- Show Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Form Errors Found:</h4>
+                <div class="space-y-2">
+                    {% for field, errors in form.errors.items %}
+                        <div class="bg-white rounded p-3 border border-blue-300">
+                            <p class="font-semibold text-blue-900 mb-1">
+                                {% if field == '__all__' %}General Form Error:{% else %}Field "{{ field }}":{% endif %}
+                            </p>
+                            <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                                {% for error in errors %}
+                                    <li>• {{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Withdrawal Form -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-6">Withdrawal Information</h2>
+        
+        <form method="post" id="tacProtectedForm" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Account Selection -->
+            <div>
+                <label for="{{ form.account.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-university text-orange-600 mr-2"></i>Withdraw From Account *
+                </label>
+                {{ form.account }}
+                {% if form.account.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.account.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Select the account to withdraw from</p>
+            </div>
+
+            <!-- Amount -->
+            <div>
+                <label for="{{ form.amount.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-dollar-sign text-orange-600 mr-2"></i>Amount *
+                </label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.amount.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Enter the amount you want to withdraw</p>
+            </div>
+
+            <!-- Withdrawal Method -->
+            <div>
+                <label for="{{ form.withdrawal_method.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-money-bill-wave text-orange-600 mr-2"></i>Withdrawal Method *
+                </label>
+                {{ form.withdrawal_method }}
+                {% if form.withdrawal_method.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.withdrawal_method.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Choose how you want to receive the funds</p>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <label for="{{ form.description.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-comment text-orange-600 mr-2"></i>Description
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <p class="mt-2 text-sm text-blue-600 flex items-center">
+                        <i class="fas fa-exclamation-circle mr-1"></i>
+                        {{ form.description.errors.0 }}
+                    </p>
+                {% endif %}
+                <p class="mt-1 text-xs text-gray-500">Add a note about this withdrawal (optional)</p>
+            </div>
+
+            <!-- Warning Notice -->
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div class="flex items-start space-x-3">
+                    <i class="fas fa-exclamation-triangle text-yellow-600 text-xl mt-0.5"></i>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-semibold text-yellow-900 mb-2">Important Notice</h4>
+                        <ul class="text-xs text-yellow-800 space-y-1">
+                            <li>• Withdrawals are subject to verification and may take 24-48 hours to process</li>
+                            <li>• Please ensure you have sufficient available balance</li>
+                            <li>• Withdrawal limits may apply based on your account type</li>
+                            <li>• Processing fees may be deducted from the withdrawal amount</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden TAC field – populated by the modal JS before submit -->
+            <input type="hidden" name="tac_code" id="tacCodeHidden" value="">
+
+            <!-- Submit Buttons — opens TAC modal instead of submitting directly -->
+            <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                <button type="button" id="tacTriggerBtn"
+                        class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-gradient-to-r from-orange-600 to-orange-700 text-white rounded-lg font-semibold shadow-lg hover:from-orange-700 hover:to-orange-800 transform hover:scale-105 transition-all duration-200">
+                    <i class="fas fa-check mr-2"></i>
+                    Submit Withdrawal
+                </button>
+                <a href="{% url 'transaction_list' %}" class="flex-1 inline-flex items-center justify-center px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+
+        {% include 'transactions/account_restricted_modal.html' %}
+        {% include 'transactions/tac_modal.html' %}
+    </div>
+
+    <!-- Withdrawal Methods -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Available Withdrawal Methods</h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <i class="fas fa-university text-blue-600 text-2xl mb-2"></i>
+                <h4 class="font-semibold text-gray-900 mb-1">Bank Transfer</h4>
+                <p class="text-xs text-gray-600">Direct to your bank account</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <i class="fas fa-money-check text-green-600 text-2xl mb-2"></i>
+                <h4 class="font-semibold text-gray-900 mb-1">Check</h4>
+                <p class="text-xs text-gray-600">Mailed to your address</p>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <i class="fas fa-building text-purple-600 text-2xl mb-2"></i>
+                <h4 class="font-semibold text-gray-900 mb-1">Wire Transfer</h4>
+                <p class="text-xs text-gray-600">International transfers available</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Withdrawal Limits -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">Withdrawal Limits</h3>
+        <div class="space-y-3">
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-700">Daily Limit</span>
+                <span class="text-sm font-bold text-gray-900">{{ currency_symbol }}5,000.00</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-700">Weekly Limit</span>
+                <span class="text-sm font-bold text-gray-900">{{ currency_symbol }}25,000.00</span>
+            </div>
+            <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                <span class="text-sm text-gray-700">Monthly Limit</span>
+                <span class="text-sm font-bold text-gray-900">{{ currency_symbol }}100,000.00</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    select, input[type="number"], input[type="text"], textarea {
+        @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 text-gray-900;
+    }
+    
+    textarea {
+        @apply min-h-24 resize-y;
+    }
+</style>
+{% endblock %}

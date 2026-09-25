@@ -1,0 +1,844 @@
+{% load static %}
+<!doctype html>
+<html lang="en" class="h-full" style="background:#0A0A0A;">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{{ title }} - Santerde Trust{% endblock %}</title>
+
+    <!-- ===================== FAVICONS ===================== -->
+    <link rel="icon" type="image/x-icon"       href="{% static 'icons/favicon.ico' %}?v=2" />
+    <link rel="icon" type="image/png" sizes="16x16"  href="{% static 'icons/favicon-16x16.png' %}?v=2" />
+    <link rel="icon" type="image/png" sizes="32x32"  href="{% static 'icons/favicon-32x32.png' %}?v=2" />
+    <link rel="apple-touch-icon" sizes="180x180"     href="{% static 'icons/apple-touch-icon.png' %}?v=2" />
+    <link rel="manifest"                             href="{% static 'icons/site.webmanifest' %}?v=2" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+
+    <!-- ===================== SEO: Core ===================== -->
+    <meta name="description" content="{% block meta_description %}Santerde Trust — secure online wealth management built for modern individuals.{% endblock %}" />
+    <meta name="keywords"    content="{% block meta_keywords %}Santerde Trust, secure transfers, wealth management, financial freedom, personal finance{% endblock %}" />
+    <meta name="robots"      content="index, follow" />
+    <meta name="author"      content="Santerde Trust" />
+    <link rel="canonical"    href="{% block canonical %}{{ request.build_absolute_uri }}{% endblock %}" />
+
+    <!-- ===================== SEO: Open Graph ===================== -->
+    <meta property="og:type"        content="website" />
+    <meta property="og:site_name"   content="Santerde Trust" />
+    <meta property="og:title"       content="{% block og_title %}{% block title2 %}{{ title }} - Santerde Trust{% endblock %}{% endblock %}" />
+    <meta property="og:description" content="{% block og_description %}Secure online  wealth management platform.{% endblock %}" />
+    <meta property="og:image"       content="{% block og_image %}{% static 'icons/android-chrome-512x512.png' %}?v=2{% endblock %}" />
+    <meta property="og:url"         content="{{ request.build_absolute_uri }}" />
+
+    <!-- ===================== SEO: Twitter Card ===================== -->
+    <meta name="twitter:card"        content="summary_large_image" />
+    <meta name="twitter:site"        content="@SanterdeTrust" />
+    <meta name="twitter:title"       content="{% block tw_title %}{{ title }} - Santerde Trust{% endblock %}" />
+    <meta name="twitter:description" content="{% block tw_description %}Secure online wealth management platform.{% endblock %}" />
+    <meta name="twitter:image"       content="{% block tw_image %}{% static 'icons/android-chrome-512x512.png' %}?v=2{% endblock %}" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              azure: {
+                50:  "#eff6ff",
+                100: "#dbeafe",
+                200: "#bfdbfe",
+                300: "#93c5fd",
+                400: "#60a5fa",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+                800: "#1e40af",
+                900: "#1e3a8a",
+                950: "#172554",
+              },
+              gold: {
+                400: "#fbbf24",
+                500: "#f59e0b",
+              },
+              onyx:    "#0A0A0A",
+              obsidian:"#111111",
+              charcoal:"#1A1A1A",
+              iron:    "#242424",
+              pearl:   "#F9FAFB",
+            },
+            fontFamily: {
+              sans: ["Plus Jakarta Sans", "Inter", "system-ui", "-apple-system", "sans-serif"],
+            },
+          },
+        },
+      };
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+      * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+      html { scroll-behavior: smooth; background: #0A0A0A; }
+      body { font-family: "Plus Jakarta Sans", "Inter", sans-serif; background: #0A0A0A; color: #F9FAFB; }
+
+      /* ==========================================
+         SCROLLBAR
+      ========================================== */
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #111111; }
+      ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #3b82f6, #2563eb); border-radius: 3px; }
+
+      /* ==========================================
+         ANIMATIONS
+      ========================================== */
+      @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slideInLeft {
+        from { transform: translateX(-100%); }
+        to   { transform: translateX(0); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      .animate-slideDown    { animation: slideDown 0.3s ease-out; }
+      .animate-slideInLeft  { animation: slideInLeft 0.3s ease-out; }
+      .animate-fadeIn       { animation: fadeIn 0.4s ease-out; }
+
+      /* ==========================================
+         SIDEBAR ACTIVE STATE  (azure)
+      ========================================== */
+      .nav-item-active {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+        color: #fff !important;
+      }
+      .nav-item-active i,
+      .nav-item-active span { color: #fff !important; }
+      .nav-item-active:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+      }
+
+      /* ==========================================
+         GLASS PANELS
+      ========================================== */
+      .glass-dark {
+        background: rgba(255,255,255,0.04);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255,255,255,0.08);
+      }
+      .glass-sidebar {
+        background: #111111;
+        border-right: 1px solid rgba(255,255,255,0.06);
+      }
+
+      /* ==========================================
+         GLOBAL DARK OVERRIDES
+         (cards, tables, text, borders in content)
+      ========================================== */
+
+      /* Backgrounds */
+      .bg-white   { background-color: #1A1A1A !important; }
+      .bg-gray-50 { background-color: #111111 !important; }
+      .bg-gray-100{ background-color: #1E1E1E !important; }
+      .bg-gray-200{ background-color: #252525 !important; }
+
+      /* Text */
+      .text-gray-900 { color: #F9FAFB !important; }
+      .text-gray-800 { color: rgba(249,250,251,0.90) !important; }
+      .text-gray-700 { color: rgba(249,250,251,0.72) !important; }
+      .text-gray-600 { color: rgba(249,250,251,0.55) !important; }
+      .text-gray-500 { color: rgba(249,250,251,0.40) !important; }
+      .text-gray-400 { color: rgba(249,250,251,0.30) !important; }
+      .text-gray-300 { color: rgba(249,250,251,0.22) !important; }
+
+      /* Borders */
+      .border-gray-200 { border-color: rgba(255,255,255,0.08) !important; }
+      .border-gray-100 { border-color: rgba(255,255,255,0.05) !important; }
+      .border-gray-300 { border-color: rgba(255,255,255,0.12) !important; }
+      .divide-gray-200 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255,255,255,0.08) !important; }
+      .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: rgba(255,255,255,0.05) !important; }
+
+      /* Blue accent → Azure */
+      .bg-blue-600  { background-color: #3b82f6 !important; }
+      .bg-blue-700  { background-color: #2563eb !important; }
+      .bg-blue-800  { background-color: #1d4ed8 !important; }
+      .bg-blue-500  { background-color: #60a5fa !important; }
+      .bg-blue-50   { background-color: rgba(59,130,246,0.10) !important; }
+      .bg-blue-100  { background-color: rgba(59,130,246,0.15) !important; }
+      .bg-blue-200  { background-color: rgba(59,130,246,0.18) !important; }
+      .text-blue-600{ color: #3b82f6 !important; }
+      .text-blue-700{ color: #2563eb !important; }
+      .text-blue-800{ color: #60a5fa !important; }
+      .text-blue-900{ color: #F9FAFB !important; }
+      .text-blue-500{ color: #60a5fa !important; }
+      .text-blue-400{ color: #60a5fa !important; }
+      .text-blue-300{ color: #93c5fd !important; }
+      .text-blue-200{ color: rgba(147,197,253,0.7) !important; }
+      .text-blue-100{ color: rgba(219,234,254,0.6) !important; }
+      .border-blue-500 { border-color: #3b82f6 !important; }
+      .border-blue-200 { border-color: rgba(59,130,246,0.25) !important; }
+      .border-blue-100 { border-color: rgba(59,130,246,0.12) !important; }
+      .hover\:bg-blue-50:hover  { background-color: rgba(59,130,246,0.08) !important; }
+      .hover\:bg-blue-100:hover { background-color: rgba(59,130,246,0.12) !important; }
+      .hover\:bg-blue-700:hover { background-color: #2563eb !important; }
+      .hover\:text-blue-600:hover { color: #3b82f6 !important; }
+      .hover\:text-blue-700:hover { color: #2563eb !important; }
+      .focus\:ring-blue-500:focus { --tw-ring-color: rgba(59,130,246,0.20) !important; }
+      .focus\:ring-primary-500:focus { --tw-ring-color: rgba(59,130,246,0.20) !important; }
+      .focus\:border-blue-500:focus { border-color: #3b82f6 !important; }
+
+      /* Primary alias → Azure */
+      .bg-primary-50  { background-color: rgba(59,130,246,0.08) !important; }
+      .bg-primary-100 { background-color: rgba(59,130,246,0.14) !important; }
+      .bg-primary-500 { background-color: #3b82f6 !important; }
+      .bg-primary-600 { background-color: #2563eb !important; }
+      .bg-primary-700 { background-color: #1d4ed8 !important; }
+      .text-primary-500 { color: #3b82f6 !important; }
+      .text-primary-600 { color: #3b82f6 !important; }
+      .text-primary-700 { color: #2563eb !important; }
+      .border-primary-100 { border-color: rgba(59,130,246,0.15) !important; }
+      .border-primary-500 { border-color: #3b82f6 !important; }
+      .hover\:bg-primary-50:hover { background-color: rgba(59,130,246,0.08) !important; }
+      .hover\:text-primary-600:hover { color: #3b82f6 !important; }
+      .from-blue-50   { --tw-gradient-from: rgba(59,130,246,0.08) !important; }
+      .from-primary-50{ --tw-gradient-from: rgba(59,130,246,0.08) !important; }
+      .to-azure-50  { --tw-gradient-to: rgba(59,130,246,0.04) !important; }
+
+      /* Status badges */
+      .bg-azure-100 { background-color: rgba(59,130,246,0.15) !important; }
+      .text-azure-800{ color: #60a5fa !important; }
+      .text-azure-700{ color: #60a5fa !important; }
+      .text-azure-600{ color: #3b82f6 !important; }
+      .bg-red-100 { background-color: rgba(239,68,68,0.12) !important; }
+      .text-red-800   { color: #fca5a5 !important; }
+      .text-red-700   { color: #f87171 !important; }
+      .text-red-600   { color: #f87171 !important; }
+      .border-red-200 { border-color: rgba(239,68,68,0.2) !important; }
+      .bg-yellow-100  { background-color: rgba(251,191,36,0.12) !important; }
+      .text-yellow-800{ color: #fcd34d !important; }
+      .text-yellow-600{ color: #fbbf24 !important; }
+      .bg-amber-100   { background-color: rgba(251,191,36,0.12) !important; }
+      .text-amber-800 { color: #fcd34d !important; }
+      .text-amber-600 { color: #fbbf24 !important; }
+      .bg-orange-100  { background-color: rgba(251,146,60,0.12) !important; }
+      .text-orange-800{ color: #fb923c !important; }
+      .bg-violet-100  { background-color: rgba(139,92,246,0.12) !important; }
+      .text-violet-800{ color: #c4b5fd !important; }
+      .bg-indigo-100  { background-color: rgba(99,102,241,0.12) !important; }
+      .text-indigo-800{ color: #a5b4fc !important; }
+      .bg-purple-100  { background-color: rgba(168,85,247,0.12) !important; }
+      .text-purple-800{ color: #d8b4fe !important; }
+      .bg-pink-100    { background-color: rgba(244,114,182,0.12) !important; }
+      .text-pink-800  { color: #f9a8d4 !important; }
+
+      /* ==========================================
+         GRADIENT BACKGROUNDS — gray/white stops
+         (gray gradients become dark in dark mode)
+      ========================================== */
+      .from-gray-50  { --tw-gradient-from: #111111 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(17,17,17,0)) !important; }
+      .from-gray-100 { --tw-gradient-from: #1A1A1A !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(26,26,26,0)) !important; }
+      .from-gray-200 { --tw-gradient-from: #222222 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(34,34,34,0)) !important; }
+      .from-gray-300 { --tw-gradient-from: #2A2A2A !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(42,42,42,0)) !important; }
+      .to-gray-50    { --tw-gradient-to: #111111 !important; }
+      .to-gray-100   { --tw-gradient-to: #1A1A1A !important; }
+      .to-gray-200   { --tw-gradient-to: #222222 !important; }
+      .to-gray-300   { --tw-gradient-to: #2A2A2A !important; }
+      .to-white      { --tw-gradient-to: #1A1A1A !important; }
+      .via-gray-50   { --tw-gradient-via: #111111 !important; }
+      .via-gray-100  { --tw-gradient-via: #1A1A1A !important; }
+
+      /* Primary-color gradient stops → Azure */
+      .from-primary-400 { --tw-gradient-from: #60a5fa !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(96,165,250,0)) !important; }
+      .from-primary-500 { --tw-gradient-from: #3b82f6 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59,130,246,0)) !important; }
+      .from-primary-600 { --tw-gradient-from: #2563eb !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(37,99,235,0)) !important; }
+      .from-primary-700 { --tw-gradient-from: #1d4ed8 !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(29,78,216,0)) !important; }
+      .from-primary-900 { --tw-gradient-from: #1e3a8a !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30,58,138,0)) !important; }
+      .to-primary-600   { --tw-gradient-to: #2563eb !important; }
+      .to-primary-700   { --tw-gradient-to: #1d4ed8 !important; }
+      .to-primary-800   { --tw-gradient-to: #1e40af !important; }
+      .via-primary-500  { --tw-gradient-via: #3b82f6 !important; }
+      .via-primary-900  { --tw-gradient-via: #1e3a8a !important; }
+
+      /* ==========================================
+         TEXT & BORDER OVERRIDES — dark/black text
+      ========================================== */
+      /* text-black is used in some templates and would be invisible on dark bg */
+      .text-black { color: #F9FAFB !important; }
+
+      /* Gradient text utility — redefine for azure */
+      .gradient-text {
+        background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 50%, #2563eb 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* border-white — soften so it reads as a subtle separator, not glaring */
+      .border-white { border-color: rgba(255,255,255,0.18) !important; }
+
+      /* ==========================================
+         HOVER STATE OVERRIDES
+      ========================================== */
+      .hover\:bg-gray-50:hover  { background-color: rgba(255,255,255,0.04) !important; }
+      .hover\:bg-gray-100:hover { background-color: rgba(255,255,255,0.07) !important; }
+      .hover\:bg-gray-200:hover { background-color: rgba(255,255,255,0.10) !important; }
+      .hover\:bg-green-50:hover  { background-color: rgba(34,197,94,0.06) !important; }
+      .hover\:bg-purple-50:hover { background-color: rgba(168,85,247,0.06) !important; }
+      .hover\:border-primary-200:hover { border-color: rgba(59,130,246,0.3) !important; }
+      .hover\:border-blue-500:hover    { border-color: #3b82f6 !important; }
+
+      /* ==========================================
+         GREEN — success semantics only (income/deposit/completed).
+         Kept distinct from the azure brand accent.
+      ========================================== */
+      .bg-green-50  { background-color: rgba(34,197,94,0.07) !important; }
+      .bg-green-100 { background-color: rgba(34,197,94,0.12) !important; }
+      .bg-green-200 { background-color: rgba(34,197,94,0.18) !important; }
+      .text-green-400 { color: #4ade80 !important; }
+      .text-green-500 { color: #22c55e !important; }
+      .text-green-600 { color: #4ade80 !important; }
+      .text-green-700 { color: #22c55e !important; }
+      .text-green-800 { color: #4ade80 !important; }
+      .text-green-900 { color: #86efac !important; }
+      .border-green-200 { border-color: rgba(34,197,94,0.25) !important; }
+      .border-green-500 { border-color: #22c55e !important; }
+      .hover\:text-green-600:hover { color: #4ade80 !important; }
+
+      /* ==========================================
+         GRAY-800 / GRAY-900 BACKGROUNDS
+         (used in card visual elements — keep dark, just ensure they're dark enough)
+      ========================================== */
+      .bg-gray-700 { background-color: #2A2A2A !important; }
+      .bg-gray-800 { background-color: #1E1E1E !important; }
+      .bg-gray-900 { background-color: #111111 !important; }
+      .from-gray-700 { --tw-gradient-from: #2A2A2A !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(42,42,42,0)) !important; }
+      .from-gray-800 { --tw-gradient-from: #1E1E1E !important; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30,30,30,0)) !important; }
+      .to-gray-700   { --tw-gradient-to: #2A2A2A !important; }
+      .to-gray-800   { --tw-gradient-to: #1E1E1E !important; }
+      .to-gray-900   { --tw-gradient-to: #111111 !important; }
+      .text-gray-200 { color: rgba(249,250,251,0.15) !important; }
+      .text-gray-100 { color: rgba(249,250,251,0.10) !important; }
+
+      /* ==========================================
+         MODAL / POPUP OVERRIDES
+      ========================================== */
+      /* Profile picture modal footer and image container */
+      .bg-gradient-to-b { /* handled by from-*/to-* above */ }
+      /* Make sure modal close button shows correctly */
+      .bg-gray-200 { background-color: rgba(255,255,255,0.10) !important; }
+      .hover\:bg-gray-300:hover { background-color: rgba(255,255,255,0.14) !important; }
+      .bg-gray-300  { background-color: rgba(255,255,255,0.12) !important; }
+
+      /* Shadows for dark theme */
+      .shadow-sm { box-shadow: 0 1px 4px rgba(0,0,0,0.8) !important; }
+      .shadow    { box-shadow: 0 2px 8px rgba(0,0,0,0.7) !important; }
+      .shadow-md { box-shadow: 0 4px 12px rgba(0,0,0,0.7) !important; }
+      .shadow-lg { box-shadow: 0 8px 24px rgba(0,0,0,0.8) !important; }
+      .shadow-xl { box-shadow: 0 16px 40px rgba(0,0,0,0.8) !important; }
+      .shadow-2xl{ box-shadow: 0 24px 60px rgba(0,0,0,0.9) !important; }
+
+      /* Table headers */
+      thead { background-color: rgba(255,255,255,0.03) !important; }
+      thead th { background-color: transparent !important; }
+
+      /* ==========================================
+         FORM INPUTS  — dark style
+      ========================================== */
+      input[type="text"],
+      input[type="email"],
+      input[type="password"],
+      input[type="number"],
+      input[type="tel"],
+      input[type="date"],
+      input[type="url"],
+      input[type="search"],
+      select,
+      textarea {
+        background-color: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        color: #F9FAFB !important;
+        border-radius: 0.75rem !important;
+      }
+      input::placeholder,
+      textarea::placeholder { color: rgba(249,250,251,0.30) !important; }
+      input:focus,
+      textarea:focus,
+      select:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 3px rgba(59,130,246,0.15) !important;
+        outline: none !important;
+      }
+      select option {
+        background-color: #1A1A1A;
+        color: #F9FAFB;
+      }
+
+      /* File inputs */
+      input[type="file"] {
+        background-color: rgba(255,255,255,0.05) !important;
+        border: 1px dashed rgba(59,130,246,0.30) !important;
+        color: rgba(249,250,251,0.60) !important;
+        border-radius: 0.75rem !important;
+      }
+
+      /* Checkboxes / radios */
+      input[type="checkbox"],
+      input[type="radio"] {
+        accent-color: #3b82f6;
+        background-color: rgba(255,255,255,0.08) !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+      }
+
+      /* ==========================================
+         RESPONSIVE OVERRIDES
+      ========================================== */
+      @media (max-width: 640px) {
+        .text-4xl { font-size: 1.5rem !important;   line-height: 2rem !important; }
+        .text-3xl { font-size: 1.25rem !important;  line-height: 1.75rem !important; }
+        .text-2xl { font-size: 1.125rem !important; line-height: 1.5rem !important; }
+        .text-xl  { font-size: 1rem !important;     line-height: 1.5rem !important; }
+        .text-lg  { font-size: 0.938rem !important; line-height: 1.375rem !important; }
+        .text-6xl { font-size: 2.5rem !important; }
+        .text-5xl { font-size: 2rem !important; }
+        .text-8xl { font-size: 3rem !important; }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="tel"],
+        input[type="date"],
+        input[type="url"],
+        select,
+        textarea { font-size: 16px !important; padding: 0.625rem 0.75rem !important; }
+
+        button, .btn, [type="submit"] {
+          font-size: 0.875rem !important;
+          padding-left: 1rem !important;
+          padding-right: 1rem !important;
+        }
+
+        .p-6  { padding: 1rem !important; }
+        .p-8  { padding: 1.25rem !important; }
+        .p-12 { padding: 1.5rem !important; }
+        .px-6 { padding-left: 1rem !important; padding-right: 1rem !important; }
+        .px-8 { padding-left: 1.25rem !important; padding-right: 1.25rem !important; }
+        .py-12{ padding-top: 1.5rem !important; padding-bottom: 1.5rem !important; }
+        .mb-8 { margin-bottom: 1.25rem !important; }
+        .mb-12{ margin-bottom: 1.5rem !important; }
+        .gap-6{ gap: 1rem !important; }
+        .gap-8{ gap: 1.25rem !important; }
+
+        body, html { overflow-x: hidden; }
+        table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .font-mono { font-size: 0.813rem !important; word-break: break-all; }
+        img { max-width: 100%; height: auto; }
+
+        .grid.grid-cols-3:not(.sm\:grid-cols-3),
+        .grid.grid-cols-4:not(.sm\:grid-cols-4) {
+          grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        }
+        .max-w-md,.max-w-lg,.max-w-xl,.max-w-2xl,.max-w-4xl,.max-w-5xl,.max-w-6xl {
+          max-width: 100% !important;
+          margin-left: 0.5rem; margin-right: 0.5rem;
+        }
+        .pt-20 { padding-top: 4.5rem !important; }
+      }
+
+      @media (min-width: 641px) and (max-width: 1023px) {
+        .text-4xl { font-size: 1.875rem !important; }
+        .text-3xl { font-size: 1.5rem !important; }
+        .p-12 { padding: 2rem !important; }
+        .p-8  { padding: 1.5rem !important; }
+      }
+
+      * { max-width: 100vw; }
+      .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+  </head>
+
+  <body class="h-full antialiased" style="background:#0A0A0A; color:#F9FAFB;">
+    {% load currency_filters %}
+
+    <!-- ========================================================
+         FLASH MESSAGES
+    ======================================================== -->
+    {% if messages %}
+    <div class="fixed top-4 right-4 z-50 space-y-2 max-w-md">
+      {% for message in messages %}
+      <div class="animate-slideDown rounded-xl shadow-2xl border-l-4
+          {% if message.tags == 'success' %}border-azure-500{% elif message.tags == 'error' %}border-red-500{% elif message.tags == 'warning' %}border-amber-500{% else %}border-azure-500{% endif %}
+          p-4 flex items-start space-x-3"
+          style="background:#1A1A1A; border-top:1px solid rgba(255,255,255,0.08); border-right:1px solid rgba(255,255,255,0.08); border-bottom:1px solid rgba(255,255,255,0.08);">
+        <div class="flex-shrink-0">
+          {% if message.tags == 'success' %}
+          <i class="fas fa-check-circle text-azure-400 text-xl"></i>
+          {% elif message.tags == 'error' %}
+          <i class="fas fa-times-circle text-red-400 text-xl"></i>
+          {% elif message.tags == 'warning' %}
+          <i class="fas fa-exclamation-triangle text-amber-400 text-xl"></i>
+          {% else %}
+          <i class="fas fa-info-circle text-azure-400 text-xl"></i>
+          {% endif %}
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium" style="color:#F9FAFB;">{{ message }}</p>
+        </div>
+        <button type="button" class="flex-shrink-0 transition-colors" style="color:rgba(249,250,251,0.4);"
+          onmouseenter="this.style.color='#F9FAFB'" onmouseleave="this.style.color='rgba(249,250,251,0.4)'"
+          onclick="this.parentElement.remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <!-- ========================================================
+         AUTHENTICATED LAYOUT
+    ======================================================== -->
+    <div class="flex h-screen overflow-hidden" style="background:#0A0A0A;">
+
+      <!-- ===== DESKTOP SIDEBAR ===== -->
+      <aside class="hidden lg:flex lg:flex-shrink-0">
+        <div class="flex flex-col w-64 glass-sidebar">
+
+          <!-- Logo -->
+          <div class="flex items-center justify-center h-16 px-5 border-b" style="border-color:rgba(255,255,255,0.06); background:linear-gradient(135deg,rgba(59,130,246,0.06),transparent);">
+            <a href="{% url 'dashboard' %}" class="flex items-center group">
+              <img src="{% static 'images/SanterdeTrust.png' %}?v=2" alt="Santerde Trust" class="h-12 w-auto object-contain transition-opacity duration-200 group-hover:opacity-80">
+            </a>
+          </div>
+
+          <!-- Navigation -->
+          <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+
+            <a href="{% url 'dashboard' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if request.resolver_match.url_name == 'dashboard' %}nav-item-active{% endif %}"
+               style="{% if request.resolver_match.url_name != 'dashboard' %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-home w-5 mr-3 {% if request.resolver_match.url_name != 'dashboard' %}" style="color:rgba(249,250,251,0.35);{% endif %}"></i>
+              <span>Dashboard</span>
+            </a>
+
+            <a href="{% url 'account_list' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if 'account' in request.resolver_match.url_name %}nav-item-active{% endif %}"
+               style="{% if 'account' not in request.resolver_match.url_name %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-wallet w-5 mr-3"></i>
+              <span>Accounts</span>
+            </a>
+
+            <a href="{% url 'card_list' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if 'card' in request.resolver_match.url_name %}nav-item-active{% endif %}"
+               style="{% if 'card' not in request.resolver_match.url_name %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-credit-card w-5 mr-3"></i>
+              <span>Cards</span>
+            </a>
+
+            <a href="{% url 'transaction_list' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if 'transaction' in request.resolver_match.url_name %}nav-item-active{% endif %}"
+               style="{% if 'transaction' not in request.resolver_match.url_name %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-exchange-alt w-5 mr-3"></i>
+              <span>Transactions</span>
+            </a>
+
+            <a href="{% url 'transfer' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if request.resolver_match.url_name == 'transfer' %}nav-item-active{% endif %}"
+               style="{% if request.resolver_match.url_name != 'transfer' %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-paper-plane w-5 mr-3"></i>
+              <span>Transfer</span>
+            </a>
+
+            <a href="{% url 'beneficiary_list' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if 'beneficiary' in request.resolver_match.url_name %}nav-item-active{% endif %}"
+               style="{% if 'beneficiary' not in request.resolver_match.url_name %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-users w-5 mr-3"></i>
+              <span>Beneficiaries</span>
+            </a>
+
+            <!-- Divider -->
+            <div class="pt-3 mt-3" style="border-top:1px solid rgba(255,255,255,0.06);">
+              <p class="px-4 text-xs font-semibold uppercase tracking-wider mb-2" style="color:rgba(249,250,251,0.25);">Support</p>
+            </div>
+
+            <a href="{% url 'support_ticket_list' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if 'support' in request.resolver_match.url_name %}nav-item-active{% endif %}"
+               style="{% if 'support' not in request.resolver_match.url_name %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-headset w-5 mr-3"></i>
+              <span>Support Tickets</span>
+            </a>
+
+            <a href="{% url 'notification_list' %}"
+               class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 group
+                      {% if 'notification' in request.resolver_match.url_name %}nav-item-active{% endif %}"
+               style="{% if 'notification' not in request.resolver_match.url_name %}color:rgba(249,250,251,0.60);{% endif %}">
+              <i class="fas fa-bell w-5 mr-3"></i>
+              <span>Notifications</span>
+              {% if unread_notifications_count > 0 %}
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full font-bold" style="background:#3b82f6;color:#fff;">
+                {{ unread_notifications_count }}
+              </span>
+              {% endif %}
+            </a>
+          </nav>
+
+          <!-- User Profile -->
+          <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.06);">
+            <div class="flex items-center space-x-3 mb-3">
+              {% if user.profile_image %}
+              <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}"
+                   class="w-9 h-9 rounded-xl object-cover ring-2" style="ring-color:rgba(59,130,246,0.3);" id="profileImage">
+              {% else %}
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white shadow-lg flex-shrink-0"
+                   style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+                {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+              </div>
+              {% endif %}
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate" style="color:#F9FAFB;">{{ user.get_full_name }}</p>
+                <p class="text-xs truncate" style="color:rgba(249,250,251,0.40);">{{ user.email }}</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <a href="{% url 'profile' %}"
+                 class="flex items-center justify-center px-3 py-2 text-xs font-semibold rounded-lg transition-all"
+                 style="background:rgba(255,255,255,0.06);color:rgba(249,250,251,0.70);border:1px solid rgba(255,255,255,0.08);"
+                 onmouseenter="this.style.background='rgba(255,255,255,0.10)'"
+                 onmouseleave="this.style.background='rgba(255,255,255,0.06)'">
+                <i class="fas fa-user mr-1.5"></i>Profile
+              </a>
+              <a href="{% url 'logout' %}"
+                 class="flex items-center justify-center px-3 py-2 text-xs font-bold rounded-lg transition-all text-white shadow-lg"
+                 style="background:linear-gradient(135deg,#3b82f6,#2563eb);box-shadow:0 4px 12px rgba(59,130,246,0.25);"
+                 onmouseenter="this.style.background='linear-gradient(135deg,#2563eb,#1d4ed8)'"
+                 onmouseleave="this.style.background='linear-gradient(135deg,#3b82f6,#2563eb)'">
+                <i class="fas fa-sign-out-alt mr-1.5"></i>Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ===== MOBILE SIDEBAR OVERLAY (Alpine.js) ===== -->
+      <div x-data="{ sidebarOpen: false }" class="lg:hidden">
+
+        <!-- Mobile Top Bar -->
+        <div class="fixed top-0 left-0 right-0 h-16 z-40 flex items-center justify-between px-4"
+             style="background:#111111;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <button @click="sidebarOpen = true"
+                  class="p-2 rounded-lg transition-all"
+                  style="color:rgba(249,250,251,0.60);"
+                  onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'"
+                  onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.60)'">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+
+          <a href="{% url 'dashboard' %}" class="flex items-center">
+            <img src="{% static 'images/SanterdeTrust.png' %}?v=2" alt="Santerde Trust" class="h-10 w-auto object-contain">
+          </a>
+
+          <a href="{% url 'notification_list' %}" class="relative p-2 rounded-lg transition-all"
+             style="color:rgba(249,250,251,0.60);"
+             onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'"
+             onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.60)'">
+            <i class="fas fa-bell text-xl"></i>
+            {% if unread_notifications_count > 0 %}
+            <span class="absolute top-0 right-0 h-5 w-5 rounded-full text-white text-xs flex items-center justify-center font-bold"
+                  style="background:#3b82f6;">
+              {{ unread_notifications_count }}
+            </span>
+            {% endif %}
+          </a>
+        </div>
+
+        <!-- Overlay backdrop -->
+        <div x-show="sidebarOpen" @click="sidebarOpen = false"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-300"
+             x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-50" style="background:rgba(0,0,0,0.7);display:none;"></div>
+
+        <!-- Mobile Sidebar Panel -->
+        <div x-show="sidebarOpen" @click.away="sidebarOpen = false"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0"
+             x-transition:leave="transition ease-in duration-300"
+             x-transition:leave-start="translate-x-0" x-transition:leave-end="-translate-x-full"
+             class="fixed inset-y-0 left-0 w-64 z-50 transform flex flex-col"
+             style="background:#111111;border-right:1px solid rgba(255,255,255,0.06);display:none;">
+
+          <!-- Mobile Logo -->
+          <div class="flex items-center justify-between h-16 px-4"
+               style="border-bottom:1px solid rgba(255,255,255,0.06);background:linear-gradient(135deg,rgba(59,130,246,0.06),transparent);">
+            <a href="{% url 'dashboard' %}" class="flex items-center">
+              <img src="{% static 'images/SanterdeTrust.png' %}?v=2" alt="Santerde Trust" class="h-10 w-auto object-contain">
+            </a>
+            <button @click="sidebarOpen = false" class="p-1.5 rounded-lg transition-all" style="color:rgba(249,250,251,0.40);">
+              <i class="fas fa-times text-lg"></i>
+            </button>
+          </div>
+
+          <!-- Mobile Nav -->
+          <nav class="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
+            <a href="{% url 'dashboard' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'"><i class="fas fa-home w-5 mr-3"></i>Dashboard</a>
+            <a href="{% url 'account_list' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'"><i class="fas fa-wallet w-5 mr-3"></i>Accounts</a>
+            <a href="{% url 'card_list' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'"><i class="fas fa-credit-card w-5 mr-3"></i>Cards</a>
+            <a href="{% url 'transaction_list' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'"><i class="fas fa-exchange-alt w-5 mr-3"></i>Transactions</a>
+            <a href="{% url 'transfer' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'"><i class="fas fa-paper-plane w-5 mr-3"></i>Transfer</a>
+            <a href="{% url 'beneficiary_list' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'"><i class="fas fa-users w-5 mr-3"></i>Beneficiaries</a>
+            <div class="pt-3 mt-3" style="border-top:1px solid rgba(255,255,255,0.06);">
+              <p class="px-4 text-xs font-semibold uppercase tracking-wider mb-2" style="color:rgba(249,250,251,0.25);">Support</p>
+            </div>
+            <a href="{% url 'support_ticket_list' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'"><i class="fas fa-headset w-5 mr-3"></i>Support Tickets</a>
+            <a href="{% url 'notification_list' %}" class="flex items-center px-4 py-2.5 text-sm font-medium rounded-xl transition-all" style="color:rgba(249,250,251,0.65);" onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'" onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.65)'">
+              <i class="fas fa-bell w-5 mr-3"></i>
+              <span>Notifications</span>
+              {% if unread_notifications_count > 0 %}
+              <span class="ml-auto text-xs px-2 py-0.5 rounded-full font-bold" style="background:#3b82f6;color:#fff;">{{ unread_notifications_count }}</span>
+              {% endif %}
+            </a>
+          </nav>
+
+          <!-- Mobile User Profile -->
+          <div class="p-4" style="border-top:1px solid rgba(255,255,255,0.06);">
+            <div class="flex items-center space-x-3 mb-3">
+              {% if user.profile_image %}
+              <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}"
+                   class="w-9 h-9 rounded-xl object-cover" id="profileImage">
+              {% else %}
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                   style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+                {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+              </div>
+              {% endif %}
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold truncate" style="color:#F9FAFB;">{{ user.get_full_name }}</p>
+                <p class="text-xs truncate" style="color:rgba(249,250,251,0.40);">{{ user.email }}</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <a href="{% url 'profile' %}"
+                 class="flex items-center justify-center px-3 py-2 text-xs font-semibold rounded-lg transition-all"
+                 style="background:rgba(255,255,255,0.06);color:rgba(249,250,251,0.70);border:1px solid rgba(255,255,255,0.08);">
+                <i class="fas fa-user mr-1.5"></i>Profile
+              </a>
+              <a href="{% url 'logout' %}"
+                 class="flex items-center justify-center px-3 py-2 text-xs font-bold rounded-lg text-white"
+                 style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+                <i class="fas fa-sign-out-alt mr-1.5"></i>Logout
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== MAIN CONTENT AREA ===== -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+
+        <!-- Desktop Top Bar -->
+        <header class="hidden lg:block px-6 py-4" style="background:#111111;border-bottom:1px solid rgba(255,255,255,0.06);">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold" style="color:#F9FAFB;">
+                {% block page_title %}{{ title }}{% endblock %}
+              </h2>
+              <p class="text-sm mt-0.5" style="color:rgba(249,250,251,0.40);">
+                {% block page_description %}{% endblock %}
+              </p>
+            </div>
+
+            <div class="flex items-center space-x-4">
+              <a href="{% url 'notification_list' %}"
+                 class="relative p-2 rounded-xl transition-all"
+                 style="color:rgba(249,250,251,0.50);"
+                 onmouseenter="this.style.background='rgba(59,130,246,0.1)';this.style.color='#60a5fa'"
+                 onmouseleave="this.style.background='transparent';this.style.color='rgba(249,250,251,0.50)'">
+                <i class="fas fa-bell text-xl"></i>
+                {% if unread_notifications_count > 0 %}
+                <span class="absolute top-0 right-0 h-5 w-5 rounded-full text-white text-xs flex items-center justify-center font-bold animate-pulse"
+                      style="background:#3b82f6;">
+                  {{ unread_notifications_count }}
+                </span>
+                {% endif %}
+              </a>
+
+              <div class="flex items-center space-x-3 px-3 py-2 rounded-xl" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);">
+                <div class="text-right">
+                  <p class="text-sm font-semibold" style="color:#F9FAFB;">{{ user.get_full_name }}</p>
+                  <p class="text-xs" style="color:rgba(249,250,251,0.40);">{{ user.email }}</p>
+                </div>
+                {% if user.profile_image %}
+                <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}"
+                     class="w-9 h-9 rounded-xl object-cover" id="profileImage">
+                {% else %}
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm font-bold text-white flex-shrink-0"
+                     style="background:linear-gradient(135deg,#3b82f6,#2563eb);">
+                  {{ user.first_name.0|upper }}{{ user.last_name.0|upper }}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Main Content Block -->
+        <main class="flex-1 overflow-y-auto p-4 lg:p-6 {% if not user.is_authenticated %}pt-20{% else %}pt-20 lg:pt-6{% endif %}"
+              style="background:#0F0F0F;">
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script>
+      // Auto-dismiss flash messages after 5 seconds
+      setTimeout(() => {
+        document.querySelectorAll(".animate-slideDown").forEach((msg) => {
+          msg.style.transition = "opacity 0.5s";
+          msg.style.opacity = "0";
+          setTimeout(() => msg.remove(), 500);
+        });
+      }, 5000);
+    </script>
+
+    {% block extra_js %}{% endblock %}
+
+    <!-- Smartsupp Live Chat script -->
+    <script type="text/javascript">
+      var _smartsupp = _smartsupp || {};
+      _smartsupp.key = 'e95ce794f8b90685a205e304915803d5ca614c5d';
+      _smartsupp.color = '#3b82f6';
+      window.smartsupp||(function(d) {
+        var s,c,o=smartsupp=function(){ o._.push(arguments)};o._=[];
+        s=d.getElementsByTagName('script')[0];c=d.createElement('script');
+        c.type='text/javascript';c.charset='utf-8';c.async=true;
+        c.src='https://www.smartsuppchat.com/loader.js?';s.parentNode.insertBefore(c,s);
+      })(document);
+    </script>
+    <noscript>Powered by <a href="https://www.smartsupp.com" target="_blank">Smartsupp</a></noscript>
+  </body>
+</html>

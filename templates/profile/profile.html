@@ -1,0 +1,689 @@
+{% extends 'base.html' %}
+{% load currency_filters %}
+{% block page_title %}My Profile{% endblock %}
+{% block page_description %}View your account information{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <!-- Header -->
+    <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900 lg:hidden">My Profile</h1>
+            <p class="text-sm text-gray-600 mt-1">Manage your personal information and settings</p>
+        </div>
+        <a href="{% url 'profile_edit' %}" class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-lg font-medium hover:from-primary-700 hover:to-primary-800 transition-all duration-300 text-sm shadow-lg shadow-primary-500/25">
+            <i class="fas fa-edit mr-2"></i>Edit Profile
+        </a>
+    </div>
+
+    <!-- Profile Header -->
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+        <!-- Cover with animated gradient -->
+        <div class="relative h-40 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700 overflow-hidden">
+            <!-- Animated background elements -->
+            <div class="absolute inset-0 overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-2xl animate-pulse"></div>
+                <div class="absolute -bottom-10 -left-10 w-60 h-60 bg-primary-400/20 rounded-full blur-3xl"></div>
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-primary-400/10 to-transparent rounded-full"></div>
+            </div>
+            <!-- Subtle pattern overlay -->
+            <div class="absolute inset-0 opacity-10" style="background-image: url('data:image/svg+xml,%3Csvg width=&quot;60&quot; height=&quot;60&quot; viewBox=&quot;0 0 60 60&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot;%3E%3Cg fill=&quot;none&quot; fill-rule=&quot;evenodd&quot;%3E%3Cg fill=&quot;%23ffffff&quot; fill-opacity=&quot;0.4&quot;%3E%3Cpath d=&quot;M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z&quot;/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+        </div>
+        
+        <div class="relative px-6 pb-6">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between -mt-20">
+                <div class="flex flex-col md:flex-row md:items-end gap-4">
+                    <!-- Profile Picture with Click Handler -->
+                    <div class="relative group cursor-pointer" onclick="openProfileModal()">
+                        <div class="w-24 h-24 sm:w-36 sm:h-36 rounded-2xl border-4 border-white shadow-2xl overflow-hidden bg-gray-200 transform transition-all duration-500 group-hover:scale-105 group-hover:shadow-primary-500/30 group-hover:border-primary-200">
+                            {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" alt="{{ user.get_full_name }}" class="w-full h-full object-cover" id="profileImage">
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700" id="profileImage" data-initials="{{ user.first_name.0 }}{{ user.last_name.0 }}">
+                                <span class="text-white text-2xl sm:text-4xl font-bold">{{ user.first_name.0|upper }}{{ user.last_name.0|upper }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Hover overlay with zoom icon -->
+                        <div class="absolute inset-0 rounded-2xl bg-gradient-to-t from-primary-900/80 via-primary-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                            <div class="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                                <div class="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border border-white/30">
+                                    <i class="fas fa-search-plus text-white text-lg"></i>
+                                </div>
+                                <p class="text-white text-xs font-medium mt-2 text-center">Click to zoom</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Online status indicator -->
+                        <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-azure-500 border-4 border-white rounded-full shadow-lg"></div>
+                        
+                        <!-- Decorative ring -->
+                        <div class="absolute -inset-2 rounded-2xl border-2 border-primary-200 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h2 class="text-lg sm:text-2xl font-bold text-black">{{ user.get_full_name }}</h2>
+                        <p class="text-sm text-gray-600">{{ user.email }}</p>
+                        {% if user.bank_id %}<p class="text-sm font-mono text-gray-500 mt-1">ID: {{ user.bank_id }}</p>{% endif %}
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-semibold
+                        {% if user.account_status == 'Active' %}bg-azure-100 text-azure-800
+                        {% elif user.account_status == 'Pending Verification' %}bg-amber-100 text-amber-800
+                        {% elif user.account_status == 'Suspended' %}bg-primary-100 text-primary-800
+                        {% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {% if user.account_status == 'Active' %}<span class="w-2 h-2 bg-azure-500 rounded-full mr-2 animate-pulse"></span>{% endif %}
+                        {{ user.account_status }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:border-primary-200 transition-all duration-300">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-gray-600">Total Balance</h3>
+                <div class="w-10 h-10 bg-azure-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-wallet text-azure-600 text-lg"></i>
+                </div>
+            </div>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ user.get_total_balance|currency:currency_symbol }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:border-primary-200 transition-all duration-300">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-gray-600">Accounts</h3>
+                <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-university text-primary-600 text-lg"></i>
+                </div>
+            </div>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ user.accounts.count }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:border-primary-200 transition-all duration-300">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-gray-600">Cards</h3>
+                <div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-credit-card text-violet-600 text-lg"></i>
+                </div>
+            </div>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ user.cards.count }}</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl hover:border-primary-200 transition-all duration-300">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm font-semibold text-gray-600">Member Since</h3>
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-calendar text-amber-600 text-lg"></i>
+                </div>
+            </div>
+            <p class="text-lg sm:text-2xl font-bold text-gray-900 break-all">{{ user.date_joined|date:"Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Personal Information</h3>
+            <a href="{% url 'profile_edit' %}" class="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors">
+                <i class="fas fa-edit mr-1"></i>Edit
+            </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><p class="text-xs text-gray-500 mb-1">Full Name</p><p class="text-sm font-semibold text-gray-900">{{ user.get_full_name }}</p></div>
+            <div><p class="text-xs text-gray-500 mb-1">Email</p><p class="text-sm font-semibold text-gray-900">{{ user.email }}</p></div>
+            <div><p class="text-xs text-gray-500 mb-1">Phone</p><p class="text-sm font-semibold text-gray-900">{{ user.phone_number }}</p></div>
+            {% if user.alternate_phone %}<div><p class="text-xs text-gray-500 mb-1">Alt Phone</p><p class="text-sm font-semibold text-gray-900">{{ user.alternate_phone }}</p></div>{% endif %}
+            {% if user.date_of_birth %}<div><p class="text-xs text-gray-500 mb-1">DOB</p><p class="text-sm font-semibold text-gray-900">{{ user.date_of_birth|date:"F d, Y" }}</p></div>{% endif %}
+            <div><p class="text-xs text-gray-500 mb-1">Gender</p><p class="text-sm font-semibold text-gray-900">{{ user.gender }}</p></div>
+            {% if user.marital_status %}<div><p class="text-xs text-gray-500 mb-1">Marital Status</p><p class="text-sm font-semibold text-gray-900">{{ user.marital_status }}</p></div>{% endif %}
+            {% if user.nationality %}<div><p class="text-xs text-gray-500 mb-1">Nationality</p><p class="text-sm font-semibold text-gray-900">{{ user.nationality }}</p></div>{% endif %}
+        </div>
+    </div>
+
+    <!-- Address -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Address</h3>
+            <a href="{% url 'profile_edit' %}" class="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"><i class="fas fa-edit mr-1"></i>Edit</a>
+        </div>
+        {% if user.address %}
+        <div class="space-y-4">
+            <div><p class="text-xs text-gray-500 mb-1">Street</p><p class="text-sm font-semibold text-gray-900">{{ user.address }}</p></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% if user.city %}<div><p class="text-xs text-gray-500 mb-1">City</p><p class="text-sm font-semibold text-gray-900">{{ user.city }}</p></div>{% endif %}
+                {% if user.state %}<div><p class="text-xs text-gray-500 mb-1">State</p><p class="text-sm font-semibold text-gray-900">{{ user.state }}</p></div>{% endif %}
+                {% if user.postal_code %}<div><p class="text-xs text-gray-500 mb-1">Postal</p><p class="text-sm font-semibold text-gray-900">{{ user.postal_code }}</p></div>{% endif %}
+            </div>
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-500 text-center py-4">No address on file</p>
+        {% endif %}
+    </div>
+
+    <!-- Employment -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Employment</h3>
+            <a href="{% url 'employment_info' %}" class="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"><i class="fas fa-edit mr-1"></i>Edit</a>
+        </div>
+        {% if user.employment_status %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><p class="text-xs text-gray-500 mb-1">Status</p><p class="text-sm font-semibold text-gray-900">{{ user.employment_status }}</p></div>
+            {% if user.employer_name %}<div><p class="text-xs text-gray-500 mb-1">Employer</p><p class="text-sm font-semibold text-gray-900">{{ user.employer_name }}</p></div>{% endif %}
+            {% if user.job_title %}<div><p class="text-xs text-gray-500 mb-1">Title</p><p class="text-sm font-semibold text-gray-900">{{ user.job_title }}</p></div>{% endif %}
+            {% if user.annual_income %}<div><p class="text-xs text-gray-500 mb-1">Income</p><p class="text-sm font-semibold text-gray-900">{{ user.annual_income|currency:currency_symbol }}</p></div>{% endif %}
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-500 text-center py-4">No employment info</p>
+        {% endif %}
+    </div>
+
+    <!-- KYC -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">KYC Verification</h3>
+            <a href="{% url 'kyc_documents' %}" class="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"><i class="fas fa-upload mr-1"></i>Upload</a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-semibold text-gray-700">Submitted</p>
+                    {% if user.has_submitted_kyc %}<i class="fas fa-check-circle text-azure-600 text-xl"></i>{% else %}<i class="fas fa-times-circle text-gray-400 text-xl"></i>{% endif %}
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-semibold text-gray-700">Verified</p>
+                    {% if user.has_verified_kyc %}<i class="fas fa-check-circle text-azure-600 text-xl"></i>{% else %}<i class="fas fa-clock text-amber-600 text-xl"></i>{% endif %}
+                </div>
+            </div>
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-sm font-semibold text-gray-700">ID Type</p>
+                    <i class="fas fa-id-card text-primary-600 text-xl"></i>
+                </div>
+                <p class="text-xs text-gray-600">{% if user.government_id_type %}{{ user.government_id_type }}{% else %}N/A{% endif %}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Security -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+        <h3 class="text-lg font-bold text-gray-900 mb-6">Security</h3>
+        <div class="space-y-4">
+            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-200 transition-colors">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center"><i class="fas fa-lock text-primary-600"></i></div>
+                    <div><p class="text-sm font-semibold text-gray-900">Password</p><p class="text-xs text-gray-600">{% if user.password_changed_at %}Changed {{ user.password_changed_at|timesince }} ago{% else %}Never changed{% endif %}</p></div>
+                </div>
+                <a href="{% url 'change_password' %}" class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 text-sm transition-colors shadow-md shadow-primary-500/20">Change</a>
+            </div>
+            <!-- <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-200 transition-colors">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center"><i class="fas fa-shield-alt text-primary-600"></i></div>
+                    <div><p class="text-sm font-semibold text-gray-900">2FA</p><p class="text-xs text-gray-600">{% if user.two_factor_enabled %}Enabled{% else %}Not enabled{% endif %}</p></div>
+                </div>
+                {% if user.two_factor_enabled %}
+                <span class="px-4 py-2 bg-azure-100 text-azure-800 rounded-lg font-medium text-sm"><i class="fas fa-check mr-1"></i>On</span>
+                {% else %}
+                <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 text-sm transition-colors">Enable</button>
+                {% endif %}
+            </div> -->
+        </div>
+    </div>
+</div>
+
+<!-- Premium Profile Picture Modal -->
+<div id="profileModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Backdrop with blur -->
+    <div class="fixed inset-0 bg-gray-900/80 backdrop-blur-md transition-opacity duration-500" id="modalBackdrop" onclick="closeProfileModal()"></div>
+    
+    <!-- Modal Content -->
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div id="modalContent" class="relative transform overflow-hidden rounded-3xl bg-white shadow-2xl transition-all duration-500 max-w-2xl w-full opacity-0 scale-95">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-white"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-white" id="modal-title">Profile Picture</h3>
+                                <p class="text-sm text-primary-100">{{ user.get_full_name }}</p>
+                            </div>
+                        </div>
+                        <button onclick="closeProfileModal()" class="w-10 h-10 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors group">
+                            <i class="fas fa-times text-white text-lg group-hover:rotate-90 transition-transform duration-300"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Image Container with Zoom -->
+                <div class="relative bg-gradient-to-b from-gray-100 to-gray-50 p-8">
+                    <!-- Decorative elements -->
+                    <div class="absolute top-4 left-4 w-20 h-20 bg-primary-100 rounded-full blur-2xl opacity-50"></div>
+                    <div class="absolute bottom-4 right-4 w-32 h-32 bg-primary-200 rounded-full blur-3xl opacity-30"></div>
+                    
+                    <!-- Image wrapper with zoom functionality -->
+                    <div class="relative mx-auto max-w-md">
+                        <div id="imageWrapper" class="relative overflow-hidden rounded-2xl shadow-2xl border-4 border-white cursor-zoom-in transition-all duration-500" 
+                             style="aspect-ratio: 1/1;">
+                            {% if user.profile_image %}
+                            <img src="{{ user.profile_image.url }}" 
+                                 alt="{{ user.get_full_name }}" 
+                                 class="w-full h-full object-cover transition-transform duration-500 ease-out"
+                                 id="zoomableImage"
+                                 draggable="false">
+                            {% else %}
+                            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700">
+                                <span class="text-white text-5xl sm:text-8xl font-bold">{{ user.first_name.0 }}{{ user.last_name.0 }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Zoom level indicator -->
+                            <div id="zoomIndicator" class="absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-full text-white text-sm font-medium opacity-0 transition-opacity duration-300">
+                                <i class="fas fa-search-plus mr-2"></i><span id="zoomLevel">100%</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Zoom controls -->
+                        <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center space-x-2 bg-white rounded-full shadow-xl p-2 border border-gray-100">
+                            <button onclick="zoomOut()" class="w-10 h-10 bg-gray-100 hover:bg-primary-100 rounded-full flex items-center justify-center transition-colors group">
+                                <i class="fas fa-minus text-gray-600 group-hover:text-primary-600 transition-colors"></i>
+                            </button>
+                            <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div id="zoomBar" class="h-full bg-gradient-to-r from-primary-500 to-primary-600 rounded-full transition-all duration-300" style="width: 25%;"></div>
+                            </div>
+                            <button onclick="zoomIn()" class="w-10 h-10 bg-gray-100 hover:bg-primary-100 rounded-full flex items-center justify-center transition-colors group">
+                                <i class="fas fa-plus text-gray-600 group-hover:text-primary-600 transition-colors"></i>
+                            </button>
+                            <div class="w-px h-6 bg-gray-200 mx-1"></div>
+                            <button onclick="resetZoom()" class="w-10 h-10 bg-gray-100 hover:bg-primary-100 rounded-full flex items-center justify-center transition-colors group" title="Reset">
+                                <i class="fas fa-undo text-gray-600 group-hover:text-primary-600 transition-colors"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal Footer -->
+                <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 text-sm text-gray-500">
+                            <span><i class="fas fa-mouse-pointer mr-1"></i>Drag to pan</span>
+                            <span><i class="fas fa-search-plus mr-1"></i>Scroll to zoom</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <a href="{% url 'profile_edit' %}" class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors text-sm shadow-md shadow-primary-500/20">
+                                <i class="fas fa-camera mr-2"></i>Change Photo
+                            </a>
+                            <button onclick="closeProfileModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors text-sm">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Modal animations */
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+    
+    @keyframes modalFadeOut {
+        from {
+            opacity: 1;
+        }
+        to {
+            opacity: 0;
+        }
+    }
+    
+    @keyframes modalSlideOut {
+        from {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        to {
+            opacity: 0;
+            transform: scale(0.95) translateY(20px);
+        }
+    }
+    
+    .modal-enter {
+        animation: modalFadeIn 0.3s ease-out forwards;
+    }
+    
+    .modal-content-enter {
+        animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    .modal-exit {
+        animation: modalFadeOut 0.2s ease-in forwards;
+    }
+    
+    .modal-content-exit {
+        animation: modalSlideOut 0.2s ease-in forwards;
+    }
+    
+    /* Zoom cursor states */
+    .cursor-zoom-in {
+        cursor: zoom-in;
+    }
+    
+    .cursor-zoom-out {
+        cursor: zoom-out;
+    }
+    
+    .cursor-grab {
+        cursor: grab;
+    }
+    
+    .cursor-grabbing {
+        cursor: grabbing;
+    }
+    
+    /* Prevent text selection during drag */
+    .no-select {
+        user-select: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+    }
+    
+    /* Smooth image rendering */
+    #zoomableImage {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+    
+    /* Hide scrollbar when modal is open */
+    body.modal-open {
+        overflow: hidden;
+    }
+</style>
+
+<script>
+// Profile Modal and Zoom Functionality
+let currentZoom = 1;
+let minZoom = 1;
+let maxZoom = 4;
+let isDragging = false;
+let startX, startY, translateX = 0, translateY = 0;
+let lastTranslateX = 0, lastTranslateY = 0;
+
+const modal = document.getElementById('profileModal');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalContent = document.getElementById('modalContent');
+const imageWrapper = document.getElementById('imageWrapper');
+const zoomableImage = document.getElementById('zoomableImage');
+const zoomIndicator = document.getElementById('zoomIndicator');
+const zoomBar = document.getElementById('zoomBar');
+const zoomLevel = document.getElementById('zoomLevel');
+
+function openProfileModal() {
+    modal.classList.remove('hidden');
+    document.body.classList.add('modal-open');
+    
+    // Trigger animations
+    setTimeout(() => {
+        modalBackdrop.classList.add('modal-enter');
+        modalContent.classList.add('modal-content-enter');
+    }, 10);
+    
+    // Reset zoom state
+    resetZoom();
+    
+    // Add event listeners
+    if (zoomableImage) {
+        imageWrapper.addEventListener('wheel', handleWheel, { passive: false });
+        imageWrapper.addEventListener('mousedown', handleMouseDown);
+        imageWrapper.addEventListener('mousemove', handleMouseMove);
+        imageWrapper.addEventListener('mouseup', handleMouseUp);
+        imageWrapper.addEventListener('mouseleave', handleMouseUp);
+        imageWrapper.addEventListener('dblclick', handleDoubleClick);
+    }
+    
+    // Handle escape key
+    document.addEventListener('keydown', handleEscKey);
+}
+
+function closeProfileModal() {
+    modalBackdrop.classList.remove('modal-enter');
+    modalContent.classList.remove('modal-content-enter');
+    modalBackdrop.classList.add('modal-exit');
+    modalContent.classList.add('modal-content-exit');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modalBackdrop.classList.remove('modal-exit');
+        modalContent.classList.remove('modal-content-exit');
+        document.body.classList.remove('modal-open');
+    }, 200);
+    
+    // Remove event listeners
+    if (zoomableImage) {
+        imageWrapper.removeEventListener('wheel', handleWheel);
+        imageWrapper.removeEventListener('mousedown', handleMouseDown);
+        imageWrapper.removeEventListener('mousemove', handleMouseMove);
+        imageWrapper.removeEventListener('mouseup', handleMouseUp);
+        imageWrapper.removeEventListener('mouseleave', handleMouseUp);
+        imageWrapper.removeEventListener('dblclick', handleDoubleClick);
+    }
+    
+    document.removeEventListener('keydown', handleEscKey);
+}
+
+function handleEscKey(e) {
+    if (e.key === 'Escape') {
+        closeProfileModal();
+    }
+}
+
+function handleWheel(e) {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.2 : 0.2;
+    setZoom(currentZoom + delta);
+}
+
+function handleDoubleClick(e) {
+    if (currentZoom === 1) {
+        setZoom(2.5);
+    } else {
+        resetZoom();
+    }
+}
+
+function handleMouseDown(e) {
+    if (currentZoom > 1) {
+        isDragging = true;
+        startX = e.clientX - lastTranslateX;
+        startY = e.clientY - lastTranslateY;
+        imageWrapper.classList.add('cursor-grabbing');
+        imageWrapper.classList.remove('cursor-grab');
+        zoomableImage.classList.add('no-select');
+    }
+}
+
+function handleMouseMove(e) {
+    if (!isDragging) return;
+    
+    e.preventDefault();
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    
+    // Calculate bounds
+    const bounds = calculateBounds();
+    translateX = Math.max(Math.min(translateX, bounds.maxX), bounds.minX);
+    translateY = Math.max(Math.min(translateY, bounds.maxY), bounds.minY);
+    
+    applyTransform();
+}
+
+function handleMouseUp() {
+    isDragging = false;
+    lastTranslateX = translateX;
+    lastTranslateY = translateY;
+    imageWrapper.classList.remove('cursor-grabbing');
+    if (currentZoom > 1) {
+        imageWrapper.classList.add('cursor-grab');
+    }
+    if (zoomableImage) {
+        zoomableImage.classList.remove('no-select');
+    }
+}
+
+function calculateBounds() {
+    const wrapperRect = imageWrapper.getBoundingClientRect();
+    const scaledWidth = wrapperRect.width * currentZoom;
+    const scaledHeight = wrapperRect.height * currentZoom;
+    
+    const maxX = (scaledWidth - wrapperRect.width) / 2;
+    const maxY = (scaledHeight - wrapperRect.height) / 2;
+    
+    return {
+        minX: -maxX,
+        maxX: maxX,
+        minY: -maxY,
+        maxY: maxY
+    };
+}
+
+function setZoom(newZoom) {
+    currentZoom = Math.max(minZoom, Math.min(maxZoom, newZoom));
+    
+    // Reset position when zooming out to 1
+    if (currentZoom === 1) {
+        translateX = 0;
+        translateY = 0;
+        lastTranslateX = 0;
+        lastTranslateY = 0;
+    } else {
+        // Constrain position when zooming
+        const bounds = calculateBounds();
+        translateX = Math.max(Math.min(translateX, bounds.maxX), bounds.minX);
+        translateY = Math.max(Math.min(translateY, bounds.maxY), bounds.minY);
+        lastTranslateX = translateX;
+        lastTranslateY = translateY;
+    }
+    
+    applyTransform();
+    updateUI();
+}
+
+function applyTransform() {
+    if (zoomableImage) {
+        zoomableImage.style.transform = `scale(${currentZoom}) translate(${translateX / currentZoom}px, ${translateY / currentZoom}px)`;
+    }
+}
+
+function updateUI() {
+    // Update zoom level text
+    zoomLevel.textContent = Math.round(currentZoom * 100) + '%';
+    
+    // Update zoom bar
+    const percentage = ((currentZoom - minZoom) / (maxZoom - minZoom)) * 100;
+    zoomBar.style.width = percentage + '%';
+    
+    // Show/hide zoom indicator
+    zoomIndicator.style.opacity = currentZoom > 1 ? '1' : '0';
+    
+    // Update cursor
+    if (currentZoom > 1) {
+        imageWrapper.classList.remove('cursor-zoom-in');
+        imageWrapper.classList.add('cursor-grab');
+    } else {
+        imageWrapper.classList.remove('cursor-grab', 'cursor-grabbing');
+        imageWrapper.classList.add('cursor-zoom-in');
+    }
+}
+
+function zoomIn() {
+    setZoom(currentZoom + 0.5);
+}
+
+function zoomOut() {
+    setZoom(currentZoom - 0.5);
+}
+
+function resetZoom() {
+    currentZoom = 1;
+    translateX = 0;
+    translateY = 0;
+    lastTranslateX = 0;
+    lastTranslateY = 0;
+    applyTransform();
+    updateUI();
+}
+
+// Touch support for mobile
+if (imageWrapper) {
+    let initialDistance = 0;
+    let initialZoom = 1;
+    
+    imageWrapper.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            initialDistance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            initialZoom = currentZoom;
+        } else if (e.touches.length === 1 && currentZoom > 1) {
+            isDragging = true;
+            startX = e.touches[0].clientX - lastTranslateX;
+            startY = e.touches[0].clientY - lastTranslateY;
+        }
+    }, { passive: true });
+    
+    imageWrapper.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2) {
+            e.preventDefault();
+            const distance = Math.hypot(
+                e.touches[0].clientX - e.touches[1].clientX,
+                e.touches[0].clientY - e.touches[1].clientY
+            );
+            const scale = distance / initialDistance;
+            setZoom(initialZoom * scale);
+        } else if (e.touches.length === 1 && isDragging) {
+            translateX = e.touches[0].clientX - startX;
+            translateY = e.touches[0].clientY - startY;
+            
+            const bounds = calculateBounds();
+            translateX = Math.max(Math.min(translateX, bounds.maxX), bounds.minX);
+            translateY = Math.max(Math.min(translateY, bounds.maxY), bounds.minY);
+            
+            applyTransform();
+        }
+    }, { passive: false });
+    
+    imageWrapper.addEventListener('touchend', () => {
+        isDragging = false;
+        lastTranslateX = translateX;
+        lastTranslateY = translateY;
+    }, { passive: true });
+}
+</script>
+{% endblock %}
