@@ -335,10 +335,18 @@ FRONTEND_URL = 'http://localhost:3000'
 SITE_URL = config('SITE_URL', default='https://www.santerdetrust.com')
 
 # ============================================
-# RESEND (TRANSACTIONAL EMAIL)
+# EMAIL (SMTP via Hostinger)
 # ============================================
-RESEND_KEY = config('RESEND_KEY', default='')
-RESEND_FROM_EMAIL = config('RESEND_FROM_EMAIL', default='Santerde Trust <no-reply@santerdetrust.com>')
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.hostinger.com')
+EMAIL_PORT = config('EMAIL_PORT', default=465, cast=int)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=True, cast=bool)
+EMAIL_USE_TLS = False
+EMAIL_HOST_USER = config('FROM_EMAIL', default='support@santerdetrust.com')
+EMAIL_HOST_PASSWORD = config('HOSTINGER_EMAIL_PASSWORD', default='')
+EMAIL_TIMEOUT = 20
+# Hostinger only relays mail sent from the authenticated mailbox
+DEFAULT_FROM_EMAIL = f'Santerde Trust <{EMAIL_HOST_USER}>'
 
 
 

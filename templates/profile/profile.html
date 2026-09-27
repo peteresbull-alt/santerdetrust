@@ -236,17 +236,34 @@
                 </div>
                 <a href="{% url 'change_password' %}" class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 text-sm transition-colors shadow-md shadow-primary-500/20">Change</a>
             </div>
-            <!-- <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-200 transition-colors">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center"><i class="fas fa-shield-alt text-primary-600"></i></div>
-                    <div><p class="text-sm font-semibold text-gray-900">2FA</p><p class="text-xs text-gray-600">{% if user.two_factor_enabled %}Enabled{% else %}Not enabled{% endif %}</p></div>
+            <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary-200 transition-colors" x-data="{ confirmOff: false }">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center"><i class="fas fa-shield-alt text-primary-600"></i></div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">Two-Factor Authentication</p>
+                            <p class="text-xs text-gray-600">{% if user.two_factor_enabled %}On: a code is emailed to {{ user.email }} at each sign-in{% else %}Off: add a code sent to your email at sign-in{% endif %}</p>
+                        </div>
+                    </div>
+                    {% if user.two_factor_enabled %}
+                    <button type="button" @click="confirmOff = !confirmOff" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 text-sm transition-colors flex-shrink-0">Turn off</button>
+                    {% else %}
+                    <form method="post" action="{% url 'two_factor_toggle' %}" class="flex-shrink-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="enable">
+                        <button type="submit" class="px-4 py-2 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 text-sm transition-colors shadow-md shadow-primary-500/20">Turn on</button>
+                    </form>
+                    {% endif %}
                 </div>
                 {% if user.two_factor_enabled %}
-                <span class="px-4 py-2 bg-azure-100 text-azure-800 rounded-lg font-medium text-sm"><i class="fas fa-check mr-1"></i>On</span>
-                {% else %}
-                <button class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 text-sm transition-colors">Enable</button>
+                <form method="post" action="{% url 'two_factor_toggle' %}" x-show="confirmOff" style="display:none" class="mt-4 flex flex-col sm:flex-row gap-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="disable">
+                    <input type="password" name="password" required autocomplete="current-password" placeholder="Enter your password to confirm" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 text-sm transition-colors">Confirm turn off</button>
+                </form>
                 {% endif %}
-            </div> -->
+            </div>
         </div>
     </div>
 </div>

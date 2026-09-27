@@ -225,7 +225,7 @@
       <div class="text-center mb-8">
         <h2 class="text-xl sm:text-2xl font-bold text-white mb-2">Verify Your Identity</h2>
         <p class="text-sm" style="color:rgba(249,250,251,0.55)">
-          We sent a verification code to your {{ user.two_factor_method|lower }}
+          We emailed a 6-digit verification code to
         </p>
         <p class="text-sm font-semibold text-azure-400 mt-1.5">{{ user.email }}</p>
       </div>
@@ -282,13 +282,13 @@
         </button>
 
         <!-- Resend -->
-        <div class="text-center" x-data="{ countdown: 60 }" x-init="setInterval(() => { if (countdown > 0) countdown-- }, 1000)">
+        <div class="text-center" x-data="{ countdown: {{ resend_wait|default:0 }} }" x-init="setInterval(() => { if (countdown > 0) countdown-- }, 1000)">
           <p class="text-sm" style="color:rgba(249,250,251,0.5)">
-            Didn't receive the code?
+            Didn't receive the code? Check your spam folder, or
             <button
-              type="button"
+              type="submit"
+              form="resendOtpForm"
               x-show="countdown === 0"
-              @click="countdown = 60"
               class="font-semibold text-azure-400 hover:text-azure-300 transition-colors ml-1"
             >Resend</button>
             <span x-show="countdown > 0" class="ml-1" style="color:rgba(249,250,251,0.4)">
@@ -303,6 +303,11 @@
             <i class="fas fa-arrow-left mr-1.5"></i>Back to sign in
           </a>
         </div>
+      </form>
+
+      <!-- Separate form so Resend doesn't submit the code form -->
+      <form id="resendOtpForm" method="post" action="{% url 'resend_otp' %}" class="hidden">
+        {% csrf_token %}
       </form>
 
       <!-- Security notice -->

@@ -7,11 +7,14 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
+from django.views.decorators.http import require_POST
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from decimal import Decimal
 from datetime import datetime, timedelta
 import random
+import secrets
+import hmac
 import string
 import json
 
@@ -27,7 +30,12 @@ from .forms import (
     WithdrawalForm, TransferForm, BeneficiaryForm,
     SupportTicketForm, NotificationPreferencesForm
 )
-from .email import send_tac_email, send_welcome_email
+from .email import send_tac_email, send_welcome_email, send_otp_email
+
+# Two-factor authentication (email code) settings
+OTP_VALID_MINUTES = 10
+OTP_MAX_ATTEMPTS = 5
+OTP_RESEND_COOLDOWN_SECONDS = 60
 
 
 # ============================================
@@ -119,23 +127,21 @@ def login_view(request):
                 
                 # Check if 2FA is enabled
                 if user.two_factor_enabled:
-                    # Generate and send OTP
-                    otp = generate_otp()
-                    user.otp_code = otp
-                    user.otp_created_at = timezone.now()
-                    user.save()
-                    
-                    # TODO: Send OTP via email/SMS based on user preference
-                    # send_otp(user, otp)
-                    
+                    # Generate a code and email it
+                    otp = issue_otp(user)
+
                     # Store user ID in session for OTP verification
                     request.session['otp_user_id'] = user.id
                     request.session['remember_me'] = remember_me
-                    
-                    messages.info(
-                        request,
-                        f'An OTP has been sent to your {user.two_factor_method.lower()}.'
-                    )
+                    request.session['otp_attempts'] = 0
+
+                    if send_otp_email(user, otp, OTP_VALID_MINUTES):
+                        messages.info(request, 'We emailed you a 6-digit verification code.')
+                    else:
+                        messages.error(
+                            request,
+                            "We couldn't send your verification code. Tap Resend, or contact support if it keeps failing."
+                        )
                     return redirect('verify_otp')
                 
                 # Login user
@@ -208,71 +214,128 @@ def login_view(request):
 def verify_otp_view(request):
     """OTP verification view for 2FA"""
     user_id = request.session.get('otp_user_id')
-    
+
     if not user_id:
         messages.error(request, 'Invalid session. Please login again.')
         return redirect('login')
-    
+
     user = get_object_or_404(CustomUser, id=user_id)
-    
+
     if request.method == 'POST':
         form = OTPVerificationForm(request.POST)
-        
+
         if form.is_valid():
-            otp_code = form.cleaned_data.get('otp_code')
-            
-            # Check if OTP is valid and not expired (10 minutes)
-            if user.otp_code == otp_code:
-                if user.otp_created_at:
-                    otp_age = timezone.now() - user.otp_created_at
-                    if otp_age.total_seconds() <= 600:  # 10 minutes
-                        # OTP is valid
-                        login(request, user)
-                        
-                        # Clear OTP
-                        user.otp_code = None
-                        user.otp_created_at = None
-                        user.failed_login_attempts = 0
-                        user.last_login_ip = get_client_ip(request)
-                        user.save()
-                        
-                        # Set session expiry
-                        remember_me = request.session.get('remember_me', False)
-                        if not remember_me:
-                            request.session.set_expiry(0)
-                        
-                        # Clear session data
-                        del request.session['otp_user_id']
-                        if 'remember_me' in request.session:
-                            del request.session['remember_me']
-                        
-                        # Create audit log
-                        AuditLog.objects.create(
-                            user=user,
-                            action='LOGIN',
-                            model_name='CustomUser',
-                            object_id=str(user.id),
-                            ip_address=get_client_ip(request),
-                            user_agent=request.META.get('HTTP_USER_AGENT', '')
-                        )
-                        
-                        messages.success(request, f'Welcome back, {user.get_full_name}!')
-                        return redirect('dashboard')
-                    else:
-                        messages.error(request, 'OTP has expired. Please request a new one.')
+            otp_code = (form.cleaned_data.get('otp_code') or '').strip()
+            otp_expired = (
+                not user.otp_created_at
+                or (timezone.now() - user.otp_created_at).total_seconds() > OTP_VALID_MINUTES * 60
+            )
+
+            if not user.otp_code:
+                messages.error(request, 'This code is no longer valid. Tap Resend to get a new one.')
+            elif otp_expired:
+                messages.error(request, 'Your code has expired. Tap Resend to get a new one.')
+            elif not hmac.compare_digest(user.otp_code, otp_code):
+                attempts = request.session.get('otp_attempts', 0) + 1
+                request.session['otp_attempts'] = attempts
+                if attempts >= OTP_MAX_ATTEMPTS:
+                    # Too many wrong guesses: cancel the code so it can't be brute-forced
+                    user.otp_code = None
+                    user.otp_created_at = None
+                    user.save(update_fields=['otp_code', 'otp_created_at'])
+                    messages.error(request, 'Too many incorrect codes. For your security that code was cancelled. Tap Resend to get a new one.')
                 else:
-                    messages.error(request, 'Invalid OTP.')
+                    remaining = OTP_MAX_ATTEMPTS - attempts
+                    messages.error(request, f'Incorrect code. {remaining} attempt{"s" if remaining != 1 else ""} left.')
             else:
-                messages.error(request, 'Invalid OTP code.')
+                # OTP is valid
+                login(request, user)
+
+                # Clear OTP
+                user.otp_code = None
+                user.otp_created_at = None
+                user.failed_login_attempts = 0
+                user.last_login_ip = get_client_ip(request)
+                user.save()
+
+                # Set session expiry
+                remember_me = request.session.get('remember_me', False)
+                if not remember_me:
+                    request.session.set_expiry(0)
+
+                # Clear session data
+                for key in ('otp_user_id', 'remember_me', 'otp_attempts'):
+                    request.session.pop(key, None)
+
+                # Create audit log
+                AuditLog.objects.create(
+                    user=user,
+                    action='LOGIN',
+                    model_name='CustomUser',
+                    object_id=str(user.id),
+                    ip_address=get_client_ip(request),
+                    user_agent=request.META.get('HTTP_USER_AGENT', '')
+                )
+
+                messages.success(request, f'Welcome back, {user.get_full_name}!')
+                return redirect('dashboard')
     else:
         form = OTPVerificationForm()
-    
+
     context = {
         'form': form,
         'title': 'Verify OTP',
-        'user': user
+        'user': user,
+        'resend_wait': otp_resend_wait(user),
     }
     return render(request, 'auth/verify_otp.html', context)
+
+
+@require_POST
+def resend_otp_view(request):
+    """Email a fresh 2FA code to the user who is part-way through signing in"""
+    user_id = request.session.get('otp_user_id')
+    if not user_id:
+        messages.error(request, 'Invalid session. Please login again.')
+        return redirect('login')
+
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    wait = otp_resend_wait(user)
+    if wait:
+        messages.error(request, f'Please wait {wait} seconds before requesting another code.')
+        return redirect('verify_otp')
+
+    otp = issue_otp(user)
+    request.session['otp_attempts'] = 0
+    if send_otp_email(user, otp, OTP_VALID_MINUTES):
+        messages.success(request, 'A new verification code is on its way to your email.')
+    else:
+        messages.error(request, "We couldn't send your verification code. Please try again or contact support.")
+    return redirect('verify_otp')
+
+
+@login_required
+@require_POST
+def two_factor_toggle_view(request):
+    """Turn email two-factor authentication on or off for the signed-in user"""
+    user = request.user
+    action = request.POST.get('action')
+
+    if action == 'enable':
+        user.two_factor_enabled = True
+        user.two_factor_method = 'EMAIL'
+        user.save(update_fields=['two_factor_enabled', 'two_factor_method'])
+        messages.success(request, f"Two-factor authentication is on. We'll email a code to {user.email} each time you sign in.")
+    elif action == 'disable':
+        # Require the password so someone with an unlocked session can't switch it off
+        if not user.check_password(request.POST.get('password', '')):
+            messages.error(request, 'Incorrect password. Two-factor authentication is still on.')
+        else:
+            user.two_factor_enabled = False
+            user.save(update_fields=['two_factor_enabled'])
+            messages.success(request, 'Two-factor authentication is off.')
+    return redirect('profile')
 
 
 @login_required
@@ -1605,7 +1668,23 @@ def generate_ticket_number():
 
 
 def generate_otp():
-    """Generate 6-digit OTP"""
-    return ''.join([str(random.randint(0, 9)) for _ in range(6)])
+    """Generate a 6-digit OTP using a cryptographically secure random source"""
+    return f"{secrets.randbelow(10**6):06d}"
+
+
+def issue_otp(user):
+    """Create and store a fresh 2FA code for the user; returns the code"""
+    user.otp_code = generate_otp()
+    user.otp_created_at = timezone.now()
+    user.save(update_fields=['otp_code', 'otp_created_at'])
+    return user.otp_code
+
+
+def otp_resend_wait(user):
+    """Seconds the user must wait before another code can be sent (0 if none)"""
+    if not user.otp_created_at:
+        return 0
+    elapsed = (timezone.now() - user.otp_created_at).total_seconds()
+    return max(0, int(OTP_RESEND_COOLDOWN_SECONDS - elapsed))
 
 

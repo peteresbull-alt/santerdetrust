@@ -19,6 +19,7 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('verify-otp/', views.verify_otp_view, name='verify_otp'),
+    path('verify-otp/resend/', views.resend_otp_view, name='resend_otp'),
     
     # ============================================
     # DASHBOARD
@@ -74,6 +75,7 @@ urlpatterns = [
     path('profile/edit/', views.profile_edit_view, name='profile_edit'),
     path('profile/employment/', views.employment_info_view, name='employment_info'),
     path('profile/tax/', views.tax_info_view, name='tax_info'),
+    path('profile/two-factor/', views.two_factor_toggle_view, name='two_factor_toggle'),
     path('profile/kyc/', views.kyc_documents_view, name='kyc_documents'),
     path('profile/change-password/', views.change_password_view, name='change_password'),
     

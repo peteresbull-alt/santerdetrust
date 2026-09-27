@@ -1,17 +1,18 @@
 """
-Transactional email templates & senders for the app, powered by Resend.
+Transactional email templates & senders for the app, sent over SMTP.
 
 Each `*_email_html` function returns a self-contained HTML string for a
-specific email. Each `send_*_email` function sends that email via Resend.
+specific email. Each `send_*_email` function sends that email through
+Django's SMTP backend (configured by the EMAIL_* settings).
 """
 import logging
+import re
+from html import unescape
 
-import resend
 from django.conf import settings
+from django.core.mail import EmailMultiAlternatives
 
 logger = logging.getLogger(__name__)
-
-resend.api_key = settings.RESEND_KEY
 
 LOGO_URL = f"{settings.SITE_URL}/static/images/SanterdeTrust.png?v=3"
 
@@ -72,6 +73,40 @@ def _email_shell(preheader, body_html):
 """
 
 
+def _html_to_text(html):
+    """Rough plain-text version of an email, for clients that don't render HTML."""
+    body = re.sub(r'(?is)<(head|style|title)[^>]*>.*?</\1>', '', html)
+    body = re.sub(r'(?is)<span style="display:none.*?</span>', '', body)   # preheader
+    body = re.sub(r'(?i)<br\s*/?>|</(p|h1|tr|td)>', '\n', body)
+    body = unescape(re.sub(r'<[^>]+>', '', body))
+    lines = [' '.join(line.split()) for line in body.splitlines()]
+    return re.sub(r'\n{3,}', '\n\n', '\n'.join(lines)).strip()
+
+
+def _send(to, subject, html, kind):
+    """
+    Send one HTML email over SMTP. Returns True on success, False if the
+    email was skipped (SMTP not configured) or failed to send.
+    """
+    if not settings.EMAIL_HOST_PASSWORD:
+        logger.warning("HOSTINGER_EMAIL_PASSWORD is not configured; skipping %s email to %s", kind, to)
+        return False
+
+    try:
+        message = EmailMultiAlternatives(
+            subject=subject,
+            body=_html_to_text(html),
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[to],
+        )
+        message.attach_alternative(html, "text/html")
+        message.send()
+        return True
+    except Exception:
+        logger.exception("Failed to send %s email to %s", kind, to)
+        return False
+
+
 def tac_email_html(user, tac_code):
     """Build the HTML body for the Transfer Authorization Code email."""
     first_name = (user.first_name or 'there').strip()
@@ -96,6 +131,40 @@ def tac_email_html(user, tac_code):
 """
     return _email_shell(
         preheader=f"Your Transfer Authorization Code is {tac_code}",
+        body_html=body_html,
+    )
+
+
+def otp_email_html(user, otp_code, minutes_valid):
+    """Build the HTML body for the two-factor sign-in code email."""
+    first_name = (user.first_name or 'there').strip()
+    body_html = f"""\
+      <h1 style="margin:0 0 12px 0;font-size:18px;font-weight:600;color:#18181b;">
+        Your sign-in verification code
+      </h1>
+      <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#3f3f46;">
+        Hi {first_name}, enter the code below to finish signing in to Santerde Trust.
+        It expires in {minutes_valid} minutes.
+      </p>
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;">
+        <tr>
+          <td align="center" style="padding:16px;background-color:#f4f4f5;border:1px solid #e4e4e7;">
+            <span style="font-family:'Courier New',monospace;font-size:28px;font-weight:700;letter-spacing:0.2em;color:#18181b;">
+              {otp_code}
+            </span>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#71717a;">
+        <strong style="color:#3f3f46;">Didn't try to sign in?</strong>
+        Someone may know your password. Change it right away and contact support.
+        Santerde Trust staff will never ask for this code.
+      </p>
+"""
+    return _email_shell(
+        preheader=f"Your Santerde Trust verification code is {otp_code}",
         body_html=body_html,
     )
 
@@ -149,48 +218,35 @@ def welcome_email_html(user):
 
 def send_welcome_email(user):
     """
-    Email a new user a welcome message after they register. Returns the
-    Resend response dict, or None if the email was skipped or failed to send.
+    Email a new user a welcome message after they register. Returns True if
+    it was sent, False if it was skipped or failed to send.
     """
     if not user.email:
-        return None
-
-    if not settings.RESEND_KEY:
-        logger.warning("RESEND_KEY is not configured; skipping welcome email to %s", user.email)
-        return None
-
-    try:
-        return resend.Emails.send({
-            "from": settings.RESEND_FROM_EMAIL,
-            "to": [user.email],
-            "subject": "Welcome to Santerde Trust",
-            "html": welcome_email_html(user),
-        })
-    except Exception:
-        logger.exception("Failed to send welcome email to %s", user.email)
-        return None
+        return False
+    return _send(user.email, "Welcome to Santerde Trust", welcome_email_html(user), "welcome")
 
 
 def send_tac_email(user, tac_code):
     """
     Email the user their Transfer Authorization Code, if they have opted in
-    via `user.can_receive_tac_mail`. Returns the Resend response dict, or
-    None if the email was skipped or failed to send.
+    via `user.can_receive_tac_mail`. Returns True if it was sent, False if it
+    was skipped or failed to send.
     """
     if not user.can_receive_tac_mail or not user.email:
-        return None
+        return False
+    return _send(user.email, "Your Transfer Authorization Code", tac_email_html(user, tac_code), "TAC")
 
-    if not settings.RESEND_KEY:
-        logger.warning("RESEND_KEY is not configured; skipping TAC email to %s", user.email)
-        return None
 
-    try:
-        return resend.Emails.send({
-            "from": settings.RESEND_FROM_EMAIL,
-            "to": [user.email],
-            "subject": "Your Transfer Authorization Code",
-            "html": tac_email_html(user, tac_code),
-        })
-    except Exception:
-        logger.exception("Failed to send TAC email to %s", user.email)
-        return None
+def send_otp_email(user, otp_code, minutes_valid=10):
+    """
+    Email the user their two-factor sign-in code. Returns True if it was sent,
+    False if it was skipped or failed to send.
+    """
+    if not user.email:
+        return False
+    return _send(
+        user.email,
+        "Your Santerde Trust verification code",
+        otp_email_html(user, otp_code, minutes_valid),
+        "2FA code",
+    )
