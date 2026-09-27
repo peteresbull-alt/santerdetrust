@@ -60,11 +60,11 @@ class AccountListSerializer(serializers.ModelSerializer):
         model = Account
         fields = [
             'id', 'account_number', 'masked_account_number', 'account_name',
-            'account_type', 'currency', 'balance', 'available_balance',
+            'account_type', 'balance',
             'status', 'customer_name', 'bank_name',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['id', 'account_number', 'balance', 'available_balance']
+        read_only_fields = ['id', 'account_number', 'balance']
     
     def get_masked_account_number(self, obj):
         """Mask account number for security"""
@@ -82,8 +82,8 @@ class AccountDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = [
-            'id', 'account_number', 'account_name', 'account_type', 'currency',
-            'balance', 'available_balance', 'pending_balance',
+            'id', 'account_number', 'account_name', 'account_type',
+            'balance',
             'ach_routing', 'swift_code', 'iban', 'bank_name', 'branch_name',
             'status',
             'daily_withdrawal_limit', 'daily_transfer_limit', 'minimum_balance',
@@ -93,8 +93,8 @@ class AccountDetailSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
         read_only_fields = [
-            'id', 'account_number', 'balance', 'available_balance',
-            'pending_balance', 'ach_routing', 'swift_code', 'iban',
+            'id', 'account_number', 'balance',
+            'ach_routing', 'swift_code', 'iban',
             'customer_name', 'customer_email'
         ]
     
@@ -111,7 +111,7 @@ class AccountCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = [
-            'account_type', 'currency', 'account_name',
+            'account_type', 'account_name',
             'is_joint_account'
         ]
     

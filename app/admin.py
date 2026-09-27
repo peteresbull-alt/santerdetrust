@@ -36,6 +36,9 @@ class CustomUserChangeForm(UserChangeForm):
         fields = '__all__'
 
 
+SENSITIVE_FIELDSET = 'Tax Identity (superusers only)'
+
+
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -72,7 +75,11 @@ class CustomUserAdmin(UserAdmin):
             ),
         }),
         ('Identifiers', {
-            'fields': ('bank_id', 'customer_id', 'ssn', 'tax_identity_number'),
+            'fields': ('bank_id', 'customer_id'),
+        }),
+        (SENSITIVE_FIELDSET, {
+            'fields': ('ssn', 'tax_identity_number'),
+            'description': 'Encrypted at rest. Visible to superusers only.',
         }),
         ('Address', {
             'fields': ('address', 'address_line2', 'city', 'state', 'country', 'postal_code'),
@@ -136,9 +143,29 @@ class CustomUserAdmin(UserAdmin):
         }),
     )
 
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+        # SSN / tax ID are hidden from (and not editable by) non-superuser staff.
+        # The change form is built from these fieldsets, so the fields are excluded entirely.
+        if not request.user.is_superuser:
+            fieldsets = [fs for fs in fieldsets if fs[0] != SENSITIVE_FIELDSET]
+        return fieldsets
+
 
 # Register your models here.
-admin.site.register(Account)
+@admin.register(Account)
+class AccountAdmin(admin.ModelAdmin):
+    list_display = ('account_number', 'customer', 'account_type', 'user_currency', 'balance', 'status', 'created_at')
+    list_filter = ('account_type', 'status', 'customer__preferred_currency')
+    search_fields = ('account_number', 'customer__email')
+    list_select_related = ('customer',)
+
+    @admin.display(description='Currency', ordering='customer__preferred_currency')
+    def user_currency(self, obj):
+        # Accounts have no currency of their own; it comes from the user
+        return obj.customer.preferred_currency
+
+
 admin.site.register(Beneficiary)
 admin.site.register(Card)
 admin.site.register(ExchangeRate)

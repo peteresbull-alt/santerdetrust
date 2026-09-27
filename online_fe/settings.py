@@ -20,6 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = config('SECRET_KEY')
 
+# Key for encrypting SSN / tax ID at rest. Keep it secret and backed up:
+# if it is lost or changed, the stored numbers cannot be decrypted.
+FIELD_ENCRYPTION_KEY = config('FIELD_ENCRYPTION_KEY', default=None)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 DEBUG = config('DEBUG', default=False, cast=bool)

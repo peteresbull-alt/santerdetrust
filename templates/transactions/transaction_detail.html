@@ -50,7 +50,7 @@
                 {% else %}text-gray-900{% endif %}">
                 {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
             </p>
-            <p class="text-sm text-gray-500 mt-1">{{ transaction.currency }}</p>
+            <p class="text-sm text-gray-500 mt-1">{{ user.preferred_currency }}</p>
         </div>
     </div>
 
@@ -288,7 +288,7 @@
             <span class="rp-sign rp-sign-neg">&minus;</span>
             {% endif %}
             <span class="rp-amount">{{ transaction.amount|currency:currency_symbol }}</span>
-            <span class="rp-ccy">{{ transaction.currency }}</span>
+            <span class="rp-ccy">{{ user.preferred_currency }}</span>
         </div>
         <div class="rp-status-pill rp-pill-{{ transaction.status|lower }}">
             <span class="rp-pill-dot"></span>{{ transaction.get_status_display }}
@@ -314,7 +314,7 @@
                 <div class="rp-row"><span class="rp-rl">Account Holder</span><span class="rp-rv">{{ transaction.user.get_full_name|default:transaction.user.email }}</span></div>
                 <div class="rp-row"><span class="rp-rl">Account Number</span><span class="rp-rv rp-mono">{{ transaction.account.account_number }}</span></div>
                 <div class="rp-row"><span class="rp-rl">Account Type</span><span class="rp-rv">{{ transaction.account.get_account_type_display }}</span></div>
-                <div class="rp-row rp-row-last"><span class="rp-rl">Currency</span><span class="rp-rv">{{ transaction.currency }}</span></div>
+                <div class="rp-row rp-row-last"><span class="rp-rl">Currency</span><span class="rp-rv">{{ user.preferred_currency }}</span></div>
             </div>
 
         </div>

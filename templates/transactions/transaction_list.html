@@ -172,7 +172,7 @@
                                 {% else %}text-gray-900{% endif %}">
                                 {% if transaction.transaction_type == 'DEPOSIT' %}+{% elif transaction.transaction_type == 'WITHDRAWAL' or transaction.transaction_type == 'TRANSFER' %}-{% endif %} {{ transaction.amount|currency:currency_symbol }}
                             </div>
-                            <div class="text-xs text-gray-500">{{ transaction.currency }}</div>
+                            <div class="text-xs text-gray-500">{{ user.preferred_currency }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full

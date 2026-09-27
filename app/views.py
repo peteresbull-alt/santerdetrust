@@ -21,7 +21,7 @@ from .models import (
 )
 from .forms import (
     UserRegistrationForm, UserLoginForm, OTPVerificationForm,
-    ProfileUpdateForm, EmploymentInformationForm, KYCDocumentForm,
+    ProfileUpdateForm, EmploymentInformationForm, TaxInformationForm, KYCDocumentForm,
     ChangePasswordForm, AccountApplicationForm, AccountActivationForm,
     CardApplicationForm, CardActivationForm, CardPINForm,
     WithdrawalForm, TransferForm, BeneficiaryForm,
@@ -796,7 +796,7 @@ def deposit_view(request):
                 account=account,
                 transaction_type='DEPOSIT',
                 amount=amount,
-                currency=account.currency,
+                currency=request.user.preferred_currency,
                 status='PENDING',
                 channel='WEB',
                 description=f'{payment_method.replace("_", " ").title()} Deposit',
@@ -811,14 +811,14 @@ def deposit_view(request):
                 priority='MEDIUM',
                 title='Deposit Request Submitted',
                 message=(
-                    f'Your deposit request of {amount} {account.currency} has been '
+                    f'Your deposit request of {amount} {request.user.preferred_currency} has been '
                     'submitted and is pending approval.'
                 ),
                 transaction=transaction,
             )
             messages.success(
                 request,
-                f'Deposit of {amount} {account.currency} submitted! '
+                f'Deposit of {amount} {request.user.preferred_currency} submitted! '
                 'Your account will be credited after verification.',
             )
             return redirect('transaction_detail', transaction_id=transaction.transaction_id)
@@ -910,7 +910,7 @@ def withdrawal_view(request):
                 account=account,
                 transaction_type='WITHDRAWAL',
                 amount=amount,
-                currency=account.currency,
+                currency=request.user.preferred_currency,
                 status='PENDING',
                 channel='WEB',
                 description=description or f'{withdrawal_method} Withdrawal',
@@ -924,13 +924,13 @@ def withdrawal_view(request):
                 notification_type='TRANSACTION',
                 priority='HIGH',
                 title='Withdrawal Request Submitted',
-                message=f'Your withdrawal request of {amount} {account.currency} has been submitted and is pending approval.',
+                message=f'Your withdrawal request of {amount} {request.user.preferred_currency} has been submitted and is pending approval.',
                 transaction=transaction
             )
             
             messages.success(
                 request,
-                f'Withdrawal request of {amount} {account.currency} submitted successfully! '
+                f'Withdrawal request of {amount} {request.user.preferred_currency} submitted successfully! '
                 'Your request is being processed.'
             )
             return redirect('transaction_detail', transaction_id=transaction.transaction_id)
@@ -1021,7 +1021,7 @@ def transfer_view(request):
                 account=from_account,
                 transaction_type='TRANSFER',
                 amount=amount,
-                currency=from_account.currency,
+                currency=request.user.preferred_currency,
                 fee=fee,
                 status='PENDING',
                 channel='WEB',
@@ -1057,13 +1057,13 @@ def transfer_view(request):
                 notification_type='TRANSACTION',
                 priority='HIGH',
                 title='Transfer Request Submitted',
-                message=f'Your transfer of {amount} {from_account.currency} to {beneficiary_name} has been submitted and is pending processing.',
+                message=f'Your transfer of {amount} {request.user.preferred_currency} to {beneficiary_name} has been submitted and is pending processing.',
                 transaction=transaction
             )
             
             messages.success(
                 request,
-                f'Transfer of {amount} {from_account.currency} to {beneficiary_name} submitted successfully! '
+                f'Transfer of {amount} {request.user.preferred_currency} to {beneficiary_name} submitted successfully! '
                 'The transfer is being processed.'
             )
             return redirect('transaction_detail', transaction_id=transaction.transaction_id)
@@ -1283,6 +1283,29 @@ def employment_info_view(request):
         'form': form
     }
     return render(request, 'profile/employment_info.html', context)
+
+
+@login_required
+def tax_info_view(request):
+    """Update SSN and tax identity number"""
+    if request.method == 'POST':
+        form = TaxInformationForm(request.POST, instance=request.user)
+        
+        if form.is_valid():
+            form.save()
+            
+            messages.success(request, 'Tax information updated successfully!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        form = TaxInformationForm(instance=request.user)
+    
+    context = {
+        'title': 'Tax Information',
+        'form': form
+    }
+    return render(request, 'profile/tax_info.html', context)
 
 
 @login_required

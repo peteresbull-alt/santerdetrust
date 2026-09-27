@@ -301,6 +301,49 @@ class EmploymentInformationForm(forms.ModelForm):
         }
 
 
+class TaxInformationForm(forms.ModelForm):
+    """SSN and tax identity number form.
+
+    Stored numbers are never rendered back into the page: the inputs start
+    empty, and leaving one blank keeps the number already on file.
+    """
+
+    class Meta:
+        model = CustomUser
+        fields = ['ssn', 'tax_identity_number']
+        labels = {'ssn': 'SSN', 'tax_identity_number': 'Tax identity number'}
+        widgets = {
+            'ssn': forms.TextInput(attrs={'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent', 'autocomplete': 'off', 'inputmode': 'numeric', 'maxlength': '11', 'placeholder': '123-45-6789'}),
+            'tax_identity_number': forms.TextInput(attrs={'class': 'w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent', 'autocomplete': 'off', 'maxlength': '20', 'placeholder': 'Enter your tax identification number'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.initial['ssn'] = ''
+        self.initial['tax_identity_number'] = ''
+        if self.instance.ssn:
+            self.fields['ssn'].widget.attrs['placeholder'] = f"On file: {self.instance.masked_ssn} (leave blank to keep)"
+        if self.instance.tax_identity_number:
+            self.fields['tax_identity_number'].widget.attrs['placeholder'] = f"On file: {self.instance.masked_tax_identity_number} (leave blank to keep)"
+
+    def clean_ssn(self):
+        value = (self.cleaned_data.get('ssn') or '').strip()
+        if not value:
+            return self.instance.ssn
+        digits = ''.join(ch for ch in value if ch.isdigit())
+        if len(digits) != 9 or any(ch not in '0123456789- ' for ch in value):
+            raise ValidationError('Enter a valid 9-digit SSN, e.g. 123-45-6789.')
+        return f"{digits[:3]}-{digits[3:5]}-{digits[5:]}"
+
+    def clean_tax_identity_number(self):
+        value = ' '.join((self.cleaned_data.get('tax_identity_number') or '').split()).upper()
+        if not value:
+            return self.instance.tax_identity_number
+        if not (4 <= len(value) <= 20) or any(not (ch.isalnum() or ch in '- ') for ch in value):
+            raise ValidationError('Enter a valid tax identification number (4–20 letters, digits or dashes).')
+        return value
+
+
 class KYCDocumentForm(forms.ModelForm):
     """KYC document upload form"""
     

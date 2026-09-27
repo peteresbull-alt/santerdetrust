@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block page_title %}Tax Information{% endblock %}
+{% block page_description %}Update your SSN and tax identity number{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-6">
+    <!-- Back Button -->
+    <a href="{% url 'profile' %}" class="inline-flex items-center text-sm text-gray-600 hover:text-blue-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>Back to Profile
+    </a>
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-id-card text-white text-2xl"></i>
+        </div>
+        <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Tax Information</h1>
+        <p class="text-gray-600">Provide your Social Security Number and tax identity number</p>
+    </div>
+
+    <!-- Show Form Errors -->
+    {% if form.errors %}
+    <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
+        <div class="flex items-start space-x-3">
+            <i class="fas fa-exclamation-triangle text-blue-600 text-2xl mt-0.5"></i>
+            <div class="flex-1">
+                <h4 class="text-lg font-bold text-blue-900 mb-3">Please fix the following:</h4>
+                <ul class="text-sm text-blue-800 space-y-1 ml-4">
+                    {% for field in form %}{% for error in field.errors %}
+                        <li>• {{ field.label }}: {{ error }}</li>
+                    {% endfor %}{% endfor %}
+                    {% for error in form.non_field_errors %}<li>• {{ error }}</li>{% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Tax Form -->
+    <form method="post" class="space-y-6" autocomplete="off">
+        {% csrf_token %}
+
+        <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 sm:p-8">
+            <h3 class="text-lg font-bold text-gray-900 mb-6">Tax Details</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- SSN -->
+                <div>
+                    <label for="{{ form.ssn.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Social Security Number (SSN)
+                    </label>
+                    {{ form.ssn }}
+                    {% if form.ssn.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.ssn.errors.0 }}</p>
+                    {% elif user.ssn %}
+                        <p class="mt-2 text-xs text-gray-500"><i class="fas fa-lock mr-1"></i>On file: {{ user.masked_ssn }}. Leave blank to keep it.</p>
+                    {% else %}
+                        <p class="mt-2 text-xs text-gray-500">9 digits, e.g. 123-45-6789</p>
+                    {% endif %}
+                </div>
+
+                <!-- Tax Identity Number -->
+                <div>
+                    <label for="{{ form.tax_identity_number.id_for_label }}" class="block text-sm font-semibold text-gray-700 mb-2">
+                        Tax Identity Number (TIN)
+                    </label>
+                    {{ form.tax_identity_number }}
+                    {% if form.tax_identity_number.errors %}
+                        <p class="mt-2 text-sm text-blue-600"><i class="fas fa-exclamation-circle mr-1"></i>{{ form.tax_identity_number.errors.0 }}</p>
+                    {% elif user.tax_identity_number %}
+                        <p class="mt-2 text-xs text-gray-500"><i class="fas fa-lock mr-1"></i>On file: {{ user.masked_tax_identity_number }}. Leave blank to keep it.</p>
+                    {% else %}
+                        <p class="mt-2 text-xs text-gray-500">Your national tax ID (for example an EIN, ITIN or UTR)</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start space-x-3">
+                <i class="fas fa-shield-alt text-blue-600 text-xl mt-0.5"></i>
+                <div class="flex-1">
+                    <h4 class="text-sm font-semibold text-blue-900 mb-2">How We Protect This Information</h4>
+                    <ul class="text-xs text-blue-800 space-y-1">
+                        <li>• Required for identity verification and tax reporting</li>
+                        <li>• Only the last 4 digits are ever shown on your profile</li>
+                        <li>• Santerde Trust will never ask for your SSN by phone or email</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Submit Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4">
+            <button type="submit" class="flex-1 px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-colors">
+                <i class="fas fa-save mr-2"></i>Save Tax Information
+            </button>
+            <a href="{% url 'profile' %}" class="flex-1 px-8 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition-colors text-center">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

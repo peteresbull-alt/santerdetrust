@@ -180,6 +180,22 @@
         {% endif %}
     </div>
 
+    <!-- Tax Information -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Tax Information</h3>
+            <a href="{% url 'tax_info' %}" class="text-primary-600 hover:text-primary-700 font-medium text-sm transition-colors"><i class="fas fa-edit mr-1"></i>{% if user.ssn or user.tax_identity_number %}Edit{% else %}Add{% endif %}</a>
+        </div>
+        {% if user.ssn or user.tax_identity_number %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div><p class="text-xs text-gray-500 mb-1">SSN</p><p class="text-sm font-semibold text-gray-900">{{ user.masked_ssn|default:"Not provided" }}</p></div>
+            <div><p class="text-xs text-gray-500 mb-1">Tax Identity Number</p><p class="text-sm font-semibold text-gray-900">{{ user.masked_tax_identity_number|default:"Not provided" }}</p></div>
+        </div>
+        {% else %}
+        <p class="text-sm text-gray-500 text-center py-4">No tax information on file</p>
+        {% endif %}
+    </div>
+
     <!-- KYC -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-shadow duration-300">
         <div class="flex items-center justify-between mb-6">

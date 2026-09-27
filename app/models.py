@@ -9,6 +9,7 @@ import string
 from datetime import datetime, timedelta
 from cloudinary.models import CloudinaryField
 from .managers import CustomUserManager
+from .fields import EncryptedCharField
 
 # ============================================
 # CUSTOM USER MODEL (IMPROVED)
@@ -95,10 +96,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     number_of_dependents = models.IntegerField(blank=True, null=True, validators=[MinValueValidator(0)])
     nationality = models.CharField(max_length=100, blank=True, null=True)
     
-    # Encrypted Sensitive Data (Consider using django-encrypted-model-fields)
-    # ⚠️ WARNING: These should be encrypted in production
-    ssn = models.CharField(max_length=500, blank=True, null=True)
-    tax_identity_number = models.CharField(max_length=500, blank=True, null=True)
+    # Sensitive data: encrypted at rest (FIELD_ENCRYPTION_KEY), visible to superusers only in the admin
+    ssn = EncryptedCharField(max_length=500, blank=True, null=True)
+    tax_identity_number = EncryptedCharField(max_length=500, blank=True, null=True)
     
     # Address Information
     address = models.TextField(blank=True, null=True)
@@ -273,6 +273,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.CURRENCY_SYMBOLS.get(self.preferred_currency, '$')
 
     @property
+    def masked_ssn(self):
+        """SSN with only the last 4 digits visible, e.g. •••-••-6789"""
+        if not self.ssn:
+            return ''
+        return f"•••-••-{self.ssn[-4:]}"
+
+    @property
+    def masked_tax_identity_number(self):
+        """Tax ID with only the last 4 characters visible"""
+        if not self.tax_identity_number:
+            return ''
+        return f"{'•' * max(len(self.tax_identity_number) - 4, 3)}{self.tax_identity_number[-4:]}"
+
+    @property
     def get_total_balance(self):
         """Calculate total balance across all ACTIVE accounts"""
         return self.accounts.filter(
@@ -330,19 +344,11 @@ class Account(models.Model):
         ('FROZEN', 'Frozen'),
     ]
     
-    CURRENCY_CHOICES = [
-        ('USD', 'US Dollar'),
-        ('EUR', 'Euro'),
-        ('GBP', 'British Pound'),
-    ]
-        
     # Core Fields
     customer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='accounts')
     account_number = models.CharField(max_length=20, unique=True, db_index=True)
     account_name = models.CharField(max_length=200, blank=True, null=True)
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPES)
-    currency = models.CharField(max_length=3, default='USD', editable=False)
-    
     # Balance (Single balance field - simplified)
     balance = models.DecimalField(
         max_digits=150, 
@@ -385,7 +391,7 @@ class Account(models.Model):
     activated_at = models.DateTimeField(blank=True, null=True)
     
     # Metadata
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Opened date")
     updated_at = models.DateTimeField(auto_now=True)
     closed_at = models.DateTimeField(blank=True, null=True)
     closed_reason = models.TextField(blank=True, null=True)

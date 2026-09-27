@@ -33,7 +33,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-blue-100 mb-1">Currency</p>
-                        <p class="text-xl font-bold">{{ account.currency }}</p>
+                        <p class="text-xl font-bold">{{ user.preferred_currency }}</p>
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@
                 </div>
                 <div class="flex justify-between py-3 border-b border-gray-200">
                     <span class="text-sm text-gray-600">Currency</span>
-                    <span class="text-sm font-semibold text-gray-900">{{ account.get_currency_display }}</span>
+                    <span class="text-sm font-semibold text-gray-900">{{ user.get_preferred_currency_display }}</span>
                 </div>
                 <div class="flex justify-between py-3">
                     <span class="text-sm text-gray-600">Opened Date</span>

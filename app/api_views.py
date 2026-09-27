@@ -82,7 +82,6 @@ def account_create_view(request):
     Request body:
         {
             "account_type": "CHECKING|SAVINGS|MONEY_MARKET|CD|PLATINUM|BUSINESS",
-            "currency": "USD|NGN|EUR|GBP",
             "account_name": "My Savings Account" (optional),
             "is_joint_account": false
         }
@@ -296,15 +295,13 @@ def deposit_view(request):
     
     # Create transaction
     amount = data['amount']
-    balance_before = account.balance
-    balance_after = balance_before + amount
     
     txn = Transaction.objects.create(
         user=user,
         account=account,
         transaction_type='DEPOSIT',
         amount=amount,
-        currency=account.currency,
+        currency=user.preferred_currency,
         status='COMPLETED',
         channel='WEB',
         description=data.get('description', f'Deposit to {account.account_type} account'),
@@ -313,10 +310,9 @@ def deposit_view(request):
         ip_address=get_client_ip(request)
     )
     
-    # Update account balance
-    account.balance = balance_after
-    account.available_balance = balance_after - account.pending_balance
-    account.save()
+    # The balance is updated by the update_account_balance signal once the
+    # COMPLETED transaction is saved; re-read it here for the response
+    account.refresh_from_db(fields=['balance'])
     
     serializer = TransactionDetailSerializer(txn)
     
@@ -378,11 +374,11 @@ def withdrawal_view(request):
     amount = data['amount']
     
     # Check sufficient balance
-    if account.available_balance < amount:
+    if account.balance < amount:
         return Response(
             {
                 'error': 'Insufficient funds',
-                'available_balance': str(account.available_balance),
+                'available_balance': str(account.balance),
                 'requested_amount': str(amount)
             },
             status=status.HTTP_400_BAD_REQUEST
@@ -408,15 +404,13 @@ def withdrawal_view(request):
         )
     
     # Create transaction
-    balance_before = account.balance
-    balance_after = balance_before - amount
     
     txn = Transaction.objects.create(
         user=user,
         account=account,
         transaction_type='WITHDRAWAL',
         amount=amount,
-        currency=account.currency,
+        currency=user.preferred_currency,
         status='COMPLETED',
         channel='WEB',
         description=data.get('description', f'Withdrawal from {account.account_type} account'),
@@ -424,10 +418,9 @@ def withdrawal_view(request):
         ip_address=get_client_ip(request)
     )
     
-    # Update account balance
-    account.balance = balance_after
-    account.available_balance = balance_after - account.pending_balance
-    account.save()
+    # The balance is updated by the update_account_balance signal once the
+    # COMPLETED transaction is saved; re-read it here for the response
+    account.refresh_from_db(fields=['balance'])
     
     serializer = TransactionDetailSerializer(txn)
     
@@ -494,11 +487,11 @@ def transfer_view(request):
     amount = data['amount']
     
     # Check sufficient balance
-    if from_account.available_balance < amount:
+    if from_account.balance < amount:
         return Response(
             {
                 'error': 'Insufficient funds',
-                'available_balance': str(from_account.available_balance),
+                'available_balance': str(from_account.balance),
                 'requested_amount': str(amount)
             },
             status=status.HTTP_400_BAD_REQUEST
@@ -524,15 +517,13 @@ def transfer_view(request):
     
     # Create transaction
     transfer_fee = Decimal('0.00')  # You can add fee calculation logic here
-    balance_before = from_account.balance
-    balance_after = balance_before - amount - transfer_fee
     
     txn = Transaction.objects.create(
         user=user,
         account=from_account,
         transaction_type='TRANSFER',
         amount=amount,
-        currency=from_account.currency,
+        currency=user.preferred_currency,
         fee=transfer_fee,
         status='COMPLETED',
         channel='WEB',
@@ -544,10 +535,9 @@ def transfer_view(request):
         ip_address=get_client_ip(request)
     )
     
-    # Update account balance
-    from_account.balance = balance_after
-    from_account.available_balance = balance_after - from_account.pending_balance
-    from_account.save()
+    # The balance is updated by the update_account_balance signal once the
+    # COMPLETED transaction is saved; re-read it here for the response
+    from_account.refresh_from_db(fields=['balance'])
     
     # Save beneficiary if requested
     if data.get('save_beneficiary'):
