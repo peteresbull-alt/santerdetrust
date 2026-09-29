@@ -154,7 +154,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     can_make_transfers = models.BooleanField(default=True)
     daily_transfer_limit = models.DecimalField(max_digits=120, decimal_places=2, default=10000.00)
     monthly_transfer_limit = models.DecimalField(max_digits=120, decimal_places=2, default=100000.00)
-    
+
+    # Activation fee payment methods offered to this user (shown on every account activation page)
+    pay_by_bank_transfer = models.BooleanField('Bank Transfer', default=True)
+    pay_by_wire_transfer = models.BooleanField('Wire Transfer', default=True)
+    pay_by_online_payment = models.BooleanField('Online Payment', default=True)
+    pay_in_branch = models.BooleanField('Payment in Branch', default=False)
+
     # KYC Status
     has_submitted_kyc = models.BooleanField(default=False)
     has_verified_kyc = models.BooleanField(default=False)
@@ -271,6 +277,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     def currency_symbol(self):
         """Currency symbol matching the user's preferred_currency, defaults to $"""
         return self.CURRENCY_SYMBOLS.get(self.preferred_currency, '$')
+
+    ACTIVATION_PAYMENT_METHOD_FIELDS = (
+        'pay_by_bank_transfer', 'pay_by_wire_transfer', 'pay_by_online_payment', 'pay_in_branch',
+    )
+
+    @property
+    def activation_payment_methods(self):
+        """Names of the activation fee payment methods the admin has enabled for this user"""
+        return [
+            self._meta.get_field(name).verbose_name
+            for name in self.ACTIVATION_PAYMENT_METHOD_FIELDS
+            if getattr(self, name)
+        ]
 
     @property
     def masked_ssn(self):

@@ -114,6 +114,11 @@ class CustomUserAdmin(UserAdmin):
                 'daily_transfer_limit', 'monthly_transfer_limit',
             ),
         }),
+        ('Activation Payment Methods', {
+            'fields': ('pay_by_bank_transfer', 'pay_by_wire_transfer', 'pay_by_online_payment', 'pay_in_branch'),
+            'description': 'Tick the ways this user may pay the account activation fee. '
+                           'They are listed on the activation page of every account the user opens.',
+        }),
         ('Transfer Authorization Code (TAC)', {
             'fields': ('tac', 'tac_generated_at', 'can_receive_tac_mail'),
         }),
