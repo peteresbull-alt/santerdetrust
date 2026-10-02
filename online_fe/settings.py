@@ -132,9 +132,13 @@ WSGI_APPLICATION = 'online_fe.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config("DATABASE_URL")
+        default=config("DATABASE_URL"),
+        conn_max_age=0,  # the Supabase pooler reuses connections, not Django
     )
 }
+# Required with Supabase's transaction pooler (port 6543): a server-side cursor can't
+# survive being routed to a different connection ("cursor ... does not exist")
+DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
