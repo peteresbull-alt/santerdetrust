@@ -426,7 +426,7 @@ def log_failed_login(sender, credentials, request=None, **kwargs):
 @receiver(user_logged_in)
 def log_admin_login(sender, request, user, **kwargs):
     """Record successful admin-site logins (the site's own /login/ view already logs its logins)"""
-    if not request or not request.path.startswith('/admin/'):
+    if not request or not request.path.startswith('/admin/login/'):
         return
     from app.models import AuditLog  # Import here to avoid circular import
     AuditLog.objects.create(

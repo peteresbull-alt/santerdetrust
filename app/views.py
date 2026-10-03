@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
 from django.contrib.auth import views as django_auth_views
+from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib import admin as django_admin
+from django.contrib.admin.forms import AdminAuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Sum, Count
@@ -105,20 +108,59 @@ def safe_next_url(request, url):
     return None
 
 
-def admin_login_redirect(request):
+def _otp_from_admin(request):
+    """True when the sign-in in progress started on the admin login page"""
+    return bool(request.session.get('otp_admin'))
+
+
+def _login_page(request):
+    return 'admin:login' if _otp_from_admin(request) else 'login'
+
+
+def _otp_page(request):
+    return 'admin_verify_otp' if _otp_from_admin(request) else 'verify_otp'
+
+
+def admin_login_view(request):
     """
-    Replace Django's admin login so staff sign in through the site's login,
-    which enforces two-factor authentication, then return to the admin.
+    Django admin login page (admin look and feel) that also enforces two-factor
+    authentication: staff with 2FA on must enter the emailed code before the admin opens.
     """
-    next_url = safe_next_url(request, request.GET.get('next'))
+    next_url = safe_next_url(request, request.POST.get('next') or request.GET.get('next'))
     if not (next_url and next_url.startswith('/admin/')):
-        next_url = '/admin/'
-    if request.user.is_authenticated:
-        if request.user.is_staff:
-            return redirect(next_url)
-        messages.error(request, 'Your account does not have access to the admin area.')
-        return redirect('dashboard')
-    return redirect(f"{reverse('login')}?{urlencode({'next': next_url})}")
+        next_url = reverse('admin:index')
+
+    if request.method == 'GET' and request.user.is_authenticated and request.user.is_staff:
+        return redirect(next_url)
+
+    form = AdminAuthenticationForm(request, data=request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        user = form.get_user()
+        if user.two_factor_enabled:
+            otp = issue_otp(user)
+            request.session['otp_user_id'] = user.id
+            request.session['otp_admin'] = True
+            request.session['otp_next'] = next_url
+            request.session['otp_attempts'] = 0
+            request.session['remember_me'] = False
+            if send_otp_email(user, otp, OTP_VALID_MINUTES):
+                messages.info(request, 'We emailed you a 6-digit verification code.')
+            else:
+                messages.error(request, "We couldn't send your verification code. Use Resend, or contact support if it keeps failing.")
+            return redirect('admin_verify_otp')
+        login(request, user)
+        return redirect(next_url)
+
+    context = {
+        **django_admin.site.each_context(request),
+        'title': 'Log in',
+        'subtitle': None,
+        'app_path': request.get_full_path(),
+        'form': form,
+        REDIRECT_FIELD_NAME: next_url,
+        'username': request.user.get_username() if request.user.is_authenticated else '',
+    }
+    return render(request, 'admin/login.html', context)
 
 
 def login_view(request):
@@ -163,6 +205,7 @@ def login_view(request):
                     request.session['remember_me'] = remember_me
                     request.session['otp_attempts'] = 0
                     request.session['otp_next'] = safe_next_url(request, request.GET.get('next'))
+                    request.session['otp_admin'] = False
 
                     if send_otp_email(user, otp, OTP_VALID_MINUTES):
                         messages.info(request, 'We emailed you a 6-digit verification code.')
@@ -241,12 +284,12 @@ def login_view(request):
 
 
 def verify_otp_view(request):
-    """OTP verification view for 2FA"""
+    """OTP verification view for 2FA (used by both the site login and the admin login)"""
     user_id = request.session.get('otp_user_id')
 
     if not user_id:
         messages.error(request, 'Invalid session. Please login again.')
-        return redirect('login')
+        return redirect(_login_page(request))
 
     user = get_object_or_404(CustomUser, id=user_id)
 
@@ -294,7 +337,7 @@ def verify_otp_view(request):
 
                 # Clear session data
                 next_url = request.session.pop('otp_next', None)
-                for key in ('otp_user_id', 'remember_me', 'otp_attempts'):
+                for key in ('otp_user_id', 'remember_me', 'otp_attempts', 'otp_admin'):
                     request.session.pop(key, None)
 
                 # Create audit log
@@ -318,6 +361,10 @@ def verify_otp_view(request):
         'user': user,
         'resend_wait': otp_resend_wait(user),
     }
+    if _otp_from_admin(request):
+        context.update(django_admin.site.each_context(request))
+        context.update({'title': 'Two-factor verification', 'otp_user': user})
+        return render(request, 'admin/verify_otp.html', context)
     return render(request, 'auth/verify_otp.html', context)
 
 
@@ -371,14 +418,14 @@ def resend_otp_view(request):
     user_id = request.session.get('otp_user_id')
     if not user_id:
         messages.error(request, 'Invalid session. Please login again.')
-        return redirect('login')
+        return redirect(_login_page(request))
 
     user = get_object_or_404(CustomUser, id=user_id)
 
     wait = otp_resend_wait(user)
     if wait:
         messages.error(request, f'Please wait {wait} seconds before requesting another code.')
-        return redirect('verify_otp')
+        return redirect(_otp_page(request))
 
     otp = issue_otp(user)
     request.session['otp_attempts'] = 0
@@ -386,7 +433,7 @@ def resend_otp_view(request):
         messages.success(request, 'A new verification code is on its way to your email.')
     else:
         messages.error(request, "We couldn't send your verification code. Please try again or contact support.")
-    return redirect('verify_otp')
+    return redirect(_otp_page(request))
 
 
 @login_required

@@ -1,0 +1,32 @@
+{% extends "admin/login.html" %}
+
+{% block content %}
+{% if form.errors %}
+<p class="errornote">Please enter the 6-digit code from the email.</p>
+{% endif %}
+
+<div id="content-main">
+  <p>We emailed a 6-digit verification code to <strong>{{ otp_user.email }}</strong>. It expires in 10 minutes.</p>
+
+  <form method="post" id="login-form">{% csrf_token %}
+    <div class="form-row">
+      <label class="required" for="id_otp_code">Verification code:</label>
+      <input type="text" name="otp_code" id="id_otp_code" required autofocus
+             inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code">
+    </div>
+    <div class="submit-row">
+      <input type="submit" value="Verify">
+    </div>
+  </form>
+
+  <form method="post" action="{% url 'resend_otp' %}" style="margin-top:12px">{% csrf_token %}
+    <p>
+      Didn't get it? Check your spam folder, or
+      <button type="submit" style="background:none;border:none;padding:0;color:var(--link-fg);cursor:pointer;text-decoration:underline">send a new code</button>
+      {% if resend_wait %}<span style="color:var(--body-quiet-color)">(available in {{ resend_wait }}s)</span>{% endif %}.
+    </p>
+  </form>
+
+  <p><a href="{% url 'admin:login' %}">Start again</a></p>
+</div>
+{% endblock %}

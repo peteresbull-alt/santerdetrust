@@ -31,8 +31,9 @@ admin.site.index_title = "Welcome to Santerde Trust Admin Portal"
 urlpatterns = [
     # Shows Django's 'Forgotten your password?' link on the admin login page
     path('admin/password-reset/', app_views.PasswordResetRequestView.as_view(), name='admin_password_reset'),
-    # Staff sign in through the site login so two-factor authentication applies to the admin too
-    path('admin/login/', app_views.admin_login_redirect, name='admin_login_2fa'),
+    # Admin login page that also enforces two-factor authentication for staff
+    path('admin/login/', app_views.admin_login_view, name='admin_login_2fa'),
+    path('admin/verify/', app_views.verify_otp_view, name='admin_verify_otp'),
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
 ]
