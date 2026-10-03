@@ -3,7 +3,7 @@ Signal handlers for the banking application
 """
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from django.contrib.auth.signals import user_login_failed
+from django.contrib.auth.signals import user_login_failed, user_logged_in
 from django.db.models import F
 from django.utils import timezone
 from decimal import Decimal
@@ -340,6 +340,12 @@ def _password_change_source():
         return 'manage.py createsuperuser'
     if 'change_password_view' in names:
         return 'profile: change password page'
+    if any(name == 'password_change' and path.endswith('contrib/admin/sites.py') for path, name in frames):
+        return 'admin: "Change password" link (top right)'
+    if 'user_change_password' in names:
+        return "admin: user's change-password form"
+    if any(name == 'form_valid' and path.endswith('contrib/auth/views.py') for path, name in frames):
+        return 'forgot password: emailed reset link'
     if 'contrib/admin' in files or 'contrib/auth/admin' in files:
         return 'admin site'
     app_frames = [(path, name) for path, name in frames if '/app/' in path and not path.endswith('signals.py')]
@@ -414,4 +420,21 @@ def log_failed_login(sender, credentials, request=None, **kwargs):
         changes={'email_entered': email[:254], 'reason': reason, 'page': request.path if request else ''},
         ip_address=_client_ip(request),
         user_agent=(request.META.get('HTTP_USER_AGENT', '')[:255] if request else ''),
+    )
+
+
+@receiver(user_logged_in)
+def log_admin_login(sender, request, user, **kwargs):
+    """Record successful admin-site logins (the site's own /login/ view already logs its logins)"""
+    if not request or not request.path.startswith('/admin/'):
+        return
+    from app.models import AuditLog  # Import here to avoid circular import
+    AuditLog.objects.create(
+        user=user,
+        action='LOGIN',
+        model_name='CustomUser',
+        object_id=str(user.id),
+        changes={'page': request.path},
+        ip_address=_client_ip(request),
+        user_agent=request.META.get('HTTP_USER_AGENT', '')[:255],
     )

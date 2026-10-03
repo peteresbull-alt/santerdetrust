@@ -1,15 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate, update_session_auth_hash
+from django.contrib.auth import views as django_auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q, Sum, Count
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.views.decorators.http import require_POST
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from decimal import Decimal
 from datetime import datetime, timedelta
 import random
@@ -17,6 +20,7 @@ import secrets
 import hmac
 import string
 import json
+from urllib.parse import urlencode
 
 from .models import (
     CustomUser, Account, Card, Transaction, Beneficiary,
@@ -25,6 +29,7 @@ from .models import (
 from .forms import (
     UserRegistrationForm, UserLoginForm, OTPVerificationForm,
     ProfileUpdateForm, EmploymentInformationForm, TaxInformationForm, KYCDocumentForm,
+    SanterdePasswordResetForm,
     ChangePasswordForm, AccountApplicationForm, AccountActivationForm,
     CardApplicationForm, CardActivationForm, CardPINForm,
     WithdrawalForm, TransferForm, BeneficiaryForm,
@@ -93,6 +98,29 @@ def register_view(request):
     return render(request, 'auth/register.html', context)
 
 
+def safe_next_url(request, url):
+    """Return `url` only if it points to this site (blocks open redirects), else None"""
+    if url and url_has_allowed_host_and_scheme(url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return url
+    return None
+
+
+def admin_login_redirect(request):
+    """
+    Replace Django's admin login so staff sign in through the site's login,
+    which enforces two-factor authentication, then return to the admin.
+    """
+    next_url = safe_next_url(request, request.GET.get('next'))
+    if not (next_url and next_url.startswith('/admin/')):
+        next_url = '/admin/'
+    if request.user.is_authenticated:
+        if request.user.is_staff:
+            return redirect(next_url)
+        messages.error(request, 'Your account does not have access to the admin area.')
+        return redirect('dashboard')
+    return redirect(f"{reverse('login')}?{urlencode({'next': next_url})}")
+
+
 def login_view(request):
     """User login view"""
     if request.user.is_authenticated:
@@ -134,6 +162,7 @@ def login_view(request):
                     request.session['otp_user_id'] = user.id
                     request.session['remember_me'] = remember_me
                     request.session['otp_attempts'] = 0
+                    request.session['otp_next'] = safe_next_url(request, request.GET.get('next'))
 
                     if send_otp_email(user, otp, OTP_VALID_MINUTES):
                         messages.info(request, 'We emailed you a 6-digit verification code.')
@@ -172,7 +201,7 @@ def login_view(request):
                 messages.success(request, f'Welcome back, {user.get_full_name}!')
                 
                 # Redirect to next or dashboard
-                next_url = request.GET.get('next')
+                next_url = safe_next_url(request, request.GET.get('next'))
                 if next_url:
                     return redirect(next_url)
                 return redirect('dashboard')
@@ -264,6 +293,7 @@ def verify_otp_view(request):
                     request.session.set_expiry(0)
 
                 # Clear session data
+                next_url = request.session.pop('otp_next', None)
                 for key in ('otp_user_id', 'remember_me', 'otp_attempts'):
                     request.session.pop(key, None)
 
@@ -278,7 +308,7 @@ def verify_otp_view(request):
                 )
 
                 messages.success(request, f'Welcome back, {user.get_full_name}!')
-                return redirect('dashboard')
+                return redirect(next_url or 'dashboard')
     else:
         form = OTPVerificationForm()
 
@@ -289,6 +319,50 @@ def verify_otp_view(request):
         'resend_wait': otp_resend_wait(user),
     }
     return render(request, 'auth/verify_otp.html', context)
+
+
+# ============================================
+# FORGOT PASSWORD (Django's token-based reset, Santerde templates + SMTP email)
+# ============================================
+RESET_LINK_MINUTES = settings.PASSWORD_RESET_TIMEOUT // 60
+
+
+class PasswordResetRequestView(django_auth_views.PasswordResetView):
+    """Step 1: user enters their email; a one-time reset link is emailed if the account exists"""
+    template_name = 'auth/password_reset_form.html'
+    form_class = SanterdePasswordResetForm
+    success_url = reverse_lazy('password_reset_done')
+
+
+class PasswordResetSentView(django_auth_views.PasswordResetDoneView):
+    """Step 2: 'check your email' (same message whether or not the account exists)"""
+    template_name = 'auth/password_reset_done.html'
+    extra_context = {'reset_minutes': RESET_LINK_MINUTES}
+
+
+class PasswordResetSetView(django_auth_views.PasswordResetConfirmView):
+    """Step 3: user follows the emailed link and chooses a new password"""
+    template_name = 'auth/password_reset_confirm.html'
+    success_url = reverse_lazy('password_reset_complete')
+    extra_context = {'reset_minutes': RESET_LINK_MINUTES}
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Proving ownership of the mailbox also clears any failed-login lockout
+        CustomUser.objects.filter(pk=form.user.pk).update(failed_login_attempts=0, account_locked_until=None)
+        # Let the final page point staff to the admin login
+        self.request.session['password_reset_staff'] = form.user.is_staff
+        return response
+
+
+class PasswordResetCompleteView(django_auth_views.PasswordResetCompleteView):
+    """Step 4: password changed, go sign in"""
+    template_name = 'auth/password_reset_complete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['is_staff_reset'] = self.request.session.pop('password_reset_staff', False)
+        return context
 
 
 @require_POST

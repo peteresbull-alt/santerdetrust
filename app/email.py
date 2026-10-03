@@ -169,6 +169,45 @@ def otp_email_html(user, otp_code, minutes_valid):
     )
 
 
+def password_reset_email_html(user, reset_url, minutes_valid):
+    """Build the HTML body for the forgot-password email."""
+    first_name = (user.first_name or 'there').strip()
+    body_html = f"""\
+      <h1 style="margin:0 0 12px 0;font-size:18px;font-weight:600;color:#18181b;">
+        Reset your password
+      </h1>
+      <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;color:#3f3f46;">
+        Hi {first_name}, we received a request to reset the password for your Santerde Trust account.
+        Click the button below to choose a new one. The link expires in {minutes_valid} minutes and can only be used once.
+      </p>
+
+      <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;">
+        <tr>
+          <td style="background-color:#2563eb;">
+            <a href="{reset_url}" style="display:inline-block;padding:11px 24px;color:#ffffff;font-weight:600;font-size:14px;text-decoration:none;">
+              Reset Password
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <p style="margin:0 0 20px 0;font-size:12px;line-height:1.6;color:#71717a;word-break:break-all;">
+        If the button doesn't work, copy this link into your browser:<br>
+        <a href="{reset_url}" style="color:#2563eb;text-decoration:none;">{reset_url}</a>
+      </p>
+
+      <p style="margin:0;font-size:13px;line-height:1.6;color:#71717a;">
+        <strong style="color:#3f3f46;">Didn't ask for this?</strong>
+        You can ignore this email; your password won't change. If you keep getting these emails,
+        contact support. Santerde Trust staff will never ask for your password.
+      </p>
+"""
+    return _email_shell(
+        preheader="Reset your Santerde Trust password",
+        body_html=body_html,
+    )
+
+
 def welcome_email_html(user):
     """Build the HTML body for the post-registration welcome email."""
     first_name = (user.first_name or 'there').strip()
@@ -249,4 +288,19 @@ def send_otp_email(user, otp_code, minutes_valid=10):
         "Your Santerde Trust verification code",
         otp_email_html(user, otp_code, minutes_valid),
         "2FA code",
+    )
+
+
+def send_password_reset_email(user, reset_url, minutes_valid=60):
+    """
+    Email the user a one-time link to choose a new password. Returns True if
+    it was sent, False if it was skipped or failed to send.
+    """
+    if not user.email:
+        return False
+    return _send(
+        user.email,
+        "Reset your Santerde Trust password",
+        password_reset_email_html(user, reset_url, minutes_valid),
+        "password reset",
     )

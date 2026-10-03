@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
+from app import views as app_views
+
 
 admin.site.site_header = "Santerde Trust Administration"
 admin.site.site_title = "Santerde Trust Admin Portal"
@@ -27,6 +29,10 @@ admin.site.index_title = "Welcome to Santerde Trust Admin Portal"
 
 
 urlpatterns = [
+    # Shows Django's 'Forgotten your password?' link on the admin login page
+    path('admin/password-reset/', app_views.PasswordResetRequestView.as_view(), name='admin_password_reset'),
+    # Staff sign in through the site login so two-factor authentication applies to the admin too
+    path('admin/login/', app_views.admin_login_redirect, name='admin_login_2fa'),
     path('admin/', admin.site.urls),
     path('', include('app.urls')),
 ]

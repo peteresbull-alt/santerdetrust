@@ -246,7 +246,8 @@ CORS_ALLOWED_ORIGINS = [
     'http://localhost:8001',
     # Add production frontend URL here
     'https://www.santerdetrust.com',
-    'https://libertytrust.vercel.app',
+    'https://santerdetrust.com',
+    'https://santerdetrust.vercel.app',
 ]
 
 # ✅ CRITICAL: Allow credentials (cookies)
@@ -323,7 +324,8 @@ CSRF_TRUSTED_ORIGINS = [
 
     # Add production URLs here
     'https://www.santerdetrust.com',
-    'https://libertytrust.vercel.app',
+    'https://santerdetrust.com',
+    'https://santerdetrust.vercel.app',
 
 ]
 
@@ -351,6 +353,9 @@ EMAIL_HOST_PASSWORD = config('HOSTINGER_EMAIL_PASSWORD', default='')
 EMAIL_TIMEOUT = 20
 # Hostinger only relays mail sent from the authenticated mailbox
 DEFAULT_FROM_EMAIL = f'Santerde Trust <{EMAIL_HOST_USER}>'
+
+# Forgot-password links expire after 1 hour (Django's default is 3 days)
+PASSWORD_RESET_TIMEOUT = 60 * 60
 
 
 

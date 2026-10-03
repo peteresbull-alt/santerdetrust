@@ -74,18 +74,26 @@
                 <p class="text-xs text-gray-500 mb-1">Channel</p>
                 <p class="text-sm font-semibold text-gray-900">{{ transaction.get_channel_display }}</p>
             </div>
-            {% if transaction.account %}
-            <div>
-                <p class="text-xs text-gray-500 mb-1">Account</p>
-                <a href="{% url 'account_detail' transaction.account.account_number %}" class="text-sm font-semibold text-blue-600 hover:text-blue-700 break-all">
-                    {{ transaction.account.account_number }}
-                </a>
-            </div>
-            {% endif %}
             {% if transaction.reference_number %}
             <div>
                 <p class="text-xs text-gray-500 mb-1">Reference Number</p>
                 <p class="text-sm font-mono font-semibold text-gray-900 break-all">{{ transaction.reference_number }}</p>
+            </div>
+            {% endif %}
+            {% if transaction.external_reference %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">External Reference</p>
+                <p class="text-sm font-mono font-semibold text-gray-900 break-all">{{ transaction.external_reference }}</p>
+            </div>
+            {% endif %}
+            {% if transaction.related_transaction %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Related Transaction</p>
+                {% if transaction.related_transaction.user_id == request.user.id %}
+                <a href="{% url 'transaction_detail' transaction.related_transaction.transaction_id %}" class="text-sm font-mono font-semibold text-blue-600 hover:text-blue-700 break-all">{{ transaction.related_transaction.transaction_id }}</a>
+                {% else %}
+                <p class="text-sm font-mono font-semibold text-gray-900 break-all">{{ transaction.related_transaction.transaction_id }}</p>
+                {% endif %}
             </div>
             {% endif %}
             {% if transaction.fee %}
@@ -108,19 +116,98 @@
         {% endif %}
     </div>
 
-    <!-- Transfer Details (if applicable) -->
-    {% if transaction.transaction_type == 'TRANSFER' and transaction.beneficiary_name %}
+    <!-- Account & Bank Details -->
+    {% with acct=transaction.account %}
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
-        <h2 class="text-lg font-bold text-gray-900 mb-4">Transfer Details</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-4">Account &amp; Bank Details</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if transaction.user.get_full_name %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Account Holder</p>
+                <p class="text-sm font-semibold text-gray-900 break-all">{{ transaction.user.get_full_name }}</p>
+            </div>
+            {% endif %}
+            {% if transaction.user.email %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Email</p>
+                <p class="text-sm font-semibold text-gray-900 break-all">{{ transaction.user.email }}</p>
+            </div>
+            {% endif %}
+            {% if acct %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Account Number</p>
+                <a href="{% url 'account_detail' acct.account_number %}" class="text-sm font-mono font-semibold text-blue-600 hover:text-blue-700 break-all">{{ acct.account_number }}</a>
+            </div>
+            {% if acct.get_account_type_display %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Account Type</p>
+                <p class="text-sm font-semibold text-gray-900 break-all">{{ acct.get_account_type_display }}</p>
+            </div>
+            {% endif %}
+            {% if acct.account_name %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Account Name</p>
+                <p class="text-sm font-semibold text-gray-900 break-all">{{ acct.account_name }}</p>
+            </div>
+            {% endif %}
+            {% if acct.bank_name %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Bank Name</p>
+                <p class="text-sm font-semibold text-gray-900 break-all">{{ acct.bank_name }}</p>
+            </div>
+            {% endif %}
+            {% if acct.branch_name %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Branch</p>
+                <p class="text-sm font-semibold text-gray-900 break-all">{{ acct.branch_name }}</p>
+            </div>
+            {% endif %}
+            {% if acct.branch_code %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Branch Code</p>
+                <p class="text-sm font-semibold text-gray-900 break-all font-mono">{{ acct.branch_code }}</p>
+            </div>
+            {% endif %}
+            {% if acct.ach_routing %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Routing Number (ACH)</p>
+                <p class="text-sm font-semibold text-gray-900 break-all font-mono">{{ acct.ach_routing }}</p>
+            </div>
+            {% endif %}
+            {% if acct.swift_code %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">SWIFT / BIC</p>
+                <p class="text-sm font-semibold text-gray-900 break-all font-mono">{{ acct.swift_code }}</p>
+            </div>
+            {% endif %}
+            {% if acct.iban %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">IBAN</p>
+                <p class="text-sm font-semibold text-gray-900 break-all font-mono">{{ acct.iban }}</p>
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    {% endwith %}
+
+    <!-- Beneficiary Details (whenever any beneficiary field has a value) -->
+    {% if transaction.beneficiary_name or transaction.beneficiary_account_number or transaction.beneficiary_bank %}
+    <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-4">{% if transaction.transaction_type == 'TRANSFER' %}Transfer Details{% else %}Beneficiary Details{% endif %}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if transaction.beneficiary_name %}
             <div>
                 <p class="text-xs text-gray-500 mb-1">Beneficiary Name</p>
                 <p class="text-sm font-semibold text-gray-900">{{ transaction.beneficiary_name }}</p>
             </div>
+            {% endif %}
+            {% if transaction.beneficiary_account_number %}
             <div>
                 <p class="text-xs text-gray-500 mb-1">Beneficiary Account</p>
                 <p class="text-sm font-mono font-semibold text-gray-900 break-all">{{ transaction.beneficiary_account_number }}</p>
             </div>
+            {% endif %}
             {% if transaction.beneficiary_bank %}
             <div>
                 <p class="text-xs text-gray-500 mb-1">Beneficiary Bank</p>
@@ -183,6 +270,32 @@
     </div>
     {% endif %}
 
+    <!-- Internal details: staff only, not printed -->
+    {% if request.user.is_staff %}
+    <div class="bg-white rounded-xl shadow-lg border border-dashed border-gray-300 p-3 sm:p-6">
+        <h2 class="text-lg font-bold text-gray-900 mb-1"><i class="fas fa-user-shield text-gray-500 mr-2"></i>Internal (staff only)</h2>
+        <p class="text-xs text-gray-500 mb-4">Visible to staff accounts only. Not shown to customers or on the printed receipt.</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Internal ID</p>
+                <p class="text-sm font-mono font-semibold text-gray-900">{{ transaction.pk }}</p>
+            </div>
+            {% if transaction.ip_address %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">IP Address</p>
+                <p class="text-sm font-semibold text-gray-900 break-all font-mono">{{ transaction.ip_address }}</p>
+            </div>
+            {% endif %}
+            {% if transaction.user_agent %}
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Device / Browser</p>
+                <p class="text-sm font-semibold text-gray-900 break-all">{{ transaction.user_agent }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Timeline -->
     <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-3 sm:p-6">
         <h2 class="text-lg font-bold text-gray-900 mb-4">Transaction Timeline</h2>
@@ -197,34 +310,48 @@
                 </div>
             </div>
 
-            {% if transaction.status == 'COMPLETED' %}
+            {% if transaction.completed_at or transaction.status == 'COMPLETED' %}
             <div class="flex items-start space-x-4">
                 <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-check-circle text-green-600"></i>
                 </div>
                 <div class="flex-1">
                     <p class="text-sm font-semibold text-gray-900">Transaction Completed</p>
-                    <p class="text-xs text-gray-500">{{ transaction.completed_at|date:"M d, Y - H:i" }}</p>
+                    {% if transaction.completed_at %}<p class="text-xs text-gray-500">{{ transaction.completed_at|date:"M d, Y - H:i" }}</p>{% endif %}
                 </div>
             </div>
-            {% elif transaction.status == 'PENDING' %}
+            {% endif %}
+            {% if transaction.status == 'PENDING' or transaction.status == 'PROCESSING' %}
             <div class="flex items-start space-x-4">
                 <div class="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse">
                     <i class="fas fa-clock text-yellow-600"></i>
                 </div>
                 <div class="flex-1">
-                    <p class="text-sm font-semibold text-gray-900">Processing</p>
+                    <p class="text-sm font-semibold text-gray-900">{{ transaction.get_status_display }}</p>
                     <p class="text-xs text-gray-500">Your transaction is being processed</p>
                 </div>
             </div>
-            {% elif transaction.status == 'FAILED' %}
+            {% endif %}
+            {% if transaction.status == 'FAILED' or transaction.failed_at or transaction.failure_reason %}
             <div class="flex items-start space-x-4">
                 <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-times text-blue-600"></i>
                 </div>
                 <div class="flex-1">
                     <p class="text-sm font-semibold text-gray-900">Transaction Failed</p>
+                    {% if transaction.failed_at %}<p class="text-xs text-gray-500">{{ transaction.failed_at|date:"M d, Y - H:i" }}</p>{% endif %}
                     <p class="text-xs text-gray-500">{{ transaction.failure_reason|default:"Unknown error" }}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% if transaction.status == 'CANCELLED' or transaction.status == 'REVERSED' %}
+            <div class="flex items-start space-x-4">
+                <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <i class="fas {% if transaction.status == 'REVERSED' %}fa-undo{% else %}fa-ban{% endif %} text-gray-600"></i>
+                </div>
+                <div class="flex-1">
+                    <p class="text-sm font-semibold text-gray-900">Transaction {{ transaction.get_status_display }}</p>
+                    {% if transaction.related_transaction %}<p class="text-xs text-gray-500">See related transaction {{ transaction.related_transaction.transaction_id }}</p>{% endif %}
                 </div>
             </div>
             {% endif %}
@@ -312,10 +439,27 @@
             <div class="rp-card">
                 <div class="rp-card-hdr">Account Information</div>
                 <div class="rp-row"><span class="rp-rl">Account Holder</span><span class="rp-rv">{{ transaction.user.get_full_name|default:transaction.user.email }}</span></div>
+                <div class="rp-row"><span class="rp-rl">Email</span><span class="rp-rv">{{ transaction.user.email }}</span></div>
                 <div class="rp-row"><span class="rp-rl">Account Number</span><span class="rp-rv rp-mono">{{ transaction.account.account_number }}</span></div>
                 <div class="rp-row"><span class="rp-rl">Account Type</span><span class="rp-rv">{{ transaction.account.get_account_type_display }}</span></div>
-                <div class="rp-row rp-row-last"><span class="rp-rl">Currency</span><span class="rp-rv">{{ user.preferred_currency }}</span></div>
+                {% if transaction.account.account_name %}<div class="rp-row"><span class="rp-rl">Account Name</span><span class="rp-rv">{{ transaction.account.account_name }}</span></div>{% endif %}
+                <div class="rp-row"><span class="rp-rl">Currency</span><span class="rp-rv">{{ user.preferred_currency }}</span></div>
             </div>
+
+            {% with acct=transaction.account %}
+            {% if acct.bank_name or acct.branch_name or acct.branch_code or acct.ach_routing or acct.swift_code or acct.iban %}
+            <!-- Bank details -->
+            <div class="rp-card">
+                <div class="rp-card-hdr">Bank Details</div>
+                {% if acct.bank_name %}<div class="rp-row"><span class="rp-rl">Bank Name</span><span class="rp-rv">{{ acct.bank_name }}</span></div>{% endif %}
+                {% if acct.branch_name %}<div class="rp-row"><span class="rp-rl">Branch</span><span class="rp-rv">{{ acct.branch_name }}</span></div>{% endif %}
+                {% if acct.branch_code %}<div class="rp-row"><span class="rp-rl">Branch Code</span><span class="rp-rv rp-mono">{{ acct.branch_code }}</span></div>{% endif %}
+                {% if acct.ach_routing %}<div class="rp-row"><span class="rp-rl">Routing (ACH)</span><span class="rp-rv rp-mono">{{ acct.ach_routing }}</span></div>{% endif %}
+                {% if acct.swift_code %}<div class="rp-row"><span class="rp-rl">SWIFT / BIC</span><span class="rp-rv rp-mono">{{ acct.swift_code }}</span></div>{% endif %}
+                {% if acct.iban %}<div class="rp-row"><span class="rp-rl">IBAN</span><span class="rp-rv rp-mono">{{ acct.iban }}</span></div>{% endif %}
+            </div>
+            {% endif %}
+            {% endwith %}
 
         </div>
 
@@ -332,15 +476,20 @@
                 {% if transaction.fee %}<div class="rp-row"><span class="rp-rl">Fee</span><span class="rp-rv rp-mono">{{ transaction.fee|currency:currency_symbol }}</span></div>{% endif %}
                 <div class="rp-row"><span class="rp-rl">Status</span><span class="rp-rv rp-st rp-st-{{ transaction.status|lower }}">{{ transaction.get_status_display }}</span></div>
                 {% if transaction.reference_number %}<div class="rp-row"><span class="rp-rl">Reference</span><span class="rp-rv rp-mono">{{ transaction.reference_number }}</span></div>{% endif %}
+                {% if transaction.external_reference %}<div class="rp-row"><span class="rp-rl">External Ref.</span><span class="rp-rv rp-mono">{{ transaction.external_reference }}</span></div>{% endif %}
+                {% if transaction.related_transaction %}<div class="rp-row"><span class="rp-rl">Related Txn</span><span class="rp-rv rp-mono">{{ transaction.related_transaction.transaction_id }}</span></div>{% endif %}
+                {% if transaction.completed_at %}<div class="rp-row"><span class="rp-rl">Completed</span><span class="rp-rv">{{ transaction.completed_at|date:"M d, Y H:i" }} UTC</span></div>{% endif %}
+                {% if transaction.failed_at %}<div class="rp-row"><span class="rp-rl">Failed</span><span class="rp-rv">{{ transaction.failed_at|date:"M d, Y H:i" }} UTC</span></div>{% endif %}
+                {% if transaction.failure_reason %}<div class="rp-row"><span class="rp-rl">Failure Reason</span><span class="rp-rv">{{ transaction.failure_reason }}</span></div>{% endif %}
                 {% if transaction.description %}<div class="rp-row rp-row-last"><span class="rp-rl">Description</span><span class="rp-rv">{{ transaction.description }}</span></div>{% endif %}
             </div>
 
-            {% if transaction.transaction_type == 'TRANSFER' and transaction.beneficiary_name %}
+            {% if transaction.beneficiary_name or transaction.beneficiary_account_number or transaction.beneficiary_bank %}
             <!-- Beneficiary -->
             <div class="rp-card">
                 <div class="rp-card-hdr">Beneficiary Details</div>
-                <div class="rp-row"><span class="rp-rl">Name</span><span class="rp-rv">{{ transaction.beneficiary_name }}</span></div>
-                <div class="rp-row"><span class="rp-rl">Account No.</span><span class="rp-rv rp-mono">{{ transaction.beneficiary_account_number }}</span></div>
+                {% if transaction.beneficiary_name %}<div class="rp-row"><span class="rp-rl">Name</span><span class="rp-rv">{{ transaction.beneficiary_name }}</span></div>{% endif %}
+                {% if transaction.beneficiary_account_number %}<div class="rp-row"><span class="rp-rl">Account No.</span><span class="rp-rv rp-mono">{{ transaction.beneficiary_account_number }}</span></div>{% endif %}
                 {% if transaction.beneficiary_bank %}<div class="rp-row rp-row-last"><span class="rp-rl">Bank</span><span class="rp-rv">{{ transaction.beneficiary_bank }}</span></div>{% endif %}
             </div>
             {% endif %}
@@ -368,7 +517,7 @@
     <!-- ════════════ FOOTER ════════════ -->
     <div class="rp-footer">
         <div class="rp-ft-l">
-            <div class="rp-ft-bank">Santerde Trust Bank</div>
+            <div class="rp-ft-bank">Santerde Trust</div>
             <div class="rp-ft-contact">support@santerdetrust.com</div>
         </div>
         <div class="rp-ft-c">

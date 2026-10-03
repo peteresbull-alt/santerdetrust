@@ -1,5 +1,7 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordChangeForm, PasswordResetForm
+from django.conf import settings
+from django.urls import reverse
 from django.core.exceptions import ValidationError
 from .models import (
     CustomUser, Account, Card, Transaction, Beneficiary, 
@@ -364,6 +366,27 @@ class KYCDocumentForm(forms.ModelForm):
         if expiry and expiry < date.today():
             raise ValidationError('Government ID has expired. Please provide a valid ID.')
         return expiry
+
+
+class SanterdePasswordResetForm(PasswordResetForm):
+    """Forgot-password form: sends the branded reset email over SMTP.
+
+    Django's PasswordResetForm already only emails active accounts with a usable
+    password, matches the email case-insensitively, and says nothing about whether
+    the address exists.
+    """
+
+    def send_mail(self, subject_template_name, email_template_name, context,
+                  from_email, to_email, html_email_template_name=None):
+        from .email import send_password_reset_email
+
+        # ALLOWED_HOSTS is open, so never build the link from the request's Host header,
+        # except for local development
+        base = settings.SITE_URL.rstrip('/')
+        if context.get('domain', '').split(':')[0] in ('localhost', '127.0.0.1'):
+            base = f"{context['protocol']}://{context['domain']}"
+        path = reverse('password_reset_confirm', kwargs={'uidb64': context['uid'], 'token': context['token']})
+        send_password_reset_email(context['user'], base + path, settings.PASSWORD_RESET_TIMEOUT // 60)
 
 
 class ChangePasswordForm(PasswordChangeForm):

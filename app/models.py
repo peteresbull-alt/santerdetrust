@@ -491,6 +491,7 @@ class Transaction(models.Model):
         ('ATM', 'ATM'),
         ('BRANCH', 'Branch'),
         ('API', 'API'),
+        ('CRYPTO', 'Crypto Currencies'),
     ]
     
     # Core Fields

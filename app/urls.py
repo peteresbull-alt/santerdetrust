@@ -20,6 +20,10 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('verify-otp/', views.verify_otp_view, name='verify_otp'),
     path('verify-otp/resend/', views.resend_otp_view, name='resend_otp'),
+    path('password-reset/', views.PasswordResetRequestView.as_view(), name='password_reset'),
+    path('password-reset/sent/', views.PasswordResetSentView.as_view(), name='password_reset_done'),
+    path('password-reset/<uidb64>/<token>/', views.PasswordResetSetView.as_view(), name='password_reset_confirm'),
+    path('password-reset/complete/', views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
     
     # ============================================
     # DASHBOARD
