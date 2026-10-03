@@ -54,6 +54,7 @@ class CustomUserManager(BaseUserManager):
     
     def get_by_natural_key(self, email):
         """
-        Get user by email (natural key)
+        Get user by email (natural key). Case-insensitive, so "Support@..." typed
+        on a phone that auto-capitalises still finds "support@...".
         """
-        return self.get(**{self.model.USERNAME_FIELD: email})
+        return self.get(**{f'{self.model.USERNAME_FIELD}__iexact': (email or '').strip()})

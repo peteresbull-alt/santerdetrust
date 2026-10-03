@@ -3,6 +3,7 @@ Signal handlers for the banking application
 """
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
+from django.contrib.auth.signals import user_login_failed
 from django.db.models import F
 from django.utils import timezone
 from decimal import Decimal
@@ -317,3 +318,100 @@ def log_user_action(sender, instance, created, **kwargs):
                 'last_name': instance.last_name,
             }
         )
+
+# ============================================
+# Login & password audit trail
+# ============================================
+
+def _stack():
+    """Current call stack as (posix-style path, function name) pairs"""
+    import traceback
+    return [(f.filename.replace(chr(92), '/'), f.name) for f in traceback.extract_stack()]
+
+
+def _password_change_source():
+    """Best guess at what changed a password, from the current call stack"""
+    frames = _stack()
+    files = ' '.join(path for path, _ in frames)
+    names = {name for _, name in frames}
+    if 'management/commands/changepassword' in files:
+        return 'manage.py changepassword'
+    if 'management/commands/createsuperuser' in files:
+        return 'manage.py createsuperuser'
+    if 'change_password_view' in names:
+        return 'profile: change password page'
+    if 'contrib/admin' in files or 'contrib/auth/admin' in files:
+        return 'admin site'
+    app_frames = [(path, name) for path, name in frames if '/app/' in path and not path.endswith('signals.py')]
+    if app_frames:
+        path, name = app_frames[-1]
+        return f"{path.rsplit('/', 1)[-1]}:{name}"
+    return 'unknown'
+
+
+def _is_password_rehash():
+    """True when Django is only re-hashing a correct password on login (password itself unchanged)"""
+    return any(name == 'setter' and 'contrib/auth' in path for path, name in _stack())
+
+
+@receiver(pre_save, sender='app.CustomUser')
+def remember_password_change(sender, instance, **kwargs):
+    """Flag saves that change the stored password so post_save can record them"""
+    instance._password_changed = False
+    update_fields = kwargs.get('update_fields')
+    if not instance.pk or (update_fields is not None and 'password' not in update_fields):
+        return
+    old = sender.objects.filter(pk=instance.pk).values_list('password', flat=True).first()
+    if old is not None and old != instance.password and not _is_password_rehash():
+        instance._password_changed = True
+        instance._password_change_source = _password_change_source()
+        instance.password_changed_at = timezone.now()
+
+
+@receiver(post_save, sender='app.CustomUser')
+def log_password_change(sender, instance, created, **kwargs):
+    """Record every password change in the audit log (never the password itself)"""
+    if created or not getattr(instance, '_password_changed', False):
+        return
+    instance._password_changed = False
+    if instance._password_change_source == 'profile: change password page':
+        return  # change_password_view logs this itself, with IP and browser
+    from app.models import AuditLog  # Import here to avoid circular import
+    AuditLog.objects.create(
+        user=instance,
+        action='PASSWORD_CHANGE',
+        model_name='CustomUser',
+        object_id=str(instance.id),
+        changes={'via': getattr(instance, '_password_change_source', 'unknown')},
+    )
+    instance._password_changed = False
+
+
+def _client_ip(request):
+    if not request:
+        return None
+    forwarded = request.META.get('HTTP_X_FORWARDED_FOR')
+    return (forwarded.split(',')[0].strip() if forwarded else request.META.get('REMOTE_ADDR')) or None
+
+
+@receiver(user_login_failed)
+def log_failed_login(sender, credentials, request=None, **kwargs):
+    """Record why a login failed, so 'wrong password' vs 'unknown email' is visible later"""
+    from app.models import AuditLog, CustomUser  # Import here to avoid circular import
+    email = (credentials.get('username') or credentials.get('email') or '').strip()
+    user = CustomUser.objects.filter(email__iexact=email).first() if email else None
+    if user is None:
+        reason = 'no account with this email'
+    elif not user.is_active:
+        reason = 'account is inactive'
+    else:
+        reason = 'wrong password'
+    AuditLog.objects.create(
+        user=user,
+        action='LOGIN_FAILED',
+        model_name='CustomUser',
+        object_id=str(user.id) if user else '',
+        changes={'email_entered': email[:254], 'reason': reason, 'page': request.path if request else ''},
+        ip_address=_client_ip(request),
+        user_agent=(request.META.get('HTTP_USER_AGENT', '')[:255] if request else ''),
+    )

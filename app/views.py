@@ -1428,6 +1428,7 @@ def change_password_view(request):
                 action='PASSWORD_CHANGE',
                 model_name='CustomUser',
                 object_id=str(request.user.id),
+                changes={'via': 'profile: change password page'},
                 ip_address=get_client_ip(request),
                 user_agent=request.META.get('HTTP_USER_AGENT', '')
             )

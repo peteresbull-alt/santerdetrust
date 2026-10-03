@@ -910,6 +910,7 @@ class AuditLog(models.Model):
         ('LOGIN', 'Login'),
         ('LOGOUT', 'Logout'),
         ('PASSWORD_CHANGE', 'Password Changed'),
+        ('LOGIN_FAILED', 'Login Failed'),
         ('TRANSFER', 'Transfer'),
         ('WITHDRAWAL', 'Withdrawal'),
         ('DEPOSIT', 'Deposit'),
