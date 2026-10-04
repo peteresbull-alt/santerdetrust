@@ -612,7 +612,7 @@ def account_apply_view(request):
             
             # Set default values
             account.status = 'PENDING'
-            account.bank_name = "Royal Shore International"
+            # bank_name comes from the model default ("Santerde Trust")
             
             # Generate routing numbers
             account.ach_routing = generate_routing_number()
