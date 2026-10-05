@@ -807,7 +807,7 @@ class Notification(models.Model):
     
     is_read = models.BooleanField(default=False)
     read_at = models.DateTimeField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(default=timezone.now)  # editable in the admin
     expires_at = models.DateTimeField(blank=True, null=True)
     
     # Related objects
